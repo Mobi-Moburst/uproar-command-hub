@@ -6,16 +6,29 @@ import type { MediaPlacement } from "@/data/types";
 
 /** Fetch archived (≤2025) placements from the database */
 async function getArchivedPlacements(): Promise<MediaPlacement[]> {
-  const { data, error } = await supabase
-    .from("placements_archive")
-    .select("*");
+  // Fetch all rows using pagination (default limit is 1000)
+  const allRows: Record<string, unknown>[] = [];
+  const pageSize = 1000;
+  let from = 0;
+  let hasMore = true;
 
-  if (error) {
-    console.warn("Failed to fetch archived placements:", error.message);
-    return [];
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("placements_archive")
+      .select("*")
+      .range(from, from + pageSize - 1);
+
+    if (error) {
+      console.warn("Failed to fetch archived placements:", error.message);
+      return [];
+    }
+
+    allRows.push(...(data ?? []));
+    hasMore = (data?.length ?? 0) === pageSize;
+    from += pageSize;
   }
 
-  return (data ?? []).map((row: Record<string, unknown>) => ({
+  return allRows.map((row: Record<string, unknown>) => ({
     id: String(row.id),
     date: String(row.date ?? ""),
     client_name: String(row.client_name ?? ""),
