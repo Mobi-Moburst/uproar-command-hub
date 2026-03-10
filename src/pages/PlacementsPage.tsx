@@ -44,7 +44,7 @@ export default function PlacementsPage() {
       if (securedByFilter && p.secured_by !== securedByFilter) return false;
       return true;
     });
-  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter]);
+  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter, securedByFilter]);
 
   // Reset page when filters change
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
