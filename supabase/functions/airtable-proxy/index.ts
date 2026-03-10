@@ -53,6 +53,7 @@ Deno.serve(async (req) => {
       if (offset) params.set("offset", offset);
 
       const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}?${params}`;
+      console.log("Fetching Airtable URL:", url, "baseId:", baseId);
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${apiKey}` },
       });
