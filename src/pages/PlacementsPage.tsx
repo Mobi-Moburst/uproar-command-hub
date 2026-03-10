@@ -35,7 +35,12 @@ export default function PlacementsPage() {
 
   const filtered = useMemo(() => {
     return placements.filter((p) => {
-      if (search && !p.headline.toLowerCase().includes(search.toLowerCase()) && !p.outlet.toLowerCase().includes(search.toLowerCase()) && !p.client_name.toLowerCase().includes(search.toLowerCase())) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const match = [p.headline, p.outlet, p.client_name, p.reporter_name, p.secured_by, p.vertical, p.type, p.topic_product]
+          .some((field) => field?.toLowerCase().includes(q));
+        if (!match) return false;
+      }
       if (clientFilter && p.client_name !== clientFilter) return false;
       if (teamFilter && p.team_name !== teamFilter) return false;
       if (typeFilter && p.type !== typeFilter) return false;
@@ -82,7 +87,7 @@ export default function PlacementsPage() {
         </div>
 
         <FilterBar>
-          <SearchInput value={search} onChange={handleFilterChange(setSearch)} placeholder="Search headlines, outlets, clients..." />
+          <SearchInput value={search} onChange={handleFilterChange(setSearch)} placeholder="Search headlines, outlets, clients, reporters, secured by..." />
           <FilterSelect label="All Clients" value={clientFilter} options={clientNames} onChange={handleFilterChange(setClientFilter)} />
           <FilterSelect label="All Teams" value={teamFilter} options={teamNames} onChange={handleFilterChange(setTeamFilter)} />
           <FilterSelect label="All Types" value={typeFilter} options={types} onChange={handleFilterChange(setTypeFilter)} />
