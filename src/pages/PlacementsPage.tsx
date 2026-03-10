@@ -31,6 +31,7 @@ export default function PlacementsPage() {
   const types = [...new Set(placements.map((p) => p.type))].sort();
   const verticals = [...new Set(placements.map((p) => p.vertical))].sort();
   const years = [...new Set(placements.map((p) => p.date?.slice(0, 4)).filter(Boolean))].sort().reverse();
+  const securedByNames = [...new Set(placements.map((p) => p.secured_by).filter(Boolean))].sort();
 
   const filtered = useMemo(() => {
     return placements.filter((p) => {
