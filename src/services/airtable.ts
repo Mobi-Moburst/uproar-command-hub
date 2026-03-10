@@ -1,37 +1,19 @@
 /**
- * Airtable API client for Uproar Command Center.
- *
- * SETUP INSTRUCTIONS:
- * 1. Set VITE_AIRTABLE_API_KEY to your Airtable Personal Access Token
- * 2. Set VITE_AIRTABLE_BASE_PLACEMENTS to your Clips / Media Placements base ID (e.g. "appXXXXXXXXXXXXXX")
- * 3. Set VITE_AIRTABLE_BASE_AWARDS to your Awards Submissions base ID
- * 4. Update TABLE_NAMES below to match your actual table names
- *
- * All env vars are read at runtime so the app gracefully falls back to mock data
- * when credentials are missing.
+ * Airtable client — calls the airtable-proxy edge function
+ * so the API key never reaches the browser.
  */
 
-// ── Configuration ──────────────────────────────────────────────────────────────
+import { supabase } from "@/integrations/supabase/client";
 
-const AIRTABLE_API_KEY = import.meta.env.VITE_AIRTABLE_API_KEY as string | undefined;
-
-/** Base IDs — one per Airtable base */
-export const BASE_IDS = {
-  placements: import.meta.env.VITE_AIRTABLE_BASE_PLACEMENTS as string | undefined,
-  awards: import.meta.env.VITE_AIRTABLE_BASE_AWARDS as string | undefined,
+/** Table IDs for each base */
+export const TABLE_IDS = {
+  placements: "tblsFhq3a6NPalO5N",
+  awards: "tblyqY5sA6j41GqYY",
 };
 
-/** Table names inside each base — update these to match your Airtable schema */
-export const TABLE_NAMES = {
-  placements: "Clips",        // ← rename to your actual table name
-  awards: "Submissions",      // ← rename to your actual table name
-};
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-/** Returns true when at least one Airtable base is configured */
+/** Always configured — the edge function holds the secrets */
 export function isAirtableConfigured(): boolean {
-  return Boolean(AIRTABLE_API_KEY && (BASE_IDS.placements || BASE_IDS.awards));
+  return true;
 }
 
 export interface AirtableRecord<T = Record<string, unknown>> {
@@ -40,50 +22,25 @@ export interface AirtableRecord<T = Record<string, unknown>> {
   createdTime: string;
 }
 
-interface AirtableListResponse<T = Record<string, unknown>> {
-  records: AirtableRecord<T>[];
-  offset?: string;
-}
-
 /**
- * Generic Airtable table fetcher.
- * Handles pagination automatically and returns all records.
- *
- * @param baseId  – Airtable base ID (starts with "app")
- * @param table   – Table name or ID
- * @param options – Optional Airtable API params (view, filterByFormula, sort, etc.)
+ * Fetch all records from an Airtable table via the edge-function proxy.
  */
 export async function fetchTable<T = Record<string, unknown>>(
-  baseId: string,
+  base: "placements" | "awards",
   table: string,
   options: Record<string, string> = {},
 ): Promise<AirtableRecord<T>[]> {
-  if (!AIRTABLE_API_KEY) {
-    throw new Error("Airtable API key is not configured. Set VITE_AIRTABLE_API_KEY.");
+  const { data, error } = await supabase.functions.invoke("airtable-proxy", {
+    body: { base, table, options },
+  });
+
+  if (error) {
+    throw new Error(`airtable-proxy error: ${error.message}`);
   }
 
-  const allRecords: AirtableRecord<T>[] = [];
-  let offset: string | undefined;
+  if (data?.error) {
+    throw new Error(data.error);
+  }
 
-  do {
-    const params = new URLSearchParams({ ...options });
-    if (offset) params.set("offset", offset);
-
-    const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}?${params}`;
-
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` },
-    });
-
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Airtable error ${res.status}: ${body}`);
-    }
-
-    const data: AirtableListResponse<T> = await res.json();
-    allRecords.push(...data.records);
-    offset = data.offset;
-  } while (offset);
-
-  return allRecords;
+  return data.records as AirtableRecord<T>[];
 }
