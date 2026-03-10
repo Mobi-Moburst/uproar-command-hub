@@ -71,9 +71,9 @@ export default function PlacementsPage() {
             Array.from({ length: 3 }).map((_, i) => <KpiCardSkeleton key={i} />)
           ) : (
             <>
-              <KpiCard label="Total Placements" value={filtered.length} detail={yearFilter || "All time"} />
-              <KpiCard label="Total Reach" value={formatNumber(totalReach)} detail="Self-reported · often blank" />
-              <KpiCard label="Total Ad Value" value={formatCurrency(totalAdValue)} detail="Self-reported · often blank" />
+              <KpiCard label="Total Placements" value={filtered.length.toLocaleString()} detail={yearFilter || "All time"} />
+              <KpiCard label="Total Reach" value={formatNumber(totalReach)} detail="Reported total reach" />
+              <KpiCard label="Total Ad Value" value={formatCurrency(totalAdValue)} detail="Reported total ad value" />
             </>
           )}
         </div>
