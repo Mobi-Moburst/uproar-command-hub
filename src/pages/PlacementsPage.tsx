@@ -120,8 +120,8 @@ export default function PlacementsPage() {
                     <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
                       <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-foreground">{p.outlet}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{p.reporter_name}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-foreground">{p.outlet || "–"}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{p.reporter_name || "–"}</td>
                       <td className="max-w-[280px] truncate px-4 py-3">
                         <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-emerald hover:underline font-sans">
                           {p.headline}
