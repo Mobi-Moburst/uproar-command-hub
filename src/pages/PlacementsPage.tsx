@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { KpiCard } from "@/components/KpiCard";
+import { KpiCardSkeleton } from "@/components/KpiCardSkeleton";
 import { FilterBar, FilterSelect, SearchInput } from "@/components/FilterBar";
 import { TypeBadge } from "@/components/TypeBadge";
-import { placements } from "@/data/mockData";
+import { TableSkeleton } from "@/components/TableSkeleton";
+import { ErrorState } from "@/components/ErrorState";
+import { EmptyState } from "@/components/EmptyState";
+import { usePlacements } from "@/hooks/usePlacements";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 
 export default function PlacementsPage() {
+  const { data: placements = [], isLoading, isError, refetch } = usePlacements();
+
   const [search, setSearch] = useState("");
   const [clientFilter, setClientFilter] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
@@ -39,9 +45,15 @@ export default function PlacementsPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          <KpiCard label="Total Placements" value={filtered.length} />
-          <KpiCard label="Total Reach" value={formatNumber(totalReach)} />
-          <KpiCard label="Total Ad Value" value={formatCurrency(totalAdValue)} />
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => <KpiCardSkeleton key={i} />)
+          ) : (
+            <>
+              <KpiCard label="Total Placements" value={filtered.length} />
+              <KpiCard label="Total Reach" value={formatNumber(totalReach)} />
+              <KpiCard label="Total Ad Value" value={formatCurrency(totalAdValue)} />
+            </>
+          )}
         </div>
 
         <FilterBar>
@@ -52,44 +64,52 @@ export default function PlacementsPage() {
           <FilterSelect label="All Verticals" value={verticalFilter} options={verticals} onChange={setVerticalFilter} />
         </FilterBar>
 
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Client</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Outlet</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Reporter</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Headline</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Vertical</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Reach</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Ad Value</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Secured By</th>
-              </tr>
-            </thead>
-            <tbody className="font-mono">
-              {filtered.map((p) => (
-                <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
-                  <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
-                  <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-foreground">{p.outlet}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{p.reporter_name}</td>
-                  <td className="max-w-[280px] truncate px-4 py-3">
-                    <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-emerald hover:underline font-sans">
-                      {p.headline}
-                    </a>
-                  </td>
-                  <td className="px-4 py-3"><TypeBadge type={p.type} /></td>
-                  <td className="px-4 py-3"><TypeBadge type={p.vertical} /></td>
-                  <td className="px-4 py-3 text-right">{formatNumber(p.readership_viewership)}</td>
-                  <td className="px-4 py-3 text-right">{formatCurrency(p.ad_value)}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-muted-foreground font-sans">{p.secured_by}</td>
+        {isError ? (
+          <ErrorState message="Failed to load placements." onRetry={() => refetch()} />
+        ) : isLoading ? (
+          <TableSkeleton columns={10} rows={10} />
+        ) : filtered.length === 0 ? (
+          <EmptyState message="No placements match your filters." columns={10} />
+        ) : (
+          <div className="overflow-x-auto rounded-lg border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted">
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Client</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Outlet</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Reporter</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Headline</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Vertical</th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Reach</th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Ad Value</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Secured By</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="font-mono">
+                {filtered.map((p) => (
+                  <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                    <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-foreground">{p.outlet}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{p.reporter_name}</td>
+                    <td className="max-w-[280px] truncate px-4 py-3">
+                      <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-emerald hover:underline font-sans">
+                        {p.headline}
+                      </a>
+                    </td>
+                    <td className="px-4 py-3"><TypeBadge type={p.type} /></td>
+                    <td className="px-4 py-3"><TypeBadge type={p.vertical} /></td>
+                    <td className="px-4 py-3 text-right">{formatNumber(p.readership_viewership)}</td>
+                    <td className="px-4 py-3 text-right">{formatCurrency(p.ad_value)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-muted-foreground font-sans">{p.secured_by}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
