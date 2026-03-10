@@ -22,12 +22,14 @@ export default function PlacementsPage() {
   const [teamFilter, setTeamFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [verticalFilter, setVerticalFilter] = useState("");
+  const [yearFilter, setYearFilter] = useState("");
   const [page, setPage] = useState(0);
 
   const clientNames = [...new Set(placements.map((p) => p.client_name))].sort();
   const teamNames = [...new Set(placements.map((p) => p.team_name))].sort();
   const types = [...new Set(placements.map((p) => p.type))].sort();
   const verticals = [...new Set(placements.map((p) => p.vertical))].sort();
+  const years = [...new Set(placements.map((p) => p.date?.slice(0, 4)).filter(Boolean))].sort().reverse();
 
   const filtered = useMemo(() => {
     return placements.filter((p) => {
@@ -36,9 +38,10 @@ export default function PlacementsPage() {
       if (teamFilter && p.team_name !== teamFilter) return false;
       if (typeFilter && p.type !== typeFilter) return false;
       if (verticalFilter && p.vertical !== verticalFilter) return false;
+      if (yearFilter && !p.date?.startsWith(yearFilter)) return false;
       return true;
     });
-  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter]);
+  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter]);
 
   // Reset page when filters change
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -68,9 +71,9 @@ export default function PlacementsPage() {
             Array.from({ length: 3 }).map((_, i) => <KpiCardSkeleton key={i} />)
           ) : (
             <>
-              <KpiCard label="Total Placements" value={filtered.length} />
-              <KpiCard label="Total Reach" value={formatNumber(totalReach)} />
-              <KpiCard label="Total Ad Value" value={formatCurrency(totalAdValue)} />
+              <KpiCard label="Total Placements" value={filtered.length} detail={yearFilter || "All time"} />
+              <KpiCard label="Total Reach" value={formatNumber(totalReach)} detail="Self-reported · often blank" />
+              <KpiCard label="Total Ad Value" value={formatCurrency(totalAdValue)} detail="Self-reported · often blank" />
             </>
           )}
         </div>
@@ -81,6 +84,7 @@ export default function PlacementsPage() {
           <FilterSelect label="All Teams" value={teamFilter} options={teamNames} onChange={handleFilterChange(setTeamFilter)} />
           <FilterSelect label="All Types" value={typeFilter} options={types} onChange={handleFilterChange(setTypeFilter)} />
           <FilterSelect label="All Verticals" value={verticalFilter} options={verticals} onChange={handleFilterChange(setVerticalFilter)} />
+          <FilterSelect label="All Years" value={yearFilter} options={years} onChange={handleFilterChange(setYearFilter)} />
         </FilterBar>
 
         {isError ? (
