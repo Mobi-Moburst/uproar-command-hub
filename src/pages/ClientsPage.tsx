@@ -130,7 +130,7 @@ export default function ClientsPage() {
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Client</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Team</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Vertical</th>
+                    
                     <th className="px-4 py-3 text-right font-medium text-muted-foreground">Placements</th>
                     <th className="px-4 py-3 text-right font-medium text-muted-foreground">Reach</th>
                     <th className="px-4 py-3 text-right font-medium text-muted-foreground">Ad Value</th>
