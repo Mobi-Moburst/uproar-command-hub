@@ -92,7 +92,7 @@ export default function OverviewPage() {
                   </tr>
                 </thead>
                 <tbody className="font-mono">
-                  {recentPlacements.map((p) => (
+                  {topPlacements.map((p) => (
                     <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
                       <td className="px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
