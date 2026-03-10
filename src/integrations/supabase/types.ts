@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      placements_archive: {
+        Row: {
+          ad_value: number
+          client_name: string
+          created_at: string
+          date: string | null
+          headline: string
+          id: string
+          link: string
+          notes: string
+          outlet: string
+          readership_viewership: number
+          reporter_name: string
+          secured_by: string
+          team_name: string
+          topic_product: string
+          type: string
+          vertical: string
+          weekly_wins_trigger: boolean
+        }
+        Insert: {
+          ad_value?: number
+          client_name?: string
+          created_at?: string
+          date?: string | null
+          headline?: string
+          id: string
+          link?: string
+          notes?: string
+          outlet?: string
+          readership_viewership?: number
+          reporter_name?: string
+          secured_by?: string
+          team_name?: string
+          topic_product?: string
+          type?: string
+          vertical?: string
+          weekly_wins_trigger?: boolean
+        }
+        Update: {
+          ad_value?: number
+          client_name?: string
+          created_at?: string
+          date?: string | null
+          headline?: string
+          id?: string
+          link?: string
+          notes?: string
+          outlet?: string
+          readership_viewership?: number
+          reporter_name?: string
+          secured_by?: string
+          team_name?: string
+          topic_product?: string
+          type?: string
+          vertical?: string
+          weekly_wins_trigger?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
