@@ -45,6 +45,9 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Parse out just the base ID (before any slash)
+    const baseId = rawBaseId.split("/")[0];
+
     // Fetch all pages
     const allRecords: AirtableListResponse["records"] = [];
     let offset: string | undefined;
