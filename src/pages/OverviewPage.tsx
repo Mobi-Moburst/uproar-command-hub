@@ -220,8 +220,8 @@ export default function OverviewPage() {
           </div>
 
           <div className="section-gap">
-            <h2 className="text-lg font-semibold text-foreground">Team Activity</h2>
-            {loadingTeams ? (
+            <h2 className="text-lg font-semibold text-foreground">Team Activity — This Month</h2>
+            {loadingPlacements || loadingAwards ? (
               <div className="space-y-3">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="rounded-lg border border-border bg-card p-5 space-y-3">
@@ -234,9 +234,11 @@ export default function OverviewPage() {
                   </div>
                 ))}
               </div>
+            ) : monthlyTeams.length === 0 ? (
+              <EmptyState message="No team activity this month." />
             ) : (
               <div className="space-y-3">
-                {teams.map((t) => (
+                {monthlyTeams.map((t) => (
                   <div key={t.id} className="rounded-lg border border-border bg-card p-5">
                     <p className="text-sm font-semibold text-foreground">{t.team_name}</p>
                     <div className="mt-3 grid grid-cols-3 gap-4 text-center">
