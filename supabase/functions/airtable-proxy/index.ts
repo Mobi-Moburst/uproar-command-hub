@@ -31,18 +31,22 @@ Deno.serve(async (req) => {
 
     const { base, table, options = {} } = (await req.json()) as RequestBody;
 
-    const baseIds: Record<string, string | undefined> = {
+    // Extract just the base ID (appXXX) in case the secret contains "appXXX/tblYYY"
+    const rawBaseIds: Record<string, string | undefined> = {
       placements: Deno.env.get("AIRTABLE_BASE_PLACEMENTS"),
       awards: Deno.env.get("AIRTABLE_BASE_AWARDS"),
     };
 
-    const baseId = baseIds[base];
-    if (!baseId) {
+    const rawBaseId = rawBaseIds[base];
+    if (!rawBaseId) {
       return new Response(JSON.stringify({ error: `Base "${base}" not configured` }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Parse out just the base ID (before any slash)
+    const baseId = rawBaseId.split("/")[0];
 
     // Fetch all pages
     const allRecords: AirtableListResponse["records"] = [];
