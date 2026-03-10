@@ -55,9 +55,16 @@ export default function ClientsPage() {
   const groupedAwards = useMemo(() => {
     if (!clientAwards.length) return [];
 
+    const extractYear = (a: AwardSubmission): number => {
+      if (a.due_date) return new Date(a.due_date).getFullYear();
+      const match = (a.award_edition || '').match(/\b(20\d{2})\b/)
+        || (a.submission_title || '').match(/\b(20\d{2})\b/);
+      return match ? parseInt(match[1], 10) : 0;
+    };
+
     const byYear = new Map<number, AwardSubmission[]>();
     clientAwards.forEach((a) => {
-      const year = a.due_date ? new Date(a.due_date).getFullYear() : 0;
+      const year = extractYear(a);
       if (!byYear.has(year)) byYear.set(year, []);
       byYear.get(year)!.push(a);
     });
