@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { FilterBar, FilterSelect, SearchInput } from "@/components/FilterBar";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -6,11 +6,15 @@ import { TypeBadge } from "@/components/TypeBadge";
 import { TableSkeleton } from "@/components/TableSkeleton";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { useClients } from "@/hooks/useClients";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
+import { Info } from "lucide-react";
 import type { Client } from "@/data/types";
+import type { AwardSubmission } from "@/data/types";
 
 export default function ClientsPage() {
   const { data: clients = [], isLoading, isError, refetch } = useClients();
@@ -36,11 +40,56 @@ export default function ClientsPage() {
   });
 
   const clientPlacements = selectedClient
-    ? placements.filter((p) => p.client_name === selectedClient.name).slice(0, 5)
+    ? placements
+        .filter((p) => p.client_name === selectedClient.name)
+        .sort((a, b) => (b.date || "").localeCompare(a.date || ""))
+        .slice(0, 5)
     : [];
+
   const clientAwards = selectedClient
     ? awards.filter((a) => a.client_name === selectedClient.name)
     : [];
+
+  const currentYear = new Date().getFullYear();
+
+  const groupedAwards = useMemo(() => {
+    if (!clientAwards.length) return [];
+
+    const byYear = new Map<number, AwardSubmission[]>();
+    clientAwards.forEach((a) => {
+      const year = a.due_date ? new Date(a.due_date).getFullYear() : 0;
+      if (!byYear.has(year)) byYear.set(year, []);
+      byYear.get(year)!.push(a);
+    });
+
+    const statusOrder = ["Won", "Deferred", "Not Selected"];
+    const sortedYears = [...byYear.keys()].sort((a, b) => b - a);
+
+    return sortedYears.map((year) => {
+      const yearAwards = byYear.get(year)!;
+      const byStatus = new Map<string, AwardSubmission[]>();
+      yearAwards.forEach((a) => {
+        const status = a.status || "Unknown";
+        if (!byStatus.has(status)) byStatus.set(status, []);
+        byStatus.get(status)!.push(a);
+      });
+
+      const sortedStatuses = [...byStatus.keys()].sort((a, b) => {
+        const ai = statusOrder.indexOf(a);
+        const bi = statusOrder.indexOf(b);
+        if (ai === -1 && bi === -1) return a.localeCompare(b);
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      });
+
+      return {
+        year,
+        label: year === 0 ? "Unknown Year" : String(year),
+        statuses: sortedStatuses.map((s) => ({ status: s, awards: byStatus.get(s)! })),
+      };
+    });
+  }, [clientAwards]);
 
   return (
     <DashboardLayout>
@@ -109,86 +158,137 @@ export default function ClientsPage() {
             </div>
 
             {selectedClient && (
-              <div className="fixed right-0 top-0 z-40 h-screen w-full overflow-y-auto border-l border-border bg-background p-6 shadow-xl animate-slide-in-right lg:w-1/2">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-foreground">{selectedClient.name}</h2>
-                  <button onClick={() => setSelectedClient(null)} className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
-                    Close
-                  </button>
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <StatusBadge status={selectedClient.status} />
-                  <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name} · {selectedClient.vertical}</span>
-                </div>
+              <TooltipProvider>
+                <div className="fixed right-0 top-0 z-40 h-screen w-full overflow-y-auto border-l border-border bg-background p-6 shadow-xl animate-slide-in-right lg:w-1/2">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-foreground">{selectedClient.name}</h2>
+                    <button onClick={() => setSelectedClient(null)} className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+                      Close
+                    </button>
+                  </div>
+                  <div className="mt-1 flex items-center gap-2">
+                    <StatusBadge status={selectedClient.status} />
+                    <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
+                  </div>
 
-                <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-xs text-muted-foreground">Placements</p>
-                    <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_placements}</p>
-                  </div>
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-xs text-muted-foreground">Reach</p>
-                    <p className="mt-1 font-tight text-2xl font-bold">{formatNumber(selectedClient.total_reach)}</p>
-                  </div>
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-xs text-muted-foreground">Ad Value</p>
-                    <p className="mt-1 font-tight text-2xl font-bold">{formatCurrency(selectedClient.total_ad_value)}</p>
-                  </div>
-                  <div className="rounded-md border border-border p-4">
-                    <p className="text-xs text-muted-foreground">Award Wins</p>
-                    <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_award_wins}</p>
-                  </div>
-                </div>
-
-                {selectedClient.active_campaign && (
-                  <div className="mt-6">
-                    <p className="text-xs text-muted-foreground">Active Campaign</p>
-                    <p className="mt-1 text-sm font-medium text-foreground">{selectedClient.active_campaign}</p>
-                  </div>
-                )}
-
-                <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-foreground mb-3">Recent Placements</h3>
-                  {clientPlacements.length > 0 ? (
-                    <div className="space-y-2">
-                      {clientPlacements.map((p) => (
-                        <div key={p.id} className="rounded-md border border-border p-3">
-                          <div className="flex items-start justify-between">
-                            <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald hover:underline">
-                              {p.headline}
-                            </a>
-                            <TypeBadge type={p.type} />
-                          </div>
-                          <p className="mt-1 text-xs font-mono text-muted-foreground">
-                            {p.outlet} · {formatDateShort(p.date)} · {formatNumber(p.readership_viewership)} reach
-                          </p>
-                        </div>
-                      ))}
+                  <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-xs text-muted-foreground">Placements</p>
+                      <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_placements}</p>
                     </div>
-                  ) : (
-                    <p className="text-sm font-mono text-muted-foreground">No placements recorded.</p>
-                  )}
-                </div>
-
-                <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-foreground mb-3">Awards Submissions</h3>
-                  {clientAwards.length > 0 ? (
-                    <div className="space-y-2">
-                      {clientAwards.map((a) => (
-                        <div key={a.id} className="flex items-center justify-between rounded-md border border-border p-3">
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{a.submission_title}</p>
-                            <p className="text-xs font-mono text-muted-foreground">{a.award_name} — {a.award_edition}</p>
-                          </div>
-                          <StatusBadge status={a.status} />
-                        </div>
-                      ))}
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-xs text-muted-foreground">Reach</p>
+                      <p className="mt-1 font-tight text-2xl font-bold">{formatNumber(selectedClient.total_reach)}</p>
                     </div>
-                  ) : (
-                    <p className="text-sm font-mono text-muted-foreground">No award submissions.</p>
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        Ad Value
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[220px] text-xs">
+                            Many placements leave Ad Value blank, so this total may underrepresent actual value.
+                          </TooltipContent>
+                        </Tooltip>
+                      </p>
+                      <p className="mt-1 font-tight text-2xl font-bold">{formatCurrency(selectedClient.total_ad_value)}</p>
+                    </div>
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-xs text-muted-foreground">Award Wins</p>
+                      <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_award_wins}</p>
+                    </div>
+                  </div>
+
+                  {selectedClient.active_campaign && (
+                    <div className="mt-6">
+                      <p className="text-xs text-muted-foreground">Active Campaign</p>
+                      <p className="mt-1 text-sm font-medium text-foreground">{selectedClient.active_campaign}</p>
+                    </div>
                   )}
+
+                  <div className="mt-8">
+                    <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                      Recent Placements
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-mono text-muted-foreground cursor-help">
+                            All-Time
+                            <Info className="ml-1 h-2.5 w-2.5" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[220px] text-xs">
+                          Showing the 5 most recent placements across all time.
+                        </TooltipContent>
+                      </Tooltip>
+                    </h3>
+                    {clientPlacements.length > 0 ? (
+                      <div className="space-y-2">
+                        {clientPlacements.map((p) => (
+                          <div key={p.id} className="rounded-md border border-border p-3">
+                            <div className="flex items-start justify-between">
+                              <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald hover:underline">
+                                {p.headline}
+                              </a>
+                              <TypeBadge type={p.type} />
+                            </div>
+                            <p className="mt-1 text-xs font-mono text-muted-foreground">
+                              {p.outlet} · {formatDateShort(p.date)} · {formatNumber(p.readership_viewership)} reach
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-mono text-muted-foreground">No placements recorded.</p>
+                    )}
+                  </div>
+
+                  <div className="mt-8">
+                    <h3 className="text-sm font-semibold text-foreground mb-3">Award Submissions</h3>
+                    {groupedAwards.length > 0 ? (
+                      <Accordion type="multiple" defaultValue={[String(currentYear)]}>
+                        {groupedAwards.map(({ year, label, statuses }) => (
+                          <AccordionItem key={year} value={String(year)}>
+                            <AccordionTrigger className="text-sm font-medium py-2 hover:no-underline">
+                              {label}
+                              <span className="ml-2 text-xs font-mono text-muted-foreground">
+                                {statuses.reduce((sum, s) => sum + s.awards.length, 0)} submissions
+                              </span>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <Accordion type="multiple" defaultValue={statuses.map((s) => s.status)}>
+                                {statuses.map(({ status, awards: statusAwards }) => (
+                                  <AccordionItem key={status} value={status} className="border-none">
+                                    <AccordionTrigger className="text-xs font-medium py-1.5 hover:no-underline text-muted-foreground">
+                                      {status}
+                                      <span className="ml-1.5 text-xs font-mono">({statusAwards.length})</span>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                      <div className="space-y-2 pt-1">
+                                        {statusAwards.map((a) => (
+                                          <div key={a.id} className="flex items-center justify-between rounded-md border border-border p-3">
+                                            <div>
+                                              <p className="text-sm font-medium text-foreground">{a.submission_title}</p>
+                                              <p className="text-xs font-mono text-muted-foreground">{a.award_name} — {a.award_edition}</p>
+                                            </div>
+                                            <StatusBadge status={a.status} />
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                ))}
+                              </Accordion>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                    ) : (
+                      <p className="text-sm font-mono text-muted-foreground">No award submissions.</p>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </TooltipProvider>
             )}
           </div>
         )}
