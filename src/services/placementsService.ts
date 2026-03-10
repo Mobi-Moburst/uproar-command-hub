@@ -70,7 +70,12 @@ export async function getPlacements(): Promise<MediaPlacement[]> {
     for (const p of archived) byId.set(p.id, p);
     for (const p of live) byId.set(p.id, p);
 
-    return Array.from(byId.values());
+    return Array.from(byId.values()).sort((a, b) => {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return b.date.localeCompare(a.date);
+    });
   } catch (e) {
     console.warn("Failed to fetch placements, using mock data:", e);
     return mockPlacements;
