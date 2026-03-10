@@ -252,7 +252,7 @@ export default function OverviewPage() {
                       </div>
                       <div>
                         <p className="font-tight text-xl font-bold text-foreground">{t.total_wins}</p>
-                        <p className="text-xs text-muted-foreground">Wins</p>
+                        <p className="text-xs text-muted-foreground">Award Wins</p>
                       </div>
                     </div>
                   </div>
