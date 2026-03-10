@@ -11,7 +11,6 @@ import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import type { Team } from "@/data/types";
-import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 
 export default function OverviewPage() {
   const { data: clients = [], isLoading: loadingClients, isError: errorClients, refetch: refetchClients } = useClients();
