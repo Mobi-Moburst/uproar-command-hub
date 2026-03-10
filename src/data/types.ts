@@ -22,7 +22,7 @@ export interface MediaPlacement {
   reporter_name: string;
   headline: string;
   link: string;
-  type: "Print" | "Online" | "Broadcast" | "Podcast" | "Newsletter";
+  type: string;
   vertical: string;
   readership_viewership: number;
   ad_value: number;
@@ -37,7 +37,7 @@ export interface AwardSubmission {
   client_name: string;
   award_name: string;
   award_edition: string;
-  status: "Drafting" | "Submitted" | "Finalist" | "Won" | "Lost";
+  status: string;
   team_name: string;
   submission_title: string;
   due_date: string;
