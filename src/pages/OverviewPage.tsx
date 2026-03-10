@@ -27,7 +27,7 @@ export default function OverviewPage() {
   const inProgressAwards = awards.filter((a) => ["Drafting", "Submitted", "Finalist"].includes(a.status));
   const wonAwards = awards.filter((a) => a.status === "Won");
   const weeklyWins = placements.filter((p) => p.weekly_wins_trigger);
-  const recentPlacements = placements.slice(0, 8);
+  const recentPlacements = [...placements].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
   const topReachClients = [...activeClients].sort((a, b) => b.total_reach - a.total_reach).slice(0, 5);
   const recentActiveClients = [...activeClients].sort((a, b) => b.last_placement_date.localeCompare(a.last_placement_date)).slice(0, 5);
 
