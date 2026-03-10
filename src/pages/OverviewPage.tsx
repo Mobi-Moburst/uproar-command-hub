@@ -16,9 +16,8 @@ export default function OverviewPage() {
   const { data: clients = [], isLoading: loadingClients, isError: errorClients, refetch: refetchClients } = useClients();
   const { data: placements = [], isLoading: loadingPlacements, isError: errorPlacements, refetch: refetchPlacements } = usePlacements();
   const { data: awards = [], isLoading: loadingAwards, isError: errorAwards, refetch: refetchAwards } = useAwards();
-  const { data: teams = [], isLoading: loadingTeams } = useTeams();
 
-  const isLoading = loadingClients || loadingPlacements || loadingAwards || loadingTeams;
+  const isLoading = loadingClients || loadingPlacements || loadingAwards;
 
   const activeClients = clients.filter((c) => c.status === "Active");
   const thisMonthPlacements = placements.filter((p) => p.date >= "2026-03-01");
