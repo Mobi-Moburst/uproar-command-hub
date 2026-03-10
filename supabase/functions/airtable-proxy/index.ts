@@ -8,6 +8,7 @@ interface RequestBody {
   base: "placements" | "awards";
   table: string;
   options?: Record<string, string>;
+  maxRecords?: number;
 }
 
 interface AirtableListResponse {
@@ -29,9 +30,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { base, table, options = {} } = (await req.json()) as RequestBody;
+    const { base, table, options = {}, maxRecords } = (await req.json()) as RequestBody;
 
-    // Extract just the base ID (appXXX) in case the secret contains "appXXX/tblYYY"
     const rawBaseIds: Record<string, string | undefined> = {
       placements: Deno.env.get("AIRTABLE_BASE_PLACEMENTS"),
       awards: Deno.env.get("AIRTABLE_BASE_AWARDS"),
@@ -45,19 +45,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Parse out just the base ID (before any slash)
     const baseId = rawBaseId.split("/")[0];
 
-    // Fetch all pages
+    // Fetch pages with optional maxRecords cap
     const allRecords: AirtableListResponse["records"] = [];
     let offset: string | undefined;
+    const limit = maxRecords ?? 10000; // default cap to avoid runaway pagination
 
     do {
-      const params = new URLSearchParams({ ...options });
+      const params = new URLSearchParams({ ...options, pageSize: "100" });
       if (offset) params.set("offset", offset);
 
       const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}?${params}`;
-      console.log("Fetching Airtable URL:", url, "baseId:", baseId);
+      console.log("Fetching Airtable URL:", url);
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${apiKey}` },
       });
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       const data: AirtableListResponse = await res.json();
       allRecords.push(...data.records);
       offset = data.offset;
-    } while (offset);
+    } while (offset && allRecords.length < limit);
 
     return new Response(JSON.stringify({ records: allRecords }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
