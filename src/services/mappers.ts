@@ -46,20 +46,34 @@ export function mapPlacement(record: AirtableRecord): MediaPlacement {
 // ── Awards Submissions ─────────────────────────────────────────────────────────
 
 /** Maps raw Airtable Submissions record → AwardSubmission */
-export function mapAward(record: AirtableRecord): AwardSubmission {
+export function mapAward(
+  record: AirtableRecord,
+  clientLookup?: Map<string, string>,
+): AwardSubmission {
   const f = record.fields as Record<string, any>;
 
-  // Client, Award, Award Edition are linked record IDs — try lookup fields first
-  let clientName = first(f["Client Name (from Client)"] ?? f["Client Name"]);
+  // 1. Resolve client name via lookup table (highest priority)
+  const clientRecId = first(f["Client"]);
+  let clientName = (clientLookup && clientRecId ? clientLookup.get(clientRecId) : undefined) || "";
+
+  // 2. Fallback: lookup fields from Airtable
+  if (!clientName) {
+    clientName = first(f["Client Name (from Client)"] ?? f["Client Name"]);
+  }
+
   let awardName = first(f["Award Name (from Award)"] ?? f["Award Name"]);
   let awardEdition = first(f["Award Edition Name (from Award Edition)"] ?? f["Edition Name"]);
 
-  // Fallback: parse from "Unique Key" or "Submission" field (format: "Client × Award — Edition")
+  // 3. Fallback: parse from "Submission" or "Unique Key" field
   if (!clientName || clientName.startsWith("rec")) {
-    const uniqueKey = first(f["Unique Key"] ?? f["Submission"]);
-    if (uniqueKey) {
-      const parts = uniqueKey.split("×").map((s: string) => s.trim());
-      if (parts.length >= 1 && !parts[0].startsWith("rec")) clientName = parts[0];
+    const submission = first(f["Submission"]);
+    const uniqueKey = first(f["Unique Key"]);
+    const parseSource = submission || uniqueKey;
+    if (parseSource) {
+      const parts = parseSource.split("×").map((s: string) => s.trim());
+      if (parts.length >= 1 && !parts[0].startsWith("rec")) {
+        if (!clientName || clientName.startsWith("rec")) clientName = parts[0];
+      }
       if (parts.length >= 2) {
         const rest = parts.slice(1).join("×");
         const dashParts = rest.split("—").map((s: string) => s.trim());
@@ -69,8 +83,8 @@ export function mapAward(record: AirtableRecord): AwardSubmission {
     }
   }
 
-  // Last resort: if still rec IDs, just show the raw linked field
-  if (clientName.startsWith("rec")) clientName = first(f["Client"]);
+  // Last resort: raw linked field
+  if (clientName.startsWith("rec")) clientName = "";
   if (awardName.startsWith("rec")) awardName = first(f["Award"]);
   if (awardEdition.startsWith("rec")) awardEdition = first(f["Award Edition"]);
 

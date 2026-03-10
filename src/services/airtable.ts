@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const TABLE_IDS = {
   placements: "tblsFhq3a6NPalO5N",
   awards: "tblyqY5sA6j41GqYY",
+  awardsClients: "tblmucN4TFZ8EmxB4",
 };
 
 /** Always configured — the edge function holds the secrets */
