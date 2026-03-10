@@ -6,20 +6,19 @@ import type { MediaPlacement } from "@/data/types";
 
 /** Fetch archived (≤2025) placements from the database */
 async function getArchivedPlacements(): Promise<MediaPlacement[]> {
-  // Fetch all rows using pagination (default limit is 1000)
   const allRows: Record<string, unknown>[] = [];
-  const pageSize = 5000;
+  const pageSize = 1000; // PostgREST enforces max 1000 rows per request
   let from = 0;
   let hasMore = true;
 
   while (hasMore) {
     const { data, error } = await supabase
       .from("placements_archive")
-      .select("*")
+      .select("id, date, client_name, team_name, outlet, reporter_name, headline, link, type, vertical, readership_viewership, ad_value, secured_by, weekly_wins_trigger")
       .range(from, from + pageSize - 1);
 
     if (error) {
-      console.warn("Failed to fetch archived placements:", error.message);
+      console.error("Failed to fetch archived placements:", error.message);
       return [];
     }
 
@@ -27,6 +26,8 @@ async function getArchivedPlacements(): Promise<MediaPlacement[]> {
     hasMore = (data?.length ?? 0) === pageSize;
     from += pageSize;
   }
+
+  console.log(`Fetched ${allRows.length} archived placements`);
 
   return allRows.map((row: Record<string, unknown>) => ({
     id: String(row.id),
@@ -42,8 +43,8 @@ async function getArchivedPlacements(): Promise<MediaPlacement[]> {
     readership_viewership: Number(row.readership_viewership) || 0,
     ad_value: Number(row.ad_value) || 0,
     secured_by: String(row.secured_by ?? ""),
-    topic_product: String(row.topic_product ?? ""),
-    notes: String(row.notes ?? ""),
+    topic_product: "",
+    notes: "",
     weekly_wins_trigger: Boolean(row.weekly_wins_trigger),
   }));
 }
