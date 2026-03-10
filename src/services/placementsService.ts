@@ -8,7 +8,7 @@ import type { MediaPlacement } from "@/data/types";
 async function getArchivedPlacements(): Promise<MediaPlacement[]> {
   // Fetch all rows using pagination (default limit is 1000)
   const allRows: Record<string, unknown>[] = [];
-  const pageSize = 1000;
+  const pageSize = 5000;
   let from = 0;
   let hasMore = true;
 
