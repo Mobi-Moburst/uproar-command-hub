@@ -1,1 +1,4 @@
 project_id = "pbqtzperrxwarpllxsia"
+
+[functions.seed-placements-archive]
+verify_jwt = false
