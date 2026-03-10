@@ -1,17 +1,17 @@
-import { isAirtableConfigured, fetchTable, BASE_IDS, TABLE_NAMES } from "./airtable";
+import { fetchTable, TABLE_IDS } from "./airtable";
 import { mapPlacement } from "./mappers";
 import { placements as mockPlacements } from "@/data/mockData";
 import type { MediaPlacement } from "@/data/types";
 
-/** Fetch all media placements — from Airtable if configured, otherwise mock data */
+/** Fetch all media placements — from Airtable via edge function, fallback to mock */
 export async function getPlacements(): Promise<MediaPlacement[]> {
-  if (!isAirtableConfigured() || !BASE_IDS.placements) {
-    // Simulate async to keep the loading-state UX consistent
+  try {
+    const records = await fetchTable("placements", TABLE_IDS.placements);
+    return records.map(mapPlacement);
+  } catch (e) {
+    console.warn("Failed to fetch placements from Airtable, using mock data:", e);
     return mockPlacements;
   }
-
-  const records = await fetchTable(BASE_IDS.placements, TABLE_NAMES.placements);
-  return records.map(mapPlacement);
 }
 
 /** Fetch only placements flagged as weekly wins */
