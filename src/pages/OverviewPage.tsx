@@ -42,6 +42,36 @@ export default function OverviewPage() {
     }))
     .sort((a, b) => b._score - a._score)
     .slice(0, 8);
+
+  // Monthly team stats
+  const monthlyTeams: Team[] = (() => {
+    const teamMap = new Map<string, Team>();
+    for (const p of thisMonthPlacements) {
+      const name = p.team_name;
+      if (!name) continue;
+      const existing = teamMap.get(name);
+      if (existing) {
+        existing.placement_count += 1;
+        existing.total_reach += p.readership_viewership;
+        existing.total_ad_value += p.ad_value;
+      } else {
+        teamMap.set(name, { id: name, team_name: name, placement_count: 1, total_reach: p.readership_viewership, total_ad_value: p.ad_value, total_submissions: 0, total_wins: 0 });
+      }
+    }
+    const monthlyAwards = awards.filter((a) => a.due_date >= "2026-03-01" || a.submitted_date?.startsWith("2026-03"));
+    for (const a of monthlyAwards) {
+      const name = a.team_name;
+      if (!name) continue;
+      const existing = teamMap.get(name);
+      if (existing) {
+        existing.total_submissions += 1;
+        if (a.status === "Won") existing.total_wins += 1;
+      } else {
+        teamMap.set(name, { id: name, team_name: name, placement_count: 0, total_reach: 0, total_ad_value: 0, total_submissions: 1, total_wins: a.status === "Won" ? 1 : 0 });
+      }
+    }
+    return Array.from(teamMap.values()).sort((a, b) => b.placement_count - a.placement_count);
+  })();
   const topReachClients = [...activeClients].sort((a, b) => b.total_reach - a.total_reach).slice(0, 5);
   const recentActiveClients = [...activeClients].sort((a, b) => b.last_placement_date.localeCompare(a.last_placement_date)).slice(0, 5);
 
