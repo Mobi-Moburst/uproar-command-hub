@@ -1,14 +1,15 @@
-import { isAirtableConfigured, fetchTable, BASE_IDS, TABLE_NAMES } from "./airtable";
+import { fetchTable, TABLE_IDS } from "./airtable";
 import { mapAward } from "./mappers";
 import { awards as mockAwards } from "@/data/mockData";
 import type { AwardSubmission } from "@/data/types";
 
-/** Fetch all award submissions — from Airtable if configured, otherwise mock data */
+/** Fetch all award submissions — from Airtable via edge function, fallback to mock */
 export async function getAwards(): Promise<AwardSubmission[]> {
-  if (!isAirtableConfigured() || !BASE_IDS.awards) {
+  try {
+    const records = await fetchTable("awards", TABLE_IDS.awards);
+    return records.map(mapAward);
+  } catch (e) {
+    console.warn("Failed to fetch awards from Airtable, using mock data:", e);
     return mockAwards;
   }
-
-  const records = await fetchTable(BASE_IDS.awards, TABLE_NAMES.awards);
-  return records.map(mapAward);
 }
