@@ -9,7 +9,8 @@ import { EmptyState } from "@/components/EmptyState";
 import { useClients } from "@/hooks/useClients";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
-import { useTeams } from "@/hooks/useTeams";
+import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
+import type { Team } from "@/data/types";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 
 export default function OverviewPage() {
