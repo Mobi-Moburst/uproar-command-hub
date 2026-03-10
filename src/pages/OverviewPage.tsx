@@ -71,7 +71,7 @@ export default function OverviewPage() {
 
         {/* Recent Placements */}
         <div className="section-gap">
-          <h2 className="text-lg font-semibold text-foreground">Recent Media Placements</h2>
+          <h2 className="text-lg font-semibold text-foreground">Top Placements This Month</h2>
           {errorPlacements ? (
             <ErrorState message="Failed to load placements." onRetry={() => refetchPlacements()} />
           ) : loadingPlacements ? (
