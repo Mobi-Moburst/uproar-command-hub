@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { TypeBadge } from "@/components/TypeBadge";
-import { placements } from "@/data/mockData";
+import { ErrorState } from "@/components/ErrorState";
+import { EmptyState } from "@/components/EmptyState";
+import { useWeeklyWins } from "@/hooks/usePlacements";
 import { formatDateShort } from "@/lib/format";
 
 export default function WeeklyWinsPage() {
+  const { data: weeklyWins = [], isLoading, isError, refetch } = useWeeklyWins();
+
   const [copyReady, setCopyReady] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const weeklyWins = placements.filter((p) => p.weekly_wins_trigger);
-
-  // Group by client
   const grouped = weeklyWins.reduce<Record<string, typeof weeklyWins>>((acc, p) => {
     if (!acc[p.client_name]) acc[p.client_name] = [];
     acc[p.client_name].push(p);
@@ -37,7 +38,9 @@ export default function WeeklyWinsPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Weekly Wins</h1>
-            <p className="mt-1 text-sm text-muted-foreground font-mono">Week of March 10, 2026 · {weeklyWins.length} wins</p>
+            <p className="mt-1 text-sm text-muted-foreground font-mono">
+              {isLoading ? "Loading..." : `Week of March 10, 2026 · ${weeklyWins.length} wins`}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -53,8 +56,21 @@ export default function WeeklyWinsPage() {
           </div>
         </div>
 
-        {copyReady ? (
-          /* Copy-Ready View — clean text block */
+        {isError ? (
+          <ErrorState message="Failed to load weekly wins." onRetry={() => refetch()} />
+        ) : isLoading ? (
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-lg border border-border bg-card p-5 space-y-3">
+                <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-full animate-pulse rounded bg-muted" />
+                <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+              </div>
+            ))}
+          </div>
+        ) : weeklyWins.length === 0 ? (
+          <EmptyState message="No wins flagged for this week yet." />
+        ) : copyReady ? (
           <div className="section-gap">
             <div className="flex justify-end">
               <button
@@ -81,7 +97,6 @@ export default function WeeklyWinsPage() {
             </div>
           </div>
         ) : (
-          /* Card View */
           <div className="space-y-10">
             {Object.entries(grouped).map(([client, wins]) => (
               <div key={client}>
