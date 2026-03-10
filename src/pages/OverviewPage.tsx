@@ -27,7 +27,21 @@ export default function OverviewPage() {
   const inProgressAwards = awards.filter((a) => ["Drafting", "Submitted", "Finalist"].includes(a.status));
   const wonAwards = awards.filter((a) => a.status === "Won");
   const weeklyWins = placements.filter((p) => p.weekly_wins_trigger);
-  const recentPlacements = [...placements].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+
+  // Impact-scored top placements this month
+  const typeWeights: Record<string, number> = {
+    Feature: 1.0, Interview: 1.0, Broadcast: 1.0, "Product review": 1.0,
+    "Contributed content": 0.6, Announcement: 0.6, Data: 0.6, Award: 0.6,
+    Mention: 0.3, Syndication: 0.3, "Social media": 0.3, Roundup: 0.3,
+  };
+  const maxReach = Math.max(...thisMonthPlacements.map((p) => p.readership_viewership), 1);
+  const topPlacements = [...thisMonthPlacements]
+    .map((p) => ({
+      ...p,
+      _score: (typeWeights[p.type] ?? 0.3) * 0.4 + (p.readership_viewership / maxReach) * 0.6,
+    }))
+    .sort((a, b) => b._score - a._score)
+    .slice(0, 8);
   const topReachClients = [...activeClients].sort((a, b) => b.total_reach - a.total_reach).slice(0, 5);
   const recentActiveClients = [...activeClients].sort((a, b) => b.last_placement_date.localeCompare(a.last_placement_date)).slice(0, 5);
 
@@ -57,12 +71,12 @@ export default function OverviewPage() {
 
         {/* Recent Placements */}
         <div className="section-gap">
-          <h2 className="text-lg font-semibold text-foreground">Recent Media Placements</h2>
+          <h2 className="text-lg font-semibold text-foreground">Top Placements This Month</h2>
           {errorPlacements ? (
             <ErrorState message="Failed to load placements." onRetry={() => refetchPlacements()} />
           ) : loadingPlacements ? (
             <TableSkeleton columns={6} rows={6} />
-          ) : recentPlacements.length === 0 ? (
+          ) : topPlacements.length === 0 ? (
             <EmptyState message="No placements recorded yet." columns={6} />
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
@@ -78,7 +92,7 @@ export default function OverviewPage() {
                   </tr>
                 </thead>
                 <tbody className="font-mono">
-                  {recentPlacements.map((p) => (
+                  {topPlacements.map((p) => (
                     <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
                       <td className="px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
