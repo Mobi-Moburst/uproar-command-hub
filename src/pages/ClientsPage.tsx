@@ -151,7 +151,7 @@ export default function ClientsPage() {
                       <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{c.name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{c.team_name}</td>
                       <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
-                      <td className="px-4 py-3 text-muted-foreground">{c.vertical}</td>
+                      
                       <td className="px-4 py-3 text-right">{c.total_placements}</td>
                       <td className="px-4 py-3 text-right">{formatNumber(c.total_reach)}</td>
                       <td className="px-4 py-3 text-right">{formatCurrency(c.total_ad_value)}</td>
