@@ -9,16 +9,15 @@ import { EmptyState } from "@/components/EmptyState";
 import { useClients } from "@/hooks/useClients";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
-import { useTeams } from "@/hooks/useTeams";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
+import type { Team } from "@/data/types";
 
 export default function OverviewPage() {
   const { data: clients = [], isLoading: loadingClients, isError: errorClients, refetch: refetchClients } = useClients();
   const { data: placements = [], isLoading: loadingPlacements, isError: errorPlacements, refetch: refetchPlacements } = usePlacements();
   const { data: awards = [], isLoading: loadingAwards, isError: errorAwards, refetch: refetchAwards } = useAwards();
-  const { data: teams = [], isLoading: loadingTeams } = useTeams();
 
-  const isLoading = loadingClients || loadingPlacements || loadingAwards || loadingTeams;
+  const isLoading = loadingClients || loadingPlacements || loadingAwards;
 
   const activeClients = clients.filter((c) => c.status === "Active");
   const thisMonthPlacements = placements.filter((p) => p.date >= "2026-03-01");
@@ -42,6 +41,36 @@ export default function OverviewPage() {
     }))
     .sort((a, b) => b._score - a._score)
     .slice(0, 8);
+
+  // Monthly team stats
+  const monthlyTeams: Team[] = (() => {
+    const teamMap = new Map<string, Team>();
+    for (const p of thisMonthPlacements) {
+      const name = p.team_name;
+      if (!name) continue;
+      const existing = teamMap.get(name);
+      if (existing) {
+        existing.placement_count += 1;
+        existing.total_reach += p.readership_viewership;
+        existing.total_ad_value += p.ad_value;
+      } else {
+        teamMap.set(name, { id: name, team_name: name, placement_count: 1, total_reach: p.readership_viewership, total_ad_value: p.ad_value, total_submissions: 0, total_wins: 0 });
+      }
+    }
+    const monthlyAwards = awards.filter((a) => a.due_date >= "2026-03-01" || a.submitted_date?.startsWith("2026-03"));
+    for (const a of monthlyAwards) {
+      const name = a.team_name;
+      if (!name) continue;
+      const existing = teamMap.get(name);
+      if (existing) {
+        existing.total_submissions += 1;
+        if (a.status === "Won") existing.total_wins += 1;
+      } else {
+        teamMap.set(name, { id: name, team_name: name, placement_count: 0, total_reach: 0, total_ad_value: 0, total_submissions: 1, total_wins: a.status === "Won" ? 1 : 0 });
+      }
+    }
+    return Array.from(teamMap.values()).sort((a, b) => b.placement_count - a.placement_count);
+  })();
   const topReachClients = [...activeClients].sort((a, b) => b.total_reach - a.total_reach).slice(0, 5);
   const recentActiveClients = [...activeClients].sort((a, b) => b.last_placement_date.localeCompare(a.last_placement_date)).slice(0, 5);
 
@@ -191,8 +220,8 @@ export default function OverviewPage() {
           </div>
 
           <div className="section-gap">
-            <h2 className="text-lg font-semibold text-foreground">Team Activity</h2>
-            {loadingTeams ? (
+            <h2 className="text-lg font-semibold text-foreground">Team Activity — This Month</h2>
+            {loadingPlacements || loadingAwards ? (
               <div className="space-y-3">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="rounded-lg border border-border bg-card p-5 space-y-3">
@@ -205,9 +234,11 @@ export default function OverviewPage() {
                   </div>
                 ))}
               </div>
+            ) : monthlyTeams.length === 0 ? (
+              <EmptyState message="No team activity this month." />
             ) : (
               <div className="space-y-3">
-                {teams.map((t) => (
+                {monthlyTeams.map((t) => (
                   <div key={t.id} className="rounded-lg border border-border bg-card p-5">
                     <p className="text-sm font-semibold text-foreground">{t.team_name}</p>
                     <div className="mt-3 grid grid-cols-3 gap-4 text-center">
