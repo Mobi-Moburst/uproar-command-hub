@@ -87,7 +87,7 @@ export default function PlacementsPage() {
         </div>
 
         <FilterBar>
-          <SearchInput value={search} onChange={handleFilterChange(setSearch)} placeholder="Search headlines, outlets, clients..." />
+          <SearchInput value={search} onChange={handleFilterChange(setSearch)} placeholder="Search headlines, outlets, clients, reporters, secured by..." />
           <FilterSelect label="All Clients" value={clientFilter} options={clientNames} onChange={handleFilterChange(setClientFilter)} />
           <FilterSelect label="All Teams" value={teamFilter} options={teamNames} onChange={handleFilterChange(setTeamFilter)} />
           <FilterSelect label="All Types" value={typeFilter} options={types} onChange={handleFilterChange(setTypeFilter)} />
