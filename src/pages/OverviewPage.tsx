@@ -76,7 +76,7 @@ export default function OverviewPage() {
             <ErrorState message="Failed to load placements." onRetry={() => refetchPlacements()} />
           ) : loadingPlacements ? (
             <TableSkeleton columns={6} rows={6} />
-          ) : recentPlacements.length === 0 ? (
+          ) : topPlacements.length === 0 ? (
             <EmptyState message="No placements recorded yet." columns={6} />
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
