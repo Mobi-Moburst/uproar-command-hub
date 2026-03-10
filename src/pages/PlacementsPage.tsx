@@ -23,6 +23,7 @@ export default function PlacementsPage() {
   const [typeFilter, setTypeFilter] = useState("");
   const [verticalFilter, setVerticalFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
+  const [securedByFilter, setSecuredByFilter] = useState("");
   const [page, setPage] = useState(0);
 
   const clientNames = [...new Set(placements.map((p) => p.client_name))].sort();
@@ -30,6 +31,7 @@ export default function PlacementsPage() {
   const types = [...new Set(placements.map((p) => p.type))].sort();
   const verticals = [...new Set(placements.map((p) => p.vertical))].sort();
   const years = [...new Set(placements.map((p) => p.date?.slice(0, 4)).filter(Boolean))].sort().reverse();
+  const securedByNames = [...new Set(placements.map((p) => p.secured_by).filter(Boolean))].sort();
 
   const filtered = useMemo(() => {
     return placements.filter((p) => {
@@ -39,9 +41,10 @@ export default function PlacementsPage() {
       if (typeFilter && p.type !== typeFilter) return false;
       if (verticalFilter && p.vertical !== verticalFilter) return false;
       if (yearFilter && !p.date?.startsWith(yearFilter)) return false;
+      if (securedByFilter && p.secured_by !== securedByFilter) return false;
       return true;
     });
-  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter]);
+  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter, securedByFilter]);
 
   // Reset page when filters change
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -85,6 +88,7 @@ export default function PlacementsPage() {
           <FilterSelect label="All Types" value={typeFilter} options={types} onChange={handleFilterChange(setTypeFilter)} />
           <FilterSelect label="All Verticals" value={verticalFilter} options={verticals} onChange={handleFilterChange(setVerticalFilter)} />
           <FilterSelect label="All Years" value={yearFilter} options={years} onChange={handleFilterChange(setYearFilter)} />
+          <FilterSelect label="All Secured By" value={securedByFilter} options={securedByNames} onChange={handleFilterChange(setSecuredByFilter)} />
         </FilterBar>
 
         {isError ? (
@@ -116,8 +120,8 @@ export default function PlacementsPage() {
                     <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
                       <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-foreground">{p.outlet}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{p.reporter_name}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-foreground">{p.outlet || "–"}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{p.reporter_name || "–"}</td>
                       <td className="max-w-[280px] truncate px-4 py-3">
                         <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-emerald hover:underline font-sans">
                           {p.headline}
@@ -126,7 +130,7 @@ export default function PlacementsPage() {
                       <td className="px-4 py-3"><TypeBadge type={p.type} /></td>
                       <td className="px-4 py-3"><TypeBadge type={p.vertical} /></td>
                       <td className="px-4 py-3 text-right">{formatNumber(p.readership_viewership)}</td>
-                      <td className="px-4 py-3 text-right">{formatCurrency(p.ad_value)}</td>
+                      <td className="px-4 py-3 text-right">{p.ad_value ? formatCurrency(p.ad_value) : "–"}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground font-sans">{p.secured_by}</td>
                     </tr>
                   ))}
