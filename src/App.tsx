@@ -9,6 +9,7 @@ import PlacementsPage from "./pages/PlacementsPage";
 import AwardsPage from "./pages/AwardsPage";
 import WeeklyWinsPage from "./pages/WeeklyWinsPage";
 import TeamsPage from "./pages/TeamsPage";
+import ClientReportPage from "./pages/ClientReportPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
