@@ -35,7 +35,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
               {hero.headline}
             </a>
             <p className="mt-2 text-sm font-mono text-muted-foreground">
-              {formatNumber(hero.readership_viewership)} impressions
+              {hero.readership_viewership > 0 ? `${formatNumber(hero.readership_viewership)} impressions` : "N/A impressions"}
             </p>
           </div>
           <TypeBadge type={hero.type} />
@@ -56,7 +56,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
                 {p.headline}
               </a>
               <p className="mt-0.5 text-xs font-mono text-muted-foreground">
-                {p.outlet} · {formatDateShort(p.date)} · {formatNumber(p.readership_viewership)} reach
+                {p.outlet} · {formatDateShort(p.date)} · {p.readership_viewership > 0 ? `${formatNumber(p.readership_viewership)} reach` : "N/A reach"}
               </p>
             </div>
             <TypeBadge type={p.type} />
