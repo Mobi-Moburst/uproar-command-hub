@@ -3,6 +3,7 @@ import { formatDate } from "@/lib/format";
 interface ReportHeroProps {
   clientName: string;
   teamName: string;
+  periodLabel?: string;
 }
 
 export function ReportHero({ clientName, teamName }: ReportHeroProps) {
