@@ -6,7 +6,7 @@ interface ReportHeroProps {
   periodLabel?: string;
 }
 
-export function ReportHero({ clientName, teamName }: ReportHeroProps) {
+export function ReportHero({ clientName, teamName, periodLabel }: ReportHeroProps) {
   const today = new Date().toISOString().split("T")[0];
 
   return (
