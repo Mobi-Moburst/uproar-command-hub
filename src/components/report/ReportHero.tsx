@@ -22,7 +22,7 @@ export function ReportHero({ clientName, teamName, periodLabel }: ReportHeroProp
         <h1 className="mt-4 font-tight text-5xl font-bold tracking-tight sm:text-6xl">
           {clientName}
         </h1>
-        <div className="mt-4 flex items-center gap-4 text-sm">
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
           <span className="font-mono text-primary-foreground/60">
             Prepared {formatDate(today)}
           </span>
@@ -30,6 +30,14 @@ export function ReportHero({ clientName, teamName, periodLabel }: ReportHeroProp
           <span className="font-mono text-primary-foreground/60">
             Team: {teamName}
           </span>
+          {periodLabel && (
+            <>
+              <span className="text-primary-foreground/30">·</span>
+              <span className="font-mono text-primary-foreground/60">
+                Period: {periodLabel}
+              </span>
+            </>
+          )}
         </div>
 
         <div className="mt-8 flex items-center gap-3">
