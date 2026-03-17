@@ -56,7 +56,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
                 {p.headline}
               </a>
               <p className="mt-0.5 text-xs font-mono text-muted-foreground">
-                {p.outlet} · {formatDateShort(p.date)} · {formatNumber(p.readership_viewership)} reach
+                {p.outlet} · {formatDateShort(p.date)} · {p.readership_viewership > 0 ? `${formatNumber(p.readership_viewership)} reach` : "N/A reach"}
               </p>
             </div>
             <TypeBadge type={p.type} />
