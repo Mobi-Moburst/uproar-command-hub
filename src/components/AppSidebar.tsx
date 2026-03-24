@@ -10,6 +10,7 @@ const navItems = [
   { title: "Reporter Analytics", path: "/reporters" },
   { title: "Vertical Benchmarking", path: "/verticals" },
   { title: "Teams", path: "/teams" },
+  { title: "Client Report", path: "/report" },
 ];
 
 export function AppSidebar() {

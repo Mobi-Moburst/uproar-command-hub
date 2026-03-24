@@ -1,25 +1,54 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { TypeBadge } from "@/components/TypeBadge";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { useWeeklyWins } from "@/hooks/usePlacements";
 import { formatDateShort } from "@/lib/format";
+import { startOfWeek, endOfWeek, format, subWeeks, addWeeks, isSameWeek } from "date-fns";
 
 export default function WeeklyWinsPage() {
   const { data: weeklyWins = [], isLoading, isError, refetch } = useWeeklyWins();
 
+  const [selectedWeekStart, setSelectedWeekStart] = useState(() =>
+    startOfWeek(new Date(), { weekStartsOn: 1 })
+  );
   const [copyReady, setCopyReady] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const grouped = weeklyWins.reduce<Record<string, typeof weeklyWins>>((acc, p) => {
+  const weekEnd = endOfWeek(selectedWeekStart, { weekStartsOn: 1 });
+  const weekLabel = `${format(selectedWeekStart, "MMM d")} – ${format(weekEnd, "MMM d, yyyy")}`;
+
+  // Available weeks from the data
+  const availableWeeks = useMemo(() => {
+    const weeks = new Set<string>();
+    weeklyWins.forEach((w) => {
+      if (w.date) {
+        const ws = startOfWeek(new Date(w.date), { weekStartsOn: 1 });
+        weeks.add(ws.toISOString());
+      }
+    });
+    return Array.from(weeks)
+      .sort((a, b) => b.localeCompare(a))
+      .map((iso) => new Date(iso));
+  }, [weeklyWins]);
+
+  // Filter wins to selected week
+  const filtered = useMemo(() => {
+    return weeklyWins.filter((w) => {
+      if (!w.date) return false;
+      return isSameWeek(new Date(w.date), selectedWeekStart, { weekStartsOn: 1 });
+    });
+  }, [weeklyWins, selectedWeekStart]);
+
+  const grouped = filtered.reduce<Record<string, typeof filtered>>((acc, p) => {
     if (!acc[p.client_name]) acc[p.client_name] = [];
     acc[p.client_name].push(p);
     return acc;
   }, {});
 
   const handleCopy = () => {
-    const lines: string[] = ["Weekly Wins — Week of March 10, 2026", ""];
+    const lines: string[] = [`Weekly Wins — Week of ${format(selectedWeekStart, "MMMM d, yyyy")}`, ""];
     Object.entries(grouped).forEach(([client, wins]) => {
       lines.push(client);
       wins.forEach((w) => {
@@ -32,6 +61,9 @@ export default function WeeklyWinsPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const goPrev = () => setSelectedWeekStart(subWeeks(selectedWeekStart, 1));
+  const goNext = () => setSelectedWeekStart(addWeeks(selectedWeekStart, 1));
+
   return (
     <DashboardLayout>
       <div className="stripe-gap">
@@ -39,7 +71,7 @@ export default function WeeklyWinsPage() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Weekly Wins</h1>
             <p className="mt-1 text-sm text-muted-foreground font-mono">
-              {isLoading ? "Loading..." : `Week of March 10, 2026 · ${weeklyWins.length} wins`}
+              {isLoading ? "Loading..." : `${filtered.length} wins`}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -56,6 +88,36 @@ export default function WeeklyWinsPage() {
           </div>
         </div>
 
+        {/* Week navigation */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={goPrev}
+            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
+          >
+            ← Prev
+          </button>
+          <span className="text-sm font-medium text-foreground">{weekLabel}</span>
+          <button
+            onClick={goNext}
+            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
+          >
+            Next →
+          </button>
+          {availableWeeks.length > 0 && (
+            <select
+              value={selectedWeekStart.toISOString()}
+              onChange={(e) => setSelectedWeekStart(new Date(e.target.value))}
+              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground"
+            >
+              {availableWeeks.map((ws) => (
+                <option key={ws.toISOString()} value={ws.toISOString()}>
+                  Week of {format(ws, "MMM d, yyyy")}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
         {isError ? (
           <ErrorState message="Failed to load weekly wins." onRetry={() => refetch()} />
         ) : isLoading ? (
@@ -68,8 +130,8 @@ export default function WeeklyWinsPage() {
               </div>
             ))}
           </div>
-        ) : weeklyWins.length === 0 ? (
-          <EmptyState message="No wins flagged for this week yet." />
+        ) : filtered.length === 0 ? (
+          <EmptyState message="No wins flagged for this week." />
         ) : copyReady ? (
           <div className="section-gap">
             <div className="flex justify-end">
@@ -81,7 +143,7 @@ export default function WeeklyWinsPage() {
               </button>
             </div>
             <div className="rounded-lg border border-border bg-card p-8">
-              <h2 className="text-lg font-semibold text-foreground mb-6">Weekly Wins — Week of March 10, 2026</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-6">Weekly Wins — Week of {format(selectedWeekStart, "MMMM d, yyyy")}</h2>
               {Object.entries(grouped).map(([client, wins]) => (
                 <div key={client} className="mb-6 last:mb-0">
                   <h3 className="text-sm font-semibold text-foreground">{client}</h3>
