@@ -52,7 +52,7 @@ export default function PlacementsPage() {
       if (topicFilter && p.topic_product !== topicFilter) return false;
       return true;
     });
-  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter, securedByFilter]);
+  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter, securedByFilter, topicFilter]);
 
   // Reset page when filters change
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
