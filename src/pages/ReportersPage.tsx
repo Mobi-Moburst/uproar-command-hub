@@ -11,22 +11,46 @@ import { useReporterAnalytics, ReporterAggregate } from "@/hooks/useReporterAnal
 import { formatNumber, formatDateShort } from "@/lib/format";
 import { ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
+type SortKey = "name" | "relationshipScore" | "placementCount" | "primaryOutlets" | "uniqueClients" | "topVertical" | "totalReach" | "mostRecentDate";
+type SortDir = "asc" | "desc";
+
 export default function ReportersPage() {
   const [yearFilter, setYearFilter] = useState("");
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>("relationshipScore");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const { reporters, years, isLoading, isError, refetch } = useReporterAnalytics(yearFilter || undefined);
 
-  const filtered = reporters.filter((r) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      r.name.toLowerCase().includes(q) ||
-      r.primaryOutlets.some((o) => o.toLowerCase().includes(q)) ||
-      r.uniqueClients.some((c) => c.toLowerCase().includes(q))
-    );
-  });
+  const filtered = useMemo(() => {
+    let list = reporters.filter((r) => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (
+        r.name.toLowerCase().includes(q) ||
+        r.primaryOutlets.some((o) => o.toLowerCase().includes(q)) ||
+        r.uniqueClients.some((c) => c.toLowerCase().includes(q))
+      );
+    });
+
+    list = [...list].sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case "name": cmp = a.name.localeCompare(b.name); break;
+        case "relationshipScore": cmp = a.relationshipScore - b.relationshipScore; break;
+        case "placementCount": cmp = a.placementCount - b.placementCount; break;
+        case "primaryOutlets": cmp = (a.primaryOutlets[0] || "").localeCompare(b.primaryOutlets[0] || ""); break;
+        case "uniqueClients": cmp = a.uniqueClients.length - b.uniqueClients.length; break;
+        case "topVertical": cmp = a.topVertical.localeCompare(b.topVertical); break;
+        case "totalReach": cmp = a.totalReach - b.totalReach; break;
+        case "mostRecentDate": cmp = (a.mostRecentDate || "").localeCompare(b.mostRecentDate || ""); break;
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+
+    return list;
+  }, [reporters, search, sortKey, sortDir]);
 
   const totalWithReporter = reporters.reduce((s, r) => s + r.placementCount, 0);
 
