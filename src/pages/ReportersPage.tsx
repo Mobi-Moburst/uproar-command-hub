@@ -66,6 +66,22 @@ export default function ReportersPage() {
     setExpanded(expanded === name ? null : name);
   };
 
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir(key === "name" || key === "primaryOutlets" || key === "topVertical" ? "asc" : "desc");
+    }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="inline h-3 w-3 ml-1 opacity-40" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="inline h-3 w-3 ml-1 text-emerald" />
+      : <ArrowDown className="inline h-3 w-3 ml-1 text-emerald" />;
+  };
+
   const scoreColor = (score: number) => {
     if (score >= 60) return "text-emerald";
     if (score >= 35) return "text-status-drafting";
