@@ -48,6 +48,7 @@ export default function PlacementsPage() {
       if (verticalFilter && p.vertical !== verticalFilter) return false;
       if (yearFilter && !p.date?.startsWith(yearFilter)) return false;
       if (securedByFilter && p.secured_by !== securedByFilter) return false;
+      if (topicFilter && p.topic_product !== topicFilter) return false;
       return true;
     });
   }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter, securedByFilter]);
