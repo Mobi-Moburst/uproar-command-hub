@@ -24,6 +24,7 @@ export default function PlacementsPage() {
   const [verticalFilter, setVerticalFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
   const [securedByFilter, setSecuredByFilter] = useState("Uproar");
+  const [topicFilter, setTopicFilter] = useState("");
   const [page, setPage] = useState(0);
 
   const clientNames = [...new Set(placements.map((p) => p.client_name))].sort();
