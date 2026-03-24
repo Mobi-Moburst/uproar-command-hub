@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { KpiCard } from "@/components/KpiCard";
 import { KpiCardSkeleton } from "@/components/KpiCardSkeleton";
@@ -9,24 +9,48 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { useReporterAnalytics, ReporterAggregate } from "@/hooks/useReporterAnalytics";
 import { formatNumber, formatDateShort } from "@/lib/format";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+
+type SortKey = "name" | "relationshipScore" | "placementCount" | "primaryOutlets" | "uniqueClients" | "topVertical" | "totalReach" | "mostRecentDate";
+type SortDir = "asc" | "desc";
 
 export default function ReportersPage() {
   const [yearFilter, setYearFilter] = useState("");
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>("relationshipScore");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const { reporters, years, isLoading, isError, refetch } = useReporterAnalytics(yearFilter || undefined);
 
-  const filtered = reporters.filter((r) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      r.name.toLowerCase().includes(q) ||
-      r.primaryOutlets.some((o) => o.toLowerCase().includes(q)) ||
-      r.uniqueClients.some((c) => c.toLowerCase().includes(q))
-    );
-  });
+  const filtered = useMemo(() => {
+    let list = reporters.filter((r) => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (
+        r.name.toLowerCase().includes(q) ||
+        r.primaryOutlets.some((o) => o.toLowerCase().includes(q)) ||
+        r.uniqueClients.some((c) => c.toLowerCase().includes(q))
+      );
+    });
+
+    list = [...list].sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case "name": cmp = a.name.localeCompare(b.name); break;
+        case "relationshipScore": cmp = a.relationshipScore - b.relationshipScore; break;
+        case "placementCount": cmp = a.placementCount - b.placementCount; break;
+        case "primaryOutlets": cmp = (a.primaryOutlets[0] || "").localeCompare(b.primaryOutlets[0] || ""); break;
+        case "uniqueClients": cmp = a.uniqueClients.length - b.uniqueClients.length; break;
+        case "topVertical": cmp = a.topVertical.localeCompare(b.topVertical); break;
+        case "totalReach": cmp = a.totalReach - b.totalReach; break;
+        case "mostRecentDate": cmp = (a.mostRecentDate || "").localeCompare(b.mostRecentDate || ""); break;
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+
+    return list;
+  }, [reporters, search, sortKey, sortDir]);
 
   const totalWithReporter = reporters.reduce((s, r) => s + r.placementCount, 0);
 
@@ -40,6 +64,22 @@ export default function ReportersPage() {
 
   const toggleExpand = (name: string) => {
     setExpanded(expanded === name ? null : name);
+  };
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir(key === "name" || key === "primaryOutlets" || key === "topVertical" ? "asc" : "desc");
+    }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="inline h-3 w-3 ml-1 opacity-40" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="inline h-3 w-3 ml-1 text-emerald" />
+      : <ArrowDown className="inline h-3 w-3 ml-1 text-emerald" />;
   };
 
   const scoreColor = (score: number) => {
@@ -85,14 +125,14 @@ export default function ReportersPage() {
               <thead>
                 <tr className="border-b border-border bg-muted">
                   <th className="w-8 px-2 py-3" />
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Reporter</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Score</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Placements</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Primary Outlet(s)</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Clients</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Top Vertical</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Reach</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Last Placement</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("name")}>Reporter<SortIcon col="name" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("relationshipScore")}>Score<SortIcon col="relationshipScore" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("placementCount")}>Placements<SortIcon col="placementCount" /></th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("primaryOutlets")}>Primary Outlet(s)<SortIcon col="primaryOutlets" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("uniqueClients")}>Clients<SortIcon col="uniqueClients" /></th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("topVertical")}>Top Vertical<SortIcon col="topVertical" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("totalReach")}>Reach<SortIcon col="totalReach" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("mostRecentDate")}>Last Placement<SortIcon col="mostRecentDate" /></th>
                 </tr>
               </thead>
               <tbody className="font-mono">
