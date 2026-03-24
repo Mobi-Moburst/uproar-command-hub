@@ -125,14 +125,14 @@ export default function ReportersPage() {
               <thead>
                 <tr className="border-b border-border bg-muted">
                   <th className="w-8 px-2 py-3" />
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Reporter</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Score</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Placements</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Primary Outlet(s)</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Clients</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Top Vertical</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Reach</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Last Placement</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("name")}>Reporter<SortIcon col="name" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("relationshipScore")}>Score<SortIcon col="relationshipScore" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("placementCount")}>Placements<SortIcon col="placementCount" /></th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("primaryOutlets")}>Primary Outlet(s)<SortIcon col="primaryOutlets" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("uniqueClients")}>Clients<SortIcon col="uniqueClients" /></th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("topVertical")}>Top Vertical<SortIcon col="topVertical" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("totalReach")}>Reach<SortIcon col="totalReach" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("mostRecentDate")}>Last Placement<SortIcon col="mostRecentDate" /></th>
                 </tr>
               </thead>
               <tbody className="font-mono">
