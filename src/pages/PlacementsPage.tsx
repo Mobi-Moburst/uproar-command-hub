@@ -11,6 +11,7 @@ import { usePlacements } from "@/hooks/usePlacements";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { TypeTrendChart } from "@/components/TypeTrendChart";
 
 const PAGE_SIZE = 50;
 
@@ -99,6 +100,10 @@ export default function PlacementsPage() {
           <FilterSelect label="All Secured By" value={securedByFilter} options={securedByNames} onChange={handleFilterChange(setSecuredByFilter)} />
           <FilterSelect label="All Topics" value={topicFilter} options={topicProducts} onChange={handleFilterChange(setTopicFilter)} />
         </FilterBar>
+
+        {!isLoading && !isError && filtered.length > 0 && (
+          <TypeTrendChart placements={filtered} />
+        )}
 
         {isError ? (
           <ErrorState message="Failed to load placements." onRetry={() => refetch()} />
