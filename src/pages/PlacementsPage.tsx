@@ -97,6 +97,7 @@ export default function PlacementsPage() {
           <FilterSelect label="All Verticals" value={verticalFilter} options={verticals} onChange={handleFilterChange(setVerticalFilter)} />
           <FilterSelect label="All Years" value={yearFilter} options={years} onChange={handleFilterChange(setYearFilter)} />
           <FilterSelect label="All Secured By" value={securedByFilter} options={securedByNames} onChange={handleFilterChange(setSecuredByFilter)} />
+          <FilterSelect label="All Topics" value={topicFilter} options={topicProducts} onChange={handleFilterChange(setTopicFilter)} />
         </FilterBar>
 
         {isError ? (
