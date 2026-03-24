@@ -18,13 +18,24 @@ interface TypeTrendChartProps {
 const TYPE_COLORS: Record<string, string> = {
   Feature: "hsl(160, 84%, 30%)",
   Mention: "hsl(217, 91%, 60%)",
-  Quote: "hsl(262, 83%, 58%)",
   Interview: "hsl(38, 92%, 50%)",
-  Byline: "hsl(0, 84%, 60%)",
   Broadcast: "hsl(340, 65%, 55%)",
+  Byline: "hsl(270, 60%, 55%)",
+  Quote: "hsl(30, 80%, 55%)",
+  Announcement: "hsl(200, 70%, 45%)",
+  Award: "hsl(50, 85%, 50%)",
+  "Calendar listing": "hsl(180, 50%, 45%)",
+  "Contributed content": "hsl(310, 55%, 50%)",
+  Data: "hsl(100, 50%, 40%)",
+  Online: "hsl(15, 75%, 50%)",
+  Other: "hsl(220, 15%, 65%)",
+  "Product review": "hsl(140, 60%, 40%)",
+  Roundup: "hsl(280, 50%, 60%)",
+  "Social media": "hsl(350, 70%, 55%)",
+  Syndication: "hsl(190, 65%, 40%)",
 };
 
-const DEFAULT_COLOR = "hsl(220, 9%, 46%)";
+const DEFAULT_COLOR = "hsl(220, 20%, 55%)";
 
 export function TypeTrendChart({ placements }: TypeTrendChartProps) {
   const { chartData, types } = useMemo(() => {
