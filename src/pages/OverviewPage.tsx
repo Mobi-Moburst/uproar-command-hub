@@ -59,7 +59,7 @@ export default function OverviewPage() {
         teamMap.set(name, { id: name, team_name: name, placement_count: 1, total_reach: p.readership_viewership, total_ad_value: p.ad_value, total_submissions: 0, total_wins: 0 });
       }
     }
-    const monthlyAwards = awards.filter((a) => a.due_date >= "2026-03-01" || a.submitted_date?.startsWith("2026-03"));
+    const monthlyAwards = awards.filter((a) => a.due_date >= monthStart || a.submitted_date?.startsWith(format(new Date(), "yyyy-MM")));
     for (const a of monthlyAwards) {
       const name = a.team_name;
       if (!name) continue;
