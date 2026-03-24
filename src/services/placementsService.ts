@@ -14,7 +14,7 @@ async function getArchivedPlacements(): Promise<MediaPlacement[]> {
   while (hasMore) {
     const { data, error } = await supabase
       .from("placements_archive")
-      .select("id, date, client_name, team_name, outlet, reporter_name, headline, link, type, vertical, readership_viewership, ad_value, secured_by, weekly_wins_trigger")
+      .select("id, date, client_name, team_name, outlet, reporter_name, headline, link, type, vertical, readership_viewership, ad_value, secured_by, topic_product, notes, weekly_wins_trigger")
       .range(from, from + pageSize - 1);
 
     if (error) {
