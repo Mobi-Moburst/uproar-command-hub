@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import { format, subMonths, subYears, startOfMonth } from "date-fns";
-import { CalendarIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { format, subMonths, startOfMonth, differenceInCalendarDays, subDays } from "date-fns";
+import { CalendarIcon, TrendingUp, TrendingDown, Minus, ArrowLeftRight } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { FilterBar, FilterSelect } from "@/components/FilterBar";
 import { ErrorState } from "@/components/ErrorState";
@@ -41,23 +41,44 @@ function formatShortMonth(ym: string): string {
 interface DeltaBadgeProps {
   current: number;
   previous: number;
+  label?: string;
 }
 
-function DeltaBadge({ current, previous }: DeltaBadgeProps) {
+function DeltaBadge({ current, previous, label }: DeltaBadgeProps) {
   if (previous === 0 && current === 0) {
-    return <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-muted-foreground"><Minus className="h-3 w-3" />—</span>;
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-muted-foreground">
+        <Minus className="h-3 w-3" />— {label && <span className="ml-0.5 opacity-60">{label}</span>}
+      </span>
+    );
   }
   if (previous === 0) {
-    return <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-emerald-600"><TrendingUp className="h-3 w-3" />New</span>;
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-emerald-600">
+        <TrendingUp className="h-3 w-3" />New {label && <span className="ml-0.5 opacity-60">{label}</span>}
+      </span>
+    );
   }
   const pct = Math.round(((current - previous) / previous) * 100);
   if (pct === 0) {
-    return <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-muted-foreground"><Minus className="h-3 w-3" />0%</span>;
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-muted-foreground">
+        <Minus className="h-3 w-3" />0% {label && <span className="ml-0.5 opacity-60">{label}</span>}
+      </span>
+    );
   }
   if (pct > 0) {
-    return <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-emerald-600"><TrendingUp className="h-3 w-3" />+{pct}%</span>;
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-emerald-600">
+        <TrendingUp className="h-3 w-3" />+{pct}% {label && <span className="ml-0.5 opacity-60">{label}</span>}
+      </span>
+    );
   }
-  return <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-destructive"><TrendingDown className="h-3 w-3" />{pct}%</span>;
+  return (
+    <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-destructive">
+      <TrendingDown className="h-3 w-3" />{pct}% {label && <span className="ml-0.5 opacity-60">{label}</span>}
+    </span>
+  );
 }
 
 const PRESETS = [
@@ -67,6 +88,29 @@ const PRESETS = [
   { label: "All", months: 0 },
 ] as const;
 
+function aggregateTeamPlacements(
+  placements: { date: string; team_name: string; readership_viewership: number; ad_value: number }[],
+  from?: Date,
+  to?: Date,
+) {
+  const map = new Map<string, { placements: number; reach: number; adValue: number }>();
+  for (const p of placements) {
+    if (!p.team_name) continue;
+    if (from || to) {
+      if (!p.date) continue;
+      const d = new Date(p.date);
+      if (from && d < from) continue;
+      if (to && d > to) continue;
+    }
+    if (!map.has(p.team_name)) map.set(p.team_name, { placements: 0, reach: 0, adValue: 0 });
+    const t = map.get(p.team_name)!;
+    t.placements++;
+    t.reach += p.readership_viewership;
+    t.adValue += p.ad_value;
+  }
+  return map;
+}
+
 export default function TeamsPage() {
   const { data: teams = [], isLoading, isError, refetch } = useTeams();
   const { data: clients = [] } = useClients();
@@ -75,9 +119,21 @@ export default function TeamsPage() {
   const [teamFilter, setTeamFilter] = useState("");
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
+  const [compareMode, setCompareMode] = useState(false);
 
   const teamNames = teams.map((t) => t.team_name);
   const filtered = teamFilter ? teams.filter((t) => t.team_name === teamFilter) : teams;
+
+  const hasDateFilter = fromDate || toDate;
+
+  // Compute previous period dates for comparison
+  const prevPeriod = useMemo(() => {
+    if (!compareMode || !fromDate || !toDate) return null;
+    const days = differenceInCalendarDays(toDate, fromDate);
+    const prevTo = subDays(fromDate, 1);
+    const prevFrom = subDays(fromDate, days + 1);
+    return { from: prevFrom, to: prevTo };
+  }, [compareMode, fromDate, toDate]);
 
   // Filter placements by date range
   const datePlacements = useMemo(() => {
@@ -99,7 +155,7 @@ export default function TeamsPage() {
     return getMonthsBetween(subMonths(now, 5), now);
   }, [fromDate, toDate]);
 
-  // Pre-compute monthly aggregates per team from filtered placements
+  // Monthly aggregates for sparklines
   const teamMonthly = useMemo(() => {
     const map = new Map<string, Map<string, { placements: number; reach: number; adValue: number }>>();
     for (const p of datePlacements) {
@@ -116,31 +172,29 @@ export default function TeamsPage() {
     return map;
   }, [datePlacements]);
 
-  // Compute filtered totals per team
-  const teamTotals = useMemo(() => {
-    const map = new Map<string, { placements: number; reach: number; adValue: number }>();
-    for (const p of datePlacements) {
-      if (!p.team_name) continue;
-      if (!map.has(p.team_name)) map.set(p.team_name, { placements: 0, reach: 0, adValue: 0 });
-      const t = map.get(p.team_name)!;
-      t.placements++;
-      t.reach += p.readership_viewership;
-      t.adValue += p.ad_value;
-    }
-    return map;
-  }, [datePlacements]);
+  // Current period totals
+  const teamTotals = useMemo(
+    () => aggregateTeamPlacements(placements, fromDate, toDate),
+    [placements, fromDate, toDate],
+  );
+
+  // Previous period totals (for MoM comparison)
+  const prevTeamTotals = useMemo(
+    () => prevPeriod ? aggregateTeamPlacements(placements, prevPeriod.from, prevPeriod.to) : null,
+    [placements, prevPeriod],
+  );
 
   const applyPreset = (months: number) => {
     if (months === 0) {
       setFromDate(undefined);
       setToDate(undefined);
+      setCompareMode(false);
     } else {
       setFromDate(subMonths(new Date(), months));
       setToDate(new Date());
     }
   };
 
-  const hasDateFilter = fromDate || toDate;
   const dateLabel = fromDate && toDate
     ? `${format(fromDate, "MMM d, yyyy")} – ${format(toDate, "MMM d, yyyy")}`
     : fromDate
@@ -148,6 +202,10 @@ export default function TeamsPage() {
       : toDate
         ? `Through ${format(toDate, "MMM d, yyyy")}`
         : "All time";
+
+  const prevLabel = prevPeriod
+    ? `${format(prevPeriod.from, "MMM d")} – ${format(prevPeriod.to, "MMM d")}`
+    : "";
 
   return (
     <DashboardLayout>
@@ -157,6 +215,11 @@ export default function TeamsPage() {
           <p className="mt-1 text-sm text-muted-foreground font-mono">
             {isLoading ? "Loading..." : `${teams.length} teams · ${dateLabel}`}
           </p>
+          {compareMode && prevPeriod && (
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">
+              vs. {prevLabel}
+            </p>
+          )}
         </div>
 
         <FilterBar>
@@ -196,8 +259,20 @@ export default function TeamsPage() {
             ))}
           </div>
 
+          {fromDate && toDate && (
+            <Button
+              variant={compareMode ? "default" : "outline"}
+              size="sm"
+              className="h-7 gap-1.5 px-2.5 text-xs font-mono"
+              onClick={() => setCompareMode(!compareMode)}
+            >
+              <ArrowLeftRight className="h-3 w-3" />
+              MoM
+            </Button>
+          )}
+
           {hasDateFilter && (
-            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => { setFromDate(undefined); setToDate(undefined); }}>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => { setFromDate(undefined); setToDate(undefined); setCompareMode(false); }}>
               Clear
             </Button>
           )}
@@ -236,31 +311,55 @@ export default function TeamsPage() {
                 count: monthly?.get(m)?.placements || 0,
               }));
 
-              // MoM deltas: compare last two months in the sparkline window
+              // Determine comparison values
+              const prevTotals = prevTeamTotals?.get(team.team_name) || { placements: 0, reach: 0, adValue: 0 };
+
+              // Fallback MoM from sparkline when compare mode is off
               const curMonth = sparkMonths[sparkMonths.length - 1];
               const prevMonth = sparkMonths.length >= 2 ? sparkMonths[sparkMonths.length - 2] : undefined;
-              const cur = monthly?.get(curMonth) || { placements: 0, reach: 0, adValue: 0 };
-              const prev = prevMonth ? (monthly?.get(prevMonth) || { placements: 0, reach: 0, adValue: 0 }) : { placements: 0, reach: 0, adValue: 0 };
+              const curSpark = monthly?.get(curMonth) || { placements: 0, reach: 0, adValue: 0 };
+              const prevSpark = prevMonth ? (monthly?.get(prevMonth) || { placements: 0, reach: 0, adValue: 0 }) : { placements: 0, reach: 0, adValue: 0 };
+
+              const useComparePeriod = compareMode && prevTeamTotals;
+              const deltaCur = useComparePeriod ? totals : curSpark;
+              const deltaPrev = useComparePeriod ? prevTotals : prevSpark;
+              const deltaLabel = useComparePeriod ? "vs prev" : undefined;
 
               return (
                 <div key={team.id} className="rounded-lg border border-border bg-card">
                   <div className="border-b border-border px-6 py-5">
-                    <h2 className="text-lg font-semibold text-foreground">{team.team_name}</h2>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-foreground">{team.team_name}</h2>
+                      {useComparePeriod && (
+                        <span className="text-[10px] font-mono text-muted-foreground rounded border border-border px-2 py-0.5">
+                          vs. {prevLabel}
+                        </span>
+                      )}
+                    </div>
                     <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
                       <div>
                         <p className="text-xs text-muted-foreground">Placements</p>
                         <p className="mt-1 font-tight text-2xl font-bold text-foreground">{totals.placements}</p>
-                        <DeltaBadge current={cur.placements} previous={prev.placements} />
+                        <DeltaBadge current={deltaCur.placements} previous={deltaPrev.placements} label={deltaLabel} />
+                        {useComparePeriod && (
+                          <p className="text-[10px] font-mono text-muted-foreground mt-0.5">prev: {prevTotals.placements}</p>
+                        )}
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Total Reach</p>
                         <p className="mt-1 font-tight text-2xl font-bold text-foreground">{formatNumber(totals.reach)}</p>
-                        <DeltaBadge current={cur.reach} previous={prev.reach} />
+                        <DeltaBadge current={deltaCur.reach} previous={deltaPrev.reach} label={deltaLabel} />
+                        {useComparePeriod && (
+                          <p className="text-[10px] font-mono text-muted-foreground mt-0.5">prev: {formatNumber(prevTotals.reach)}</p>
+                        )}
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Ad Value</p>
                         <p className="mt-1 font-tight text-2xl font-bold text-foreground">{formatCurrency(totals.adValue)}</p>
-                        <DeltaBadge current={cur.adValue} previous={prev.adValue} />
+                        <DeltaBadge current={deltaCur.adValue} previous={deltaPrev.adValue} label={deltaLabel} />
+                        {useComparePeriod && (
+                          <p className="text-[10px] font-mono text-muted-foreground mt-0.5">prev: {formatCurrency(prevTotals.adValue)}</p>
+                        )}
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Submissions</p>
