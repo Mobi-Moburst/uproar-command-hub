@@ -241,6 +241,7 @@ export default function ClientsPage() {
                             </div>
                             <p className="mt-1 text-xs font-mono text-muted-foreground">
                               {p.outlet} · {formatDateShort(p.date)} · {formatNumber(p.readership_viewership)} reach
+                              {p.topic_product && ` · ${p.topic_product}`}
                             </p>
                           </div>
                         ))}

@@ -112,6 +112,7 @@ export default function WeeklyWinsPage() {
                       </div>
                       <p className="mt-3 text-xs font-mono text-muted-foreground">
                         {w.outlet} · {formatDateShort(w.date)} · {w.team_name}
+                        {w.topic_product && ` · ${w.topic_product}`}
                       </p>
                       {w.notes && (
                         <p className="mt-2 text-xs text-muted-foreground">{w.notes}</p>
