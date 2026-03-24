@@ -30,6 +30,7 @@ export default function PlacementsPage() {
   const teamNames = [...new Set(placements.map((p) => p.team_name))].sort();
   const types = [...new Set(placements.map((p) => p.type))].sort();
   const verticals = [...new Set(placements.map((p) => p.vertical))].sort();
+  const topicProducts = [...new Set(placements.map((p) => p.topic_product).filter(Boolean))].sort();
   const years = [...new Set(placements.map((p) => p.date?.slice(0, 4)).filter(Boolean))].sort().reverse();
   const securedByNames = [...new Set(placements.map((p) => p.secured_by).filter(Boolean))].sort();
 
