@@ -81,7 +81,7 @@ export default function OverviewPage() {
       <div className="stripe-gap">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Overview</h1>
-          <p className="mt-1 text-sm text-muted-foreground font-mono">Executive summary — March 2026</p>
+          <p className="mt-1 text-sm text-muted-foreground font-mono">Executive summary — {format(new Date(), "MMMM yyyy")}</p>
         </div>
 
         {/* KPI Stripe */}
