@@ -9,7 +9,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { useReporterAnalytics, ReporterAggregate } from "@/hooks/useReporterAnalytics";
 import { formatNumber, formatDateShort } from "@/lib/format";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 export default function ReportersPage() {
   const [yearFilter, setYearFilter] = useState("");
