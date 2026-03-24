@@ -6,7 +6,7 @@ import { FilterBar, FilterSelect } from "@/components/FilterBar";
 import { TableSkeleton } from "@/components/TableSkeleton";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
-import { useVerticalBenchmarks } from "@/hooks/useVerticalBenchmarks";
+import { useVerticalBenchmarks, VerticalBenchmark } from "@/hooks/useVerticalBenchmarks";
 import { formatNumber, formatCurrency } from "@/lib/format";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
