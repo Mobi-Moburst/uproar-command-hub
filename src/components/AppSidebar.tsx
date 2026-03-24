@@ -7,6 +7,8 @@ const navItems = [
   { title: "Media Placements", path: "/placements" },
   { title: "Awards Pipeline", path: "/awards" },
   { title: "Weekly Wins", path: "/weekly-wins" },
+  { title: "Reporter Analytics", path: "/reporters" },
+  { title: "Vertical Benchmarking", path: "/verticals" },
   { title: "Teams", path: "/teams" },
 ];
 
