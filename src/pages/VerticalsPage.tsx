@@ -124,7 +124,7 @@ function VerticalRow({
   isExpanded,
   onToggle,
 }: {
-  benchmark: ReturnType<typeof import("@/hooks/useVerticalBenchmarks").useVerticalBenchmarks>["benchmarks"][number];
+  benchmark: VerticalBenchmark;
   isExpanded: boolean;
   onToggle: () => void;
 }) {
