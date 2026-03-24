@@ -101,6 +101,10 @@ export default function PlacementsPage() {
           <FilterSelect label="All Topics" value={topicFilter} options={topicProducts} onChange={handleFilterChange(setTopicFilter)} />
         </FilterBar>
 
+        {!isLoading && !isError && filtered.length > 0 && (
+          <TypeTrendChart placements={filtered} />
+        )}
+
         {isError ? (
           <ErrorState message="Failed to load placements." onRetry={() => refetch()} />
         ) : isLoading ? (
