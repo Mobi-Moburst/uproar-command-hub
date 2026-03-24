@@ -8,6 +8,8 @@ import ClientsPage from "./pages/ClientsPage";
 import PlacementsPage from "./pages/PlacementsPage";
 import AwardsPage from "./pages/AwardsPage";
 import WeeklyWinsPage from "./pages/WeeklyWinsPage";
+import ReportersPage from "./pages/ReportersPage";
+import VerticalsPage from "./pages/VerticalsPage";
 import TeamsPage from "./pages/TeamsPage";
 import ClientReportPage from "./pages/ClientReportPage";
 import NotFound from "./pages/NotFound";
