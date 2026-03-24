@@ -10,6 +10,7 @@ import { useClients } from "@/hooks/useClients";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
+import { format, startOfMonth } from "date-fns";
 import type { Team } from "@/data/types";
 
 export default function OverviewPage() {
@@ -20,7 +21,8 @@ export default function OverviewPage() {
   const isLoading = loadingClients || loadingPlacements || loadingAwards;
 
   const activeClients = clients.filter((c) => c.status === "Active");
-  const thisMonthPlacements = placements.filter((p) => p.date >= "2026-03-01");
+  const monthStart = format(startOfMonth(new Date()), "yyyy-MM-dd");
+  const thisMonthPlacements = placements.filter((p) => p.date >= monthStart);
   const totalReach = thisMonthPlacements.reduce((sum, p) => sum + p.readership_viewership, 0);
   const totalAdValue = thisMonthPlacements.reduce((sum, p) => sum + p.ad_value, 0);
   const inProgressAwards = awards.filter((a) => ["Drafting", "Submitted", "Finalist"].includes(a.status));
@@ -57,7 +59,7 @@ export default function OverviewPage() {
         teamMap.set(name, { id: name, team_name: name, placement_count: 1, total_reach: p.readership_viewership, total_ad_value: p.ad_value, total_submissions: 0, total_wins: 0 });
       }
     }
-    const monthlyAwards = awards.filter((a) => a.due_date >= "2026-03-01" || a.submitted_date?.startsWith("2026-03"));
+    const monthlyAwards = awards.filter((a) => a.due_date >= monthStart || a.submitted_date?.startsWith(format(new Date(), "yyyy-MM")));
     for (const a of monthlyAwards) {
       const name = a.team_name;
       if (!name) continue;
@@ -79,7 +81,7 @@ export default function OverviewPage() {
       <div className="stripe-gap">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Overview</h1>
-          <p className="mt-1 text-sm text-muted-foreground font-mono">Executive summary — March 2026</p>
+          <p className="mt-1 text-sm text-muted-foreground font-mono">Executive summary — {format(new Date(), "MMMM yyyy")}</p>
         </div>
 
         {/* KPI Stripe */}
