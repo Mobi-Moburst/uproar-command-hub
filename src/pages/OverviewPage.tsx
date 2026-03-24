@@ -21,7 +21,8 @@ export default function OverviewPage() {
   const isLoading = loadingClients || loadingPlacements || loadingAwards;
 
   const activeClients = clients.filter((c) => c.status === "Active");
-  const thisMonthPlacements = placements.filter((p) => p.date >= "2026-03-01");
+  const monthStart = format(startOfMonth(new Date()), "yyyy-MM-dd");
+  const thisMonthPlacements = placements.filter((p) => p.date >= monthStart);
   const totalReach = thisMonthPlacements.reduce((sum, p) => sum + p.readership_viewership, 0);
   const totalAdValue = thisMonthPlacements.reduce((sum, p) => sum + p.ad_value, 0);
   const inProgressAwards = awards.filter((a) => ["Drafting", "Submitted", "Finalist"].includes(a.status));
