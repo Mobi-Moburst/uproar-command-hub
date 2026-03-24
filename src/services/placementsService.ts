@@ -43,8 +43,8 @@ async function getArchivedPlacements(): Promise<MediaPlacement[]> {
     readership_viewership: Number(row.readership_viewership) || 0,
     ad_value: Number(row.ad_value) || 0,
     secured_by: String(row.secured_by ?? ""),
-    topic_product: "",
-    notes: "",
+    topic_product: String(row.topic_product ?? ""),
+    notes: String(row.notes ?? ""),
     weekly_wins_trigger: Boolean(row.weekly_wins_trigger),
   }));
 }
