@@ -325,6 +325,68 @@ export default function ClientsPage() {
                       <p className="text-sm font-mono text-muted-foreground">No award submissions.</p>
                     )}
                   </div>
+
+                  <div className="mt-8">
+                    <h3 className="text-sm font-semibold text-foreground mb-3">Samples</h3>
+                    {clientSamples.length > 0 ? (
+                      <div className="space-y-2">
+                        {clientSamples.slice(0, 5).map((s) => (
+                          <div key={s.id} className="rounded-md border border-border p-3">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="text-sm font-medium text-foreground">{s.products || "No product listed"}</p>
+                                <p className="text-xs font-mono text-muted-foreground">
+                                  {s.outlet}{s.reporter_name ? ` · ${s.reporter_name}` : ""}{s.date_requested ? ` · ${formatDateShort(s.date_requested)}` : ""}
+                                </p>
+                              </div>
+                              {s.status && <StatusBadge status={s.status} />}
+                            </div>
+                            {s.coverage_link && (
+                              <a href={s.coverage_link} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs text-primary hover:underline">
+                                View Coverage
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                        {clientSamples.length > 5 && (
+                          <p className="text-xs font-mono text-muted-foreground">+ {clientSamples.length - 5} more samples</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-mono text-muted-foreground">No samples recorded.</p>
+                    )}
+                  </div>
+
+                  <div className="mt-8">
+                    <h3 className="text-sm font-semibold text-foreground mb-3">Briefings</h3>
+                    {clientBriefings.length > 0 ? (
+                      <div className="space-y-2">
+                        {clientBriefings.slice(0, 5).map((b) => (
+                          <div key={b.id} className="rounded-md border border-border p-3">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="text-sm font-medium text-foreground">{b.topic || b.outlet || "Briefing"}</p>
+                                <p className="text-xs font-mono text-muted-foreground">
+                                  {b.outlet}{b.reporter_name ? ` · ${b.reporter_name}` : ""}{b.interview_type ? ` · ${b.interview_type}` : ""}{b.date_met ? ` · ${formatDateShort(b.date_met)}` : ""}
+                                </p>
+                              </div>
+                              {b.status && <StatusBadge status={b.status} />}
+                            </div>
+                            {b.coverage_link && (
+                              <a href={b.coverage_link} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs text-primary hover:underline">
+                                View Coverage
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                        {clientBriefings.length > 5 && (
+                          <p className="text-xs font-mono text-muted-foreground">+ {clientBriefings.length - 5} more briefings</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-mono text-muted-foreground">No briefings recorded.</p>
+                    )}
+                  </div>
                 </div>
               </TooltipProvider>
             )}
