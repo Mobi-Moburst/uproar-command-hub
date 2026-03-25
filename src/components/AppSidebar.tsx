@@ -1,5 +1,8 @@
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { title: "Overview", path: "/" },
@@ -15,6 +18,15 @@ const navItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const { user, profile, signOut } = useAuthContext();
+
+  const displayName = profile?.display_name || user?.email || "";
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "U";
 
   return (
     <aside className="fixed left-0 top-0 z-30 hidden h-screen w-60 flex-col border-r border-border bg-background lg:flex">
@@ -46,8 +58,28 @@ export function AppSidebar() {
           })}
         </ul>
       </nav>
-      <div className="border-t border-border px-6 py-4">
-        <p className="text-xs font-mono text-muted-foreground">v1.0 — Internal Use Only</p>
+      <div className="border-t border-border px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={profile?.avatar_url} />
+            <AvatarFallback className="bg-muted text-xs text-muted-foreground">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="truncate text-xs font-medium text-foreground">
+              {displayName}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Sign out
+          </Button>
+        </div>
       </div>
     </aside>
   );
