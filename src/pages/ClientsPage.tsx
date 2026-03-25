@@ -11,6 +11,8 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { useClients } from "@/hooks/useClients";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
+import { useSamples } from "@/hooks/useSamples";
+import { useBriefings } from "@/hooks/useBriefings";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Info } from "lucide-react";
 import type { Client } from "@/data/types";
@@ -20,6 +22,8 @@ export default function ClientsPage() {
   const { data: clients = [], isLoading, isError, refetch } = useClients();
   const { data: placements = [] } = usePlacements();
   const { data: awards = [] } = useAwards();
+  const { data: samples = [] } = useSamples();
+  const { data: briefings = [] } = useBriefings();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -48,6 +52,14 @@ export default function ClientsPage() {
 
   const clientAwards = selectedClient
     ? awards.filter((a) => a.client_name === selectedClient.name)
+    : [];
+
+  const clientSamples = selectedClient
+    ? samples.filter((s) => s.client === selectedClient.name)
+    : [];
+
+  const clientBriefings = selectedClient
+    ? briefings.filter((b) => b.client === selectedClient.name)
     : [];
 
   const currentYear = new Date().getFullYear();
@@ -178,7 +190,7 @@ export default function ClientsPage() {
                     <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
                   </div>
 
-                  <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
                     <div className="rounded-md border border-border p-4">
                       <p className="text-xs text-muted-foreground">Placements</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_placements}</p>
@@ -204,6 +216,24 @@ export default function ClientsPage() {
                     <div className="rounded-md border border-border p-4">
                       <p className="text-xs text-muted-foreground">Award Wins</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_award_wins}</p>
+                    </div>
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-xs text-muted-foreground">Samples</p>
+                      <p className="mt-1 font-tight text-2xl font-bold">{clientSamples.length}</p>
+                      {clientSamples.length > 0 && (
+                        <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">
+                          {Math.round((clientSamples.filter(s => s.status.toLowerCase().includes("coverage live")).length / clientSamples.length) * 100)}% conversion
+                        </p>
+                      )}
+                    </div>
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-xs text-muted-foreground">Briefings</p>
+                      <p className="mt-1 font-tight text-2xl font-bold">{clientBriefings.length}</p>
+                      {clientBriefings.length > 0 && (
+                        <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">
+                          {Math.round((clientBriefings.filter(b => b.status.toLowerCase().includes("coverage live")).length / clientBriefings.length) * 100)}% conversion
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -293,6 +323,68 @@ export default function ClientsPage() {
                       </Accordion>
                     ) : (
                       <p className="text-sm font-mono text-muted-foreground">No award submissions.</p>
+                    )}
+                  </div>
+
+                  <div className="mt-8">
+                    <h3 className="text-sm font-semibold text-foreground mb-3">Samples</h3>
+                    {clientSamples.length > 0 ? (
+                      <div className="space-y-2">
+                        {clientSamples.slice(0, 5).map((s) => (
+                          <div key={s.id} className="rounded-md border border-border p-3">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="text-sm font-medium text-foreground">{s.products || "No product listed"}</p>
+                                <p className="text-xs font-mono text-muted-foreground">
+                                  {s.outlet}{s.reporter_name ? ` · ${s.reporter_name}` : ""}{s.date_requested ? ` · ${formatDateShort(s.date_requested)}` : ""}
+                                </p>
+                              </div>
+                              {s.status && <StatusBadge status={s.status} />}
+                            </div>
+                            {s.coverage_link && (
+                              <a href={s.coverage_link} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs text-primary hover:underline">
+                                View Coverage
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                        {clientSamples.length > 5 && (
+                          <p className="text-xs font-mono text-muted-foreground">+ {clientSamples.length - 5} more samples</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-mono text-muted-foreground">No samples recorded.</p>
+                    )}
+                  </div>
+
+                  <div className="mt-8">
+                    <h3 className="text-sm font-semibold text-foreground mb-3">Briefings</h3>
+                    {clientBriefings.length > 0 ? (
+                      <div className="space-y-2">
+                        {clientBriefings.slice(0, 5).map((b) => (
+                          <div key={b.id} className="rounded-md border border-border p-3">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="text-sm font-medium text-foreground">{b.topic || b.outlet || "Briefing"}</p>
+                                <p className="text-xs font-mono text-muted-foreground">
+                                  {b.outlet}{b.reporter_name ? ` · ${b.reporter_name}` : ""}{b.interview_type ? ` · ${b.interview_type}` : ""}{b.date_met ? ` · ${formatDateShort(b.date_met)}` : ""}
+                                </p>
+                              </div>
+                              {b.status && <StatusBadge status={b.status} />}
+                            </div>
+                            {b.coverage_link && (
+                              <a href={b.coverage_link} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs text-primary hover:underline">
+                                View Coverage
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                        {clientBriefings.length > 5 && (
+                          <p className="text-xs font-mono text-muted-foreground">+ {clientBriefings.length - 5} more briefings</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-mono text-muted-foreground">No briefings recorded.</p>
                     )}
                   </div>
                 </div>
