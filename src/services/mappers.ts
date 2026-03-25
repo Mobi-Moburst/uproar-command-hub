@@ -102,3 +102,49 @@ export function mapAward(
     notes: first(f["Internal Notes"] ?? f["Notes"] ?? f["notes"]),
   };
 }
+
+// ── Samples ────────────────────────────────────────────────────────────────────
+
+/** Maps raw Airtable Samples record → Sample (excludes PII) */
+export function mapSample(record: AirtableRecord): Sample {
+  const f = record.fields as Record<string, any>;
+  return {
+    id: record.id,
+    date_requested: first(f["Date Requested"] ?? f["date_requested"]),
+    team: first(f["Team"] ?? f["team"]),
+    client: first(f["Client"] ?? f["client"]),
+    products: first(f["Products"] ?? f["products"]),
+    outlet: first(f["Outlet"] ?? f["outlet"]),
+    reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
+    date_shipped: first(f["Date Shipped"] ?? f["date_shipped"]),
+    delivery_date: first(f["Delivery Date"] ?? f["delivery_date"]),
+    status: first(f["Status"] ?? f["status"]),
+    publication_date: first(f["Publication Date"] ?? f["publication_date"]),
+    coverage_link: first(f["Coverage Link"] ?? f["coverage_link"]),
+    notes: first(f["Notes"] ?? f["notes"]),
+  };
+}
+
+// ── Briefings ──────────────────────────────────────────────────────────────────
+
+/** Maps raw Airtable Briefings record → Briefing */
+export function mapBriefing(record: AirtableRecord): Briefing {
+  const f = record.fields as Record<string, any>;
+  return {
+    id: record.id,
+    date_met: first(f["Date Met"] ?? f["date_met"]),
+    team: first(f["Team"] ?? f["team"]),
+    client: first(f["Client"] ?? f["client"]),
+    outlet: first(f["Outlet"] ?? f["outlet"]),
+    reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
+    spokesperson: first(f["Company Spokesperson"] ?? f["spokesperson"]),
+    uproar_contact: first(f["Uproar Point of Contact"] ?? f["uproar_contact"]),
+    topic: first(f["Topic"] ?? f["topic"]),
+    interview_type: first(f["Interview Type"] ?? f["interview_type"]),
+    briefing_sheet_url: first(f["Briefing Sheet"] ?? f["briefing_sheet_url"]),
+    status: first(f["Status"] ?? f["status"]),
+    publication_date: first(f["Publication Date"] ?? f["publication_date"]),
+    coverage_link: first(f["Coverage Link"] ?? f["coverage_link"]),
+    notes: first(f["Notes"] ?? f["notes"]),
+  };
+}
