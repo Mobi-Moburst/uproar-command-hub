@@ -9,6 +9,8 @@ const navItems = [
   { title: "Clients", path: "/clients" },
   { title: "Media Placements", path: "/placements" },
   { title: "Awards Pipeline", path: "/awards" },
+  { title: "Samples", path: "/samples" },
+  { title: "Briefings", path: "/briefings" },
   { title: "Weekly Wins", path: "/weekly-wins" },
   { title: "Reporter Analytics", path: "/reporters" },
   { title: "Vertical Benchmarking", path: "/verticals" },

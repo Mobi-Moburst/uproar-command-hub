@@ -13,6 +13,8 @@ import WeeklyWinsPage from "./pages/WeeklyWinsPage";
 import ReportersPage from "./pages/ReportersPage";
 import VerticalsPage from "./pages/VerticalsPage";
 import TeamsPage from "./pages/TeamsPage";
+import SamplesPage from "./pages/SamplesPage";
+import BriefingsPage from "./pages/BriefingsPage";
 import ClientReportPage from "./pages/ClientReportPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="/reporters" element={<ProtectedRoute><ReportersPage /></ProtectedRoute>} />
             <Route path="/verticals" element={<ProtectedRoute><VerticalsPage /></ProtectedRoute>} />
             <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
+            <Route path="/samples" element={<ProtectedRoute><SamplesPage /></ProtectedRoute>} />
+            <Route path="/briefings" element={<ProtectedRoute><BriefingsPage /></ProtectedRoute>} />
             <Route path="/report" element={<ProtectedRoute><ClientReportPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type StatusVariant = "active" | "inactive" | "onboarding" | "drafting" | "submitted" | "finalist" | "won" | "lost" | "default";
+type StatusVariant = "active" | "inactive" | "onboarding" | "drafting" | "submitted" | "finalist" | "won" | "lost" | "coverage live" | "pending" | "fell through" | "interview occurred, pending coverage" | "sample delivered, pending coverage" | "default";
 
 const variantClasses: Record<StatusVariant, string> = {
   active: "bg-emerald-light text-emerald",
@@ -11,6 +11,11 @@ const variantClasses: Record<StatusVariant, string> = {
   finalist: "bg-[hsl(262,83%,93%)] text-status-finalist",
   won: "bg-emerald-light text-emerald",
   lost: "bg-[hsl(0,84%,95%)] text-status-lost",
+  "coverage live": "bg-emerald-light text-emerald",
+  "pending": "bg-[hsl(38,92%,93%)] text-status-drafting",
+  "fell through": "bg-[hsl(0,84%,95%)] text-status-lost",
+  "interview occurred, pending coverage": "bg-[hsl(217,91%,93%)] text-status-submitted",
+  "sample delivered, pending coverage": "bg-[hsl(217,91%,93%)] text-status-submitted",
   default: "bg-muted text-muted-foreground",
 };
 

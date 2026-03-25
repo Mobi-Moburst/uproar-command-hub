@@ -61,3 +61,37 @@ export interface Outlet {
   name: string;
   type: string;
 }
+
+export interface Sample {
+  id: string;
+  date_requested: string;
+  team: string;
+  client: string;
+  products: string;
+  outlet: string;
+  reporter_name: string;
+  date_shipped: string;
+  delivery_date: string;
+  status: string;
+  publication_date: string;
+  coverage_link: string;
+  notes: string;
+}
+
+export interface Briefing {
+  id: string;
+  date_met: string;
+  team: string;
+  client: string;
+  outlet: string;
+  reporter_name: string;
+  spokesperson: string;
+  uproar_contact: string;
+  topic: string;
+  interview_type: string;
+  briefing_sheet_url: string;
+  status: string;
+  publication_date: string;
+  coverage_link: string;
+  notes: string;
+}
