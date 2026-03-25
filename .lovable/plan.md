@@ -1,92 +1,123 @@
 
 
-# Dashboard Review: Data Gaps and Recommendations for Uproar
+# Integrating Samples and Briefings Tables
 
-After reviewing every page, data service, and mapper in the Command Center, here's what's working well and where the team can get more value through better data hygiene in Airtable.
+## Data Review
 
----
+### Samples (~1,000 records)
+**Fields:** Date Requested, Team, Client, Products, Outlet, Reporter Name, Address, Phone Number, Date Shipped, Tracking Number, Delivery Date, Status, Publication Date, Coverage Link, Notes
 
-## What's Working Well
+**Key observations:**
+- Status values include: "Sample delivered, pending coverage", "Coverage live", "Fell through", and blank
+- Many records have no Date Requested (sparse dates)
+- Address and Phone Number are PII — should NOT be surfaced in the dashboard
+- Coverage Link ties a sample directly to the resulting placement
+- Products field is free-text and often contains multiple products in one cell
 
-The dashboard is pulling from two sources (Airtable live + DB archive) and successfully surfaces placements, awards, clients, teams, reporters, and verticals. The filtering, sorting, type trend chart, team MoM comparisons, and reporter scoring are all functional and well-connected.
+### Briefings (~295 records)
+**Fields:** Date Met, Team, Client, Outlet, Reporter Name, Company Spokesperson, Uproar Point of Contact, Topic, Interview Type, Briefing Sheet, Status, Publication Date, Coverage Link, Notes
 
----
-
-## Data Quality Issues to Flag for the Uproar Team
-
-### 1. `topic_product` is Blank for All Archived Placements
-
-**Impact: High.** The archive fetch in `placementsService.ts` hardcodes `topic_product: ""` even though the column exists in the database and the seed function writes it. This means ~all pre-2026 placements show "–" for Topic/Product, making the filter and trend analysis unreliable.
-
-**Fix (internal):** Update the archive query to include the `topic_product` column. No Airtable changes needed — this is a code fix on our side.
-
-### 2. `notes` is Also Dropped from Archive
-
-Same issue — archived placements set `notes: ""` even though the data exists in the DB. Notes context is invisible for historical records.
-
-### 3. Hardcoded Dates on Overview and Weekly Wins
-
-- Overview says "Executive summary — March 2026" regardless of when it's viewed
-- Weekly Wins says "Week of March 10, 2026" statically
-- "This month" filter uses hardcoded `"2026-03-01"` instead of dynamic date math
-
-**Recommendation:** Make these dynamic so the dashboard stays accurate without code changes each month.
-
-### 4. Missing or Inconsistent Airtable Fields (Team Action Items)
-
-These are things the Uproar team should audit in their Airtable base:
-
-| Field | Issue | Impact |
-|-------|-------|--------|
-| **Reporter Name** | Often blank | Reporters page undercounts relationships; many placements show "–" |
-| **Ad Value** | Frequently $0 or blank | Ad value KPIs underreport; tooltip on Clients page already warns about this |
-| **Readership/Viewership** | Sometimes 0 for real placements | Reach metrics and vertical benchmarks skew low |
-| **Topic/Product** | Inconsistently filled | Topic filter has sparse options; can't track narrative alignment over time |
-| **Secured By** | Blank on older records (backfilled as "Uproar") | Individual attribution impossible for historical wins |
-| **Vertical** | Some placements lack a vertical tag | Vertical benchmarking page misses those records entirely |
-| **Type** | Defaults to "Online" when blank | Type trend chart may overweight "Online" vs. actual mix |
-
-**Recommendation for the team:** Run a quarterly data audit in Airtable. The fields with the highest ROI to clean up are **Reporter Name**, **Type**, and **Topic/Product** — these power three of the newest analytics features (Reporter Analytics, Type Trends, Topic filtering).
-
-### 5. Weekly Wins Aren't Date-Scoped
-
-The Weekly Wins page shows ALL placements ever flagged as weekly wins, not just the current week. There's no date-based grouping — if the team flags wins from different weeks, they all blend together.
-
-### 6. Client Report Page Isn't in Navigation
-
-`/report` exists and is a polished client-facing report, but it's not accessible from the sidebar. The team may not know it's there.
-
-### 7. No Data Export
-
-No page offers CSV/Excel export. For a team that likely needs to pull data into slide decks or share with clients, this is a gap.
+**Key observations:**
+- Interview Type values: Recorded Interview, Live Interview, Written Q&A, Podcast, and blank
+- Status values: "Coverage live", "Interview occurred, pending coverage", blank
+- Briefing Sheet is always a Google Docs link — useful for reference but not for analytics
+- Company Spokesperson and Uproar Point of Contact are unique to this table and valuable for attribution
 
 ---
 
-## Recommended Improvements (Prioritized)
+## How to Connect via API
 
-### Quick Wins (code changes, no Airtable work needed)
+Both tables live in existing Airtable bases. The architecture is already set up — the `airtable-proxy` edge function supports any base/table combo.
 
-1. **Fix archive query** — include `topic_product` and `notes` columns from the DB instead of hardcoding empty strings
-2. **Dynamic dates** — replace hardcoded "March 2026" strings with `format(new Date(), ...)` calls
-3. **Add Client Report to sidebar** — or add a "Generate Report" button on the Clients page
-4. **Scope Weekly Wins by week** — group by ISO week or let users pick a date range
+### Steps required:
 
-### Medium Effort
+1. **Identify which Airtable base** these tables live in. If they're in the Placements base, the existing `AIRTABLE_BASE_PLACEMENTS` secret works. If they're in a separate base, a new secret (e.g. `AIRTABLE_BASE_SAMPLES`) would need to be added and the proxy updated to support a third base key.
 
-5. **CSV export button** — add to Placements, Reporters, and Verticals pages (generate client-side from filtered data)
-6. **Data completeness indicators** — show a small "fill rate" metric on the Overview page (e.g., "Reporter Name: 72% filled") so the team knows where to focus cleanup
-7. **Awards pipeline date filtering** — the Awards page has no date range controls unlike Teams
+2. **Add table IDs** to `TABLE_IDS` in `src/services/airtable.ts` (e.g. `samples: "tblXXXXX"`, `briefings: "tblYYYYY"`).
 
-### Airtable Hygiene (team process changes)
+3. **Create TypeScript interfaces** in `src/data/types.ts` for `Sample` and `Briefing`, excluding PII fields (address, phone).
 
-8. **Standardize Reporter Name entry** — consistent "First Last" format; avoid abbreviations
-9. **Always tag Type explicitly** — don't rely on the "Online" default; distinguish Feature vs. Mention vs. Interview
-10. **Fill Topic/Product on every placement** — this is the key to tracking narrative/messaging effectiveness over time
-11. **Add Readership/Viewership even if estimated** — a rough number is better than 0 for benchmarking
+4. **Create mapper functions** in `src/services/mappers.ts` to normalize Airtable field names, similar to `mapPlacement` and `mapAward`.
+
+5. **Create service files** (`samplesService.ts`, `briefingsService.ts`) and hooks (`useSamples.ts`, `useBriefings.ts`).
+
+6. **Build UI pages** — a Samples page and a Briefings page with filtering by client, team, status, and date range.
 
 ---
 
-## Summary
+## How to Maximize the Data
 
-The dashboard is mature and well-structured. The biggest untapped value is in **data completeness on the Airtable side** — the analytics features are ready, but they're only as good as the data flowing in. A focused cleanup of Reporter Name, Type, and Topic/Product would immediately improve the Reporter Analytics, Type Trends, and filtering capabilities. On the code side, the archive query fix and dynamic dates are straightforward wins.
+### Analytics you can derive
+
+**Sample Conversion Rate** — the most valuable metric. For each client (or team), calculate:
+- Total samples sent
+- Samples that resulted in coverage ("Coverage live")
+- Conversion rate = coverage / total
+
+This directly measures ROI of product seeding efforts.
+
+**Briefing-to-Coverage Rate** — same concept:
+- Total briefings conducted
+- Briefings that resulted in coverage
+- Conversion rate by client, team, interview type, and topic
+
+**Reporter Engagement Funnel** — by joining samples + briefings + placements on Reporter Name and Outlet, you can show:
+- Which reporters received samples AND briefings AND produced coverage
+- Which reporters received outreach but never converted
+- Average time from sample/briefing to publication
+
+**Client-Level Enrichment** — the Clients page can be enhanced with:
+- Total samples sent per client
+- Total briefings conducted per client
+- Sample and briefing conversion rates as KPI cards on the client detail panel
+
+**Team Performance** — the Teams page can add:
+- Samples sent and briefing count per team
+- Conversion rates by team to compare effectiveness
+
+**Interview Type Breakdown** — for briefings specifically:
+- Which interview types (Podcast, Live, Recorded, Written Q&A) have the highest conversion rate
+- Trend over time
+
+### Recommendations for the Uproar team before connecting
+
+1. **Standardize the Status field** in both tables. Currently there are blanks, free-text statuses, and inconsistent casing. A clean enum (e.g. "Pending", "Delivered", "Coverage Live", "Fell Through", "No Response") would make filtering and conversion tracking reliable.
+
+2. **Always fill Date Requested / Date Met** — many Samples records have no date, which makes time-based analysis impossible.
+
+3. **Fill Reporter Name consistently** — this is the join key to link samples/briefings back to placements and the Reporter Analytics page.
+
+4. **Decide on the Airtable base structure** — let me know which base(s) these tables live in and the table IDs, and I can wire them up.
+
+---
+
+## Technical Details
+
+### New types (src/data/types.ts)
+```text
+Sample {
+  id, date_requested, team, client, products, outlet,
+  reporter_name, date_shipped, delivery_date, status,
+  publication_date, coverage_link, notes
+}
+
+Briefing {
+  id, date_met, team, client, outlet, reporter_name,
+  spokesperson, uproar_contact, topic, interview_type,
+  briefing_sheet_url, status, publication_date,
+  coverage_link, notes
+}
+```
+
+### New pages
+- `/samples` — table with filters (client, team, status, date range), KPI cards (total sent, conversion rate, pending)
+- `/briefings` — table with filters (client, team, interview type, status, date range), KPI cards (total conducted, conversion rate, by type)
+
+### Client detail panel additions
+- "Samples" tab showing count + conversion rate
+- "Briefings" tab showing count + conversion rate
+
+### Overview page additions
+- Sample conversion rate KPI card
+- Briefing conversion rate KPI card
 
