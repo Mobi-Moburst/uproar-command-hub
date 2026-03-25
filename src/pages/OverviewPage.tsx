@@ -25,8 +25,8 @@ export default function OverviewPage() {
   const thisMonthPlacements = placements.filter((p) => p.date >= monthStart);
   const totalReach = thisMonthPlacements.reduce((sum, p) => sum + p.readership_viewership, 0);
   const totalAdValue = thisMonthPlacements.reduce((sum, p) => sum + p.ad_value, 0);
-  const inProgressAwards = awards.filter((a) => ["Drafting", "Submitted", "Finalist"].includes(a.status));
-  const wonAwards = awards.filter((a) => a.status === "Won");
+  const inProgressAwards = awards.filter((a) => ["Drafting", "Submitted", "Finalist"].includes(a.status) && (a.due_date >= monthStart || a.submitted_date?.substring(0, 7) === format(new Date(), "yyyy-MM")));
+  const wonAwards = awards.filter((a) => a.status === "Won" && (a.submitted_date?.substring(0, 7) === format(new Date(), "yyyy-MM") || a.due_date >= monthStart));
   const weeklyWins = placements.filter((p) => p.weekly_wins_trigger);
 
   // Impact-scored top placements this month
