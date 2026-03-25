@@ -165,19 +165,19 @@ export default function WeeklyWinsPage() {
                 <h2 className="text-base font-semibold text-foreground mb-3">{client}</h2>
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {wins.map((w) => (
-                    <div key={w.id} className="rounded-lg border border-border bg-card p-5">
+                    <div key={w.id} className="rounded-lg border border-border bg-card p-5 overflow-hidden">
                       <div className="flex items-start justify-between gap-2">
-                        <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-emerald hover:underline leading-snug">
+                        <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-emerald hover:underline leading-snug min-w-0 break-words">
                           {w.headline}
                         </a>
                         <TypeBadge type={w.type} />
                       </div>
-                      <p className="mt-3 text-xs font-mono text-muted-foreground">
+                      <p className="mt-3 text-xs font-mono text-muted-foreground truncate">
                         {w.outlet} · {formatDateShort(w.date)} · {w.team_name}
                         {w.topic_product && ` · ${w.topic_product}`}
                       </p>
                       {w.notes && (
-                        <p className="mt-2 text-xs text-muted-foreground">{w.notes}</p>
+                        <p className="mt-2 text-xs text-muted-foreground break-words line-clamp-2">{w.notes}</p>
                       )}
                     </div>
                   ))}
