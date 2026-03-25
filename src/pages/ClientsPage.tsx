@@ -217,6 +217,24 @@ export default function ClientsPage() {
                       <p className="text-xs text-muted-foreground">Award Wins</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_award_wins}</p>
                     </div>
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-xs text-muted-foreground">Samples</p>
+                      <p className="mt-1 font-tight text-2xl font-bold">{clientSamples.length}</p>
+                      {clientSamples.length > 0 && (
+                        <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">
+                          {Math.round((clientSamples.filter(s => s.status.toLowerCase().includes("coverage live")).length / clientSamples.length) * 100)}% conversion
+                        </p>
+                      )}
+                    </div>
+                    <div className="rounded-md border border-border p-4">
+                      <p className="text-xs text-muted-foreground">Briefings</p>
+                      <p className="mt-1 font-tight text-2xl font-bold">{clientBriefings.length}</p>
+                      {clientBriefings.length > 0 && (
+                        <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">
+                          {Math.round((clientBriefings.filter(b => b.status.toLowerCase().includes("coverage live")).length / clientBriefings.length) * 100)}% conversion
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {selectedClient.active_campaign && (
