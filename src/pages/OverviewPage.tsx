@@ -92,10 +92,10 @@ export default function OverviewPage() {
             <>
               <KpiCard label="Active Clients" value={activeClients.length} />
               <KpiCard label="Placements This Month" value={thisMonthPlacements.length} />
-              <KpiCard label="Total Reach" value={formatNumber(totalReach)} />
-              <KpiCard label="Total Ad Value" value={formatCurrency(totalAdValue)} />
-              <KpiCard label="Awards In Progress" value={inProgressAwards.length} />
-              <KpiCard label="Award Wins" value={wonAwards.length} />
+              <KpiCard label="Reach This Month" value={formatNumber(totalReach)} />
+              <KpiCard label="Ad Value This Month" value={formatCurrency(totalAdValue)} />
+              <KpiCard label="Awards In Progress This Month" value={inProgressAwards.length} />
+              <KpiCard label="Award Wins This Month" value={wonAwards.length} />
             </>
           )}
         </div>
