@@ -11,6 +11,8 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { useClients } from "@/hooks/useClients";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
+import { useSamples } from "@/hooks/useSamples";
+import { useBriefings } from "@/hooks/useBriefings";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Info } from "lucide-react";
 import type { Client } from "@/data/types";
