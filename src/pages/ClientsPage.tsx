@@ -54,6 +54,14 @@ export default function ClientsPage() {
     ? awards.filter((a) => a.client_name === selectedClient.name)
     : [];
 
+  const clientSamples = selectedClient
+    ? samples.filter((s) => s.client === selectedClient.name)
+    : [];
+
+  const clientBriefings = selectedClient
+    ? briefings.filter((b) => b.client === selectedClient.name)
+    : [];
+
   const currentYear = new Date().getFullYear();
 
   const groupedAwards = useMemo(() => {
