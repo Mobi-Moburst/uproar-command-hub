@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { title: "Overview", path: "/" },
@@ -17,6 +20,9 @@ const navItems = [
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { user, profile, signOut } = useAuthContext();
+
+  const displayName = profile?.display_name || user?.email || "";
 
   return (
     <div className="lg:hidden">
@@ -55,6 +61,25 @@ export function MobileNav() {
               })}
             </ul>
           </nav>
+          <div className="mt-6 border-t border-border pt-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={profile?.avatar_url} />
+                <AvatarFallback className="bg-muted text-xs text-muted-foreground">
+                  {displayName.slice(0, 2).toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <p className="flex-1 truncate text-sm text-foreground">{displayName}</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={signOut}
+                className="text-xs text-muted-foreground"
+              >
+                Sign out
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

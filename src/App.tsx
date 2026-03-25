@@ -3,6 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import OverviewPage from "./pages/OverviewPage";
 import ClientsPage from "./pages/ClientsPage";
 import PlacementsPage from "./pages/PlacementsPage";
@@ -12,6 +14,7 @@ import ReportersPage from "./pages/ReportersPage";
 import VerticalsPage from "./pages/VerticalsPage";
 import TeamsPage from "./pages/TeamsPage";
 import ClientReportPage from "./pages/ClientReportPage";
+import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,18 +25,21 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<OverviewPage />} />
-          <Route path="/clients" element={<ClientsPage />} />
-          <Route path="/placements" element={<PlacementsPage />} />
-          <Route path="/awards" element={<AwardsPage />} />
-          <Route path="/weekly-wins" element={<WeeklyWinsPage />} />
-          <Route path="/reporters" element={<ReportersPage />} />
-          <Route path="/verticals" element={<VerticalsPage />} />
-          <Route path="/teams" element={<TeamsPage />} />
-          <Route path="/report" element={<ClientReportPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/" element={<ProtectedRoute><OverviewPage /></ProtectedRoute>} />
+            <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
+            <Route path="/placements" element={<ProtectedRoute><PlacementsPage /></ProtectedRoute>} />
+            <Route path="/awards" element={<ProtectedRoute><AwardsPage /></ProtectedRoute>} />
+            <Route path="/weekly-wins" element={<ProtectedRoute><WeeklyWinsPage /></ProtectedRoute>} />
+            <Route path="/reporters" element={<ProtectedRoute><ReportersPage /></ProtectedRoute>} />
+            <Route path="/verticals" element={<ProtectedRoute><VerticalsPage /></ProtectedRoute>} />
+            <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
+            <Route path="/report" element={<ProtectedRoute><ClientReportPage /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
