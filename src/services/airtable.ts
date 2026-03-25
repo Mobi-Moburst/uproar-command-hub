@@ -10,6 +10,8 @@ export const TABLE_IDS = {
   placements: "tblsFhq3a6NPalO5N",
   awards: "tblyqY5sA6j41GqYY",
   awardsClients: "tblmucN4TFZ8EmxB4",
+  samples: "tblw2XmLUw693b0Oy",
+  briefings: "tblCw6tkrAGZ1eoc3",
 };
 
 /** Always configured — the edge function holds the secrets */

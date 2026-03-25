@@ -3,7 +3,7 @@
  * the app's TypeScript interfaces.
  */
 
-import type { MediaPlacement, AwardSubmission } from "@/data/types";
+import type { MediaPlacement, AwardSubmission, Sample, Briefing } from "@/data/types";
 import type { AirtableRecord } from "./airtable";
 
 /** Safely extract first element from array or return the value as-is */
