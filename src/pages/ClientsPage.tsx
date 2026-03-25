@@ -22,6 +22,8 @@ export default function ClientsPage() {
   const { data: clients = [], isLoading, isError, refetch } = useClients();
   const { data: placements = [] } = usePlacements();
   const { data: awards = [] } = useAwards();
+  const { data: samples = [] } = useSamples();
+  const { data: briefings = [] } = useBriefings();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
