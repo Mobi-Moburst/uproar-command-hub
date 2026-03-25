@@ -190,7 +190,7 @@ export default function ClientsPage() {
                     <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
                   </div>
 
-                  <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
                     <div className="rounded-md border border-border p-4">
                       <p className="text-xs text-muted-foreground">Placements</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_placements}</p>
