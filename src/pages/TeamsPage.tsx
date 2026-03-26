@@ -5,9 +5,12 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { FilterBar, FilterSelect } from "@/components/FilterBar";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
+import { TeamLeaderboard } from "@/components/TeamLeaderboard";
 import { useTeams } from "@/hooks/useTeams";
 import { useClients } from "@/hooks/useClients";
 import { usePlacements } from "@/hooks/usePlacements";
+import { useAwards } from "@/hooks/useAwards";
+import { useCoverageIntelligence } from "@/hooks/useCoverageIntelligence";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -54,7 +57,7 @@ function DeltaBadge({ current, previous, label }: DeltaBadgeProps) {
   }
   if (previous === 0) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-emerald-600">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-accent">
         <TrendingUp className="h-3 w-3" />New {label && <span className="ml-0.5 opacity-60">{label}</span>}
       </span>
     );
@@ -69,7 +72,7 @@ function DeltaBadge({ current, previous, label }: DeltaBadgeProps) {
   }
   if (pct > 0) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-emerald-600">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-accent">
         <TrendingUp className="h-3 w-3" />+{pct}% {label && <span className="ml-0.5 opacity-60">{label}</span>}
       </span>
     );
@@ -115,6 +118,8 @@ export default function TeamsPage() {
   const { data: teams = [], isLoading, isError, refetch } = useTeams();
   const { data: clients = [] } = useClients();
   const { data: placements = [] } = usePlacements();
+  const { data: awards = [] } = useAwards();
+  const { conversions } = useCoverageIntelligence();
 
   const [teamFilter, setTeamFilter] = useState("");
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
@@ -278,6 +283,17 @@ export default function TeamsPage() {
           )}
         </FilterBar>
 
+        {/* Team Leaderboard */}
+        {!isLoading && !isError && placements.length > 0 && (
+          <TeamLeaderboard
+            placements={placements}
+            awards={awards}
+            conversions={conversions}
+            fromDate={fromDate}
+            toDate={toDate}
+          />
+        )}
+
         {isError ? (
           <ErrorState message="Failed to load teams." onRetry={() => refetch()} />
         ) : isLoading ? (
@@ -379,12 +395,12 @@ export default function TeamsPage() {
                       <div className="h-[60px] w-full max-w-[280px]">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={sparkData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                            <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(220, 9%, 46%)" }} tickLine={false} axisLine={false} />
+                            <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
                             <Tooltip
-                              contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid hsl(220, 13%, 91%)" }}
+                              contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid hsl(var(--border))", backgroundColor: "hsl(var(--card))" }}
                               formatter={(v: number) => [v, "Placements"]}
                             />
-                            <Bar dataKey="count" fill="hsl(160, 84%, 30%)" radius={[2, 2, 0, 0]} />
+                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
@@ -407,7 +423,7 @@ export default function TeamsPage() {
                       <div className="space-y-2">
                         {recentPlacements.map((p) => (
                           <div key={p.id}>
-                            <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald hover:underline">
+                          <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:text-primary/80 hover:underline">
                               {p.headline}
                             </a>
                             <p className="text-xs font-mono text-muted-foreground">{p.outlet} · {formatDateShort(p.date)}</p>
