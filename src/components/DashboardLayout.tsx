@@ -11,6 +11,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <AppSidebar />
       <MobileNav />
       <main className="lg:pl-60">
+        {/* Subtle gradient accent at the top */}
+        <div className="h-[2px] gradient-brand opacity-40" />
         <div className="mx-auto max-w-[1280px] px-6 py-8 lg:px-10 lg:py-10 pt-20 lg:pt-10">
           {children}
         </div>
