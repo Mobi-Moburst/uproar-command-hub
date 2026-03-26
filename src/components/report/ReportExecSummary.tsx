@@ -16,18 +16,45 @@ export function ReportExecSummary({ placements, awardWins, periodLabel }: Report
   const featurePct = Math.round((featureCount / placements.length) * 100);
   const topOutlet = (() => {
     const counts = new Map<string, number>();
-    placements.forEach((p) => counts.set(p.outlet, (counts.get(p.outlet) || 0) + 1));
+    placements.forEach((p) => {
+      const outlet = (p.outlet || "").trim();
+      if (outlet) counts.set(outlet, (counts.get(outlet) || 0) + 1);
+    });
     return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "–";
   })();
 
-  // One-line verdict
-  const verdict = totalReach > 100_000_000
-    ? "Exceptional reach — coverage broke through at scale."
-    : totalReach > 10_000_000
-    ? "Strong visibility — consistent coverage driving brand awareness."
-    : placements.length > 20
-    ? "Solid volume — broad media footprint across outlets."
-    : "Focused coverage — quality placements building momentum.";
+  const uniqueOutlets = new Set(placements.map((p) => p.outlet).filter(Boolean)).size;
+
+  // Dynamic verdict based on actual metrics
+  const verdict = (() => {
+    if (placements.length === 0) return "Building momentum — first placements underway.";
+
+    const parts: string[] = [];
+
+    if (totalReach > 100_000_000) {
+      parts.push("Exceptional reach — coverage broke through at scale");
+    } else if (totalReach > 10_000_000) {
+      parts.push("Strong visibility driving brand awareness");
+    } else if (totalReach > 1_000_000) {
+      parts.push("Growing media presence with meaningful reach");
+    } else {
+      parts.push("Targeted coverage building momentum");
+    }
+
+    if (featurePct >= 50) {
+      parts.push(`with ${featurePct}% feature-length coverage`);
+    } else if (featurePct >= 25) {
+      parts.push(`backed by quality features`);
+    }
+
+    if (uniqueOutlets >= 10) {
+      parts.push(`across ${uniqueOutlets} outlets`);
+    } else if (topOutlet !== "–") {
+      parts.push(`led by ${topOutlet}`);
+    }
+
+    return parts.join(" ") + ".";
+  })();
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card">
