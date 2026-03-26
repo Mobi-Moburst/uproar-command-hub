@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { usePlacements } from "@/hooks/usePlacements";
-import type { MediaPlacement } from "@/data/types";
+import { useSamples } from "@/hooks/useSamples";
+import { useBriefings } from "@/hooks/useBriefings";
+import type { MediaPlacement, Sample, Briefing } from "@/data/types";
 
 export interface ReporterAggregate {
   name: string;
@@ -11,6 +13,8 @@ export interface ReporterAggregate {
   totalReach: number;
   mostRecentDate: string;
   relationshipScore: number;
+  conversionRate: number;
+  topAffinityVerticals: string[];
   placements: MediaPlacement[];
 }
 
@@ -55,9 +59,41 @@ function computeRelationshipScore(
 }
 
 export function useReporterAnalytics(yearFilter?: string) {
-  const { data: placements = [], isLoading, isError, refetch } = usePlacements();
+  const { data: placements = [], isLoading: lp, isError, refetch } = usePlacements();
+  const { data: samples = [], isLoading: ls } = useSamples();
+  const { data: briefings = [], isLoading: lb } = useBriefings();
+  const isLoading = lp || ls || lb;
 
   const reporters = useMemo(() => {
+    // Build per-reporter outreach counts
+    const reporterOutreach = new Map<string, { total: number; converted: number; verticalCounts: Map<string, number> }>();
+    const allOutreach = [
+      ...samples.map((s: Sample) => ({ reporter: s.reporter_name?.trim(), client: s.client?.trim(), date: s.date_shipped || s.date_requested })),
+      ...briefings.map((b: Briefing) => ({ reporter: b.reporter_name?.trim(), client: b.client?.trim(), date: b.date_met })),
+    ];
+    allOutreach.forEach((o) => {
+      if (!o.reporter) return;
+      const key = o.reporter;
+      if (!reporterOutreach.has(key)) reporterOutreach.set(key, { total: 0, converted: 0, verticalCounts: new Map() });
+      const entry = reporterOutreach.get(key)!;
+      entry.total++;
+      // Check if conversion exists
+      if (o.date) {
+        const oTime = new Date(o.date).getTime();
+        const match = placements.find((p) =>
+          p.reporter_name?.trim() === key &&
+          p.client_name?.trim().toLowerCase() === (o.client || "").toLowerCase() &&
+          p.date && new Date(p.date).getTime() >= oTime &&
+          new Date(p.date).getTime() <= oTime + 90 * 86_400_000
+        );
+        if (match) {
+          entry.converted++;
+          const v = match.vertical || "Unknown";
+          entry.verticalCounts.set(v, (entry.verticalCounts.get(v) || 0) + 1);
+        }
+      }
+    });
+
     const filtered = placements.filter((p) => {
       if (!p.reporter_name) return false;
       if (yearFilter && !p.date?.startsWith(yearFilter)) return false;
@@ -91,6 +127,12 @@ export function useReporterAnalytics(yearFilter?: string) {
           ""
         );
 
+        const outreach = reporterOutreach.get(name);
+        const conversionRate = outreach && outreach.total > 0 ? outreach.converted / outreach.total : 0;
+        const topAffinityVerticals = outreach
+          ? [...outreach.verticalCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([v]) => v)
+          : [];
+
         return {
           name,
           placementCount: pls.length,
@@ -100,13 +142,15 @@ export function useReporterAnalytics(yearFilter?: string) {
           totalReach,
           mostRecentDate,
           relationshipScore: computeRelationshipScore(pls, maxCount),
+          conversionRate,
+          topAffinityVerticals,
           placements: pls.sort((a, b) => (b.date || "").localeCompare(a.date || "")),
         };
       }
     );
 
     return result.sort((a, b) => b.relationshipScore - a.relationshipScore);
-  }, [placements, yearFilter]);
+  }, [placements, samples, briefings, yearFilter]);
 
   const years = useMemo(() => {
     return [...new Set(placements.map((p) => p.date?.slice(0, 4)).filter(Boolean))].sort().reverse();
