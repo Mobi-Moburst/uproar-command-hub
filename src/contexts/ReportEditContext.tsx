@@ -27,6 +27,7 @@ export function ReportEditProvider({ children }: { children: ReactNode }) {
   const [hiddenSections, setHiddenSections] = useState<Set<string>>(new Set());
   const [textOverrides, setTextOverrides] = useState<Map<string, string>>(new Map());
   const [dismissedCards, setDismissedCards] = useState<Set<string>>(new Set());
+  const [manualHighlights, setManualHighlights] = useState<CurationState["manualHighlights"]>([]);
 
   const toggleEdit = useCallback(() => setIsEditing((v) => !v), []);
 
@@ -67,20 +68,21 @@ export function ReportEditProvider({ children }: { children: ReactNode }) {
       hiddenSections: Array.from(hiddenSections),
       dismissedCards: Array.from(dismissedCards),
       textOverrides: Object.fromEntries(textOverrides),
-      manualHighlights: [],
+      manualHighlights,
       aiSummary,
     };
-  }, [hiddenSections, dismissedCards, textOverrides]);
+  }, [hiddenSections, dismissedCards, textOverrides, manualHighlights]);
 
   const loadCurationState = useCallback((state: CurationState) => {
     setHiddenSections(new Set(state.hiddenSections || []));
     setDismissedCards(new Set(state.dismissedCards || []));
     setTextOverrides(new Map(Object.entries(state.textOverrides || {})));
+    setManualHighlights(state.manualHighlights || []);
   }, []);
 
   return (
     <ReportEditContext.Provider
-      value={{ isEditing, toggleEdit, hiddenSections, hideSection, showSection, resetHidden, textOverrides, setTextOverride, getTextOverride, dismissedCards, dismissCard, restoreCard, getCurationState, loadCurationState }}
+      value={{ isEditing, toggleEdit, hiddenSections, hideSection, showSection, resetHidden, textOverrides, setTextOverride, getTextOverride, dismissedCards, dismissCard, restoreCard, manualHighlights, setManualHighlights, getCurationState, loadCurationState }}
     >
       {children}
     </ReportEditContext.Provider>
