@@ -191,12 +191,24 @@ export function TeamLeaderboard({ placements, awards, conversions, fromDate, toD
               <tr className="border-b border-border bg-muted/50">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground w-10">#</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Team</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Score</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Placements</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reach</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ad Value</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Wins</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Conv.</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">Score <InfoBadge tip="Composite score (0–100) weighted: Placements 30%, Reach 25%, Ad Value 15%, Award Wins 15%, Conversion Rate 15%. Normalized against the top-performing team." /></span>
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">Placements <InfoBadge tip="Total media placements secured by this team in the selected date range." /></span>
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">Reach <InfoBadge tip="Combined readership/viewership across all placements." /></span>
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">Ad Value <InfoBadge tip="Total advertising equivalency value of all placements." /></span>
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">Wins <InfoBadge tip="Number of award submissions with 'Won' status." /></span>
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">Conv. <InfoBadge tip="Conversion rate: percentage of outreach (samples + briefings) that resulted in a placement within 90 days." /></span>
+                </th>
               </tr>
             </thead>
             <tbody className="font-mono">
