@@ -17,7 +17,7 @@ import VerticalsPage from "./pages/VerticalsPage";
 import TeamsPage from "./pages/TeamsPage";
 import SamplesPage from "./pages/SamplesPage";
 import BriefingsPage from "./pages/BriefingsPage";
-import ClientReportPage from "./pages/ClientReportPage";
+import ReportsPage from "./pages/ReportsPage";
 import LoginPage from "./pages/LoginPage";
 import PulsePage from "./pages/PulsePage";
 import PublicReportPage from "./pages/PublicReportPage";
