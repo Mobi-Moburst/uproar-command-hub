@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_enrichment: {
+        Row: {
+          client_name: string
+          competitors: string[]
+          created_at: string
+          id: string
+          industries: string[]
+          keywords: string[]
+          updated_at: string
+        }
+        Insert: {
+          client_name: string
+          competitors?: string[]
+          created_at?: string
+          id?: string
+          industries?: string[]
+          keywords?: string[]
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string
+          competitors?: string[]
+          created_at?: string
+          id?: string
+          industries?: string[]
+          keywords?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       placements_archive: {
         Row: {
           ad_value: number
@@ -95,6 +125,51 @@ export type Database = {
           display_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      pulse_signals: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          client_name: string
+          created_at: string
+          dismissed: boolean
+          generated_date: string
+          headline: string
+          hook: string
+          id: string
+          industry: string | null
+          relevance_score: number
+          source_url: string | null
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          client_name: string
+          created_at?: string
+          dismissed?: boolean
+          generated_date?: string
+          headline: string
+          hook: string
+          id?: string
+          industry?: string | null
+          relevance_score?: number
+          source_url?: string | null
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          client_name?: string
+          created_at?: string
+          dismissed?: boolean
+          generated_date?: string
+          headline?: string
+          hook?: string
+          id?: string
+          industry?: string | null
+          relevance_score?: number
+          source_url?: string | null
         }
         Relationships: []
       }
