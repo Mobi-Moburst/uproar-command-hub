@@ -53,7 +53,7 @@ export default function ReportsPage() {
 
   if (editorState.mode === "editor" && editorState.clientName) {
     return (
-      <DashboardLayout title="Reports">
+      <DashboardLayout>
         <div className="mb-4 print:hidden">
           <Button variant="outline" size="sm" onClick={handleBackToHub} className="gap-1.5 text-xs">
             ← Back to Reports
@@ -70,7 +70,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <DashboardLayout title="Reports">
+    <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-4">
