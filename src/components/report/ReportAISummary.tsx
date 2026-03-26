@@ -35,8 +35,7 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
             <Sparkles className="h-4.5 w-4.5 text-primary" />
           </div>
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-foreground">AI Coverage Summary</h2>
-            <p className="text-[11px] font-mono text-muted-foreground/70 uppercase tracking-widest">Powered by Lovable AI</p>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">Coverage Summary</h2>
           </div>
         </div>
         <Button
