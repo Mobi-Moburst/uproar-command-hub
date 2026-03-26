@@ -246,6 +246,20 @@ function ReportCard({ report, onOpen, onDelete, onUnpublish }: { report: ClientR
         >
           {report.status === "draft" ? "Edit" : "View"}
         </Button>
+        {report.status === "published" && onUnpublish && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs gap-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              onUnpublish(report.id);
+            }}
+          >
+            <Undo2 className="h-3.5 w-3.5" />
+            Unpublish
+          </Button>
+        )}
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
