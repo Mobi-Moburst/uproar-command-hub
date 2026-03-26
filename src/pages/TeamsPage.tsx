@@ -395,12 +395,12 @@ export default function TeamsPage() {
                       <div className="h-[60px] w-full max-w-[280px]">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={sparkData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                            <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(220, 9%, 46%)" }} tickLine={false} axisLine={false} />
+                            <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
                             <Tooltip
-                              contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid hsl(220, 13%, 91%)" }}
+                              contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid hsl(var(--border))", backgroundColor: "hsl(var(--card))" }}
                               formatter={(v: number) => [v, "Placements"]}
                             />
-                            <Bar dataKey="count" fill="hsl(160, 84%, 30%)" radius={[2, 2, 0, 0]} />
+                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
@@ -423,7 +423,7 @@ export default function TeamsPage() {
                       <div className="space-y-2">
                         {recentPlacements.map((p) => (
                           <div key={p.id}>
-                            <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald hover:underline">
+                          <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:text-primary/80 hover:underline">
                               {p.headline}
                             </a>
                             <p className="text-xs font-mono text-muted-foreground">{p.outlet} · {formatDateShort(p.date)}</p>
