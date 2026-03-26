@@ -86,8 +86,10 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
   const strengths = insights.filter((i) => i.type === "strength");
   const opportunities = insights.filter((i) => i.type === "opportunity");
 
-  const allStrengths = [...strengths, ...customStrengths.map((t) => ({ type: "strength" as const, text: t }))];
-  const allOpportunities = [...opportunities, ...customOpportunities.map((t) => ({ type: "opportunity" as const, text: t }))];
+  const allStrengths = [...strengths, ...customStrengths.map((t) => ({ type: "strength" as const, text: t }))]
+    .filter((_, i) => !dismissedIds.has(`insight-strength-${i}`));
+  const allOpportunities = [...opportunities, ...customOpportunities.map((t) => ({ type: "opportunity" as const, text: t }))]
+    .filter((_, i) => !dismissedIds.has(`insight-opportunity-${i}`));
 
   if (allStrengths.length === 0 && allOpportunities.length === 0 && !isEditing) return null;
 
@@ -106,18 +108,22 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
           </div>
           {allStrengths.length > 0 ? (
             <ul className="space-y-3">
-              {allStrengths.map((s, i) => (
-                <EditableInsight
-                  key={i}
-                  id={`insight-strength-${i}`}
-                  defaultText={s.text}
-                  borderClass="border-primary/30"
-                  isEditing={isEditing}
-                  getTextOverride={getTextOverride}
-                  setTextOverride={setTextOverride}
-                  onRemove={i >= strengths.length ? () => setCustomStrengths((prev) => prev.filter((_, j) => j !== i - strengths.length)) : undefined}
-                />
-              ))}
+              {allStrengths.map((s) => {
+                const origIdx = [...strengths, ...customStrengths.map((t) => ({ type: "strength" as const, text: t }))].indexOf(s);
+                const id = `insight-strength-${origIdx}`;
+                return (
+                  <EditableInsight
+                    key={id}
+                    id={id}
+                    defaultText={s.text}
+                    borderClass="border-primary/30"
+                    isEditing={isEditing}
+                    getTextOverride={getTextOverride}
+                    setTextOverride={setTextOverride}
+                    onRemove={isEditing ? () => setDismissedIds((prev) => new Set(prev).add(id)) : undefined}
+                  />
+                );
+              })}
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground/50">Building momentum — insights will appear with more data.</p>
@@ -140,18 +146,22 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
           </div>
           {allOpportunities.length > 0 ? (
             <ul className="space-y-3">
-              {allOpportunities.map((o, i) => (
-                <EditableInsight
-                  key={i}
-                  id={`insight-opportunity-${i}`}
-                  defaultText={o.text}
-                  borderClass="border-accent/40"
-                  isEditing={isEditing}
-                  getTextOverride={getTextOverride}
-                  setTextOverride={setTextOverride}
-                  onRemove={i >= opportunities.length ? () => setCustomOpportunities((prev) => prev.filter((_, j) => j !== i - opportunities.length)) : undefined}
-                />
-              ))}
+              {allOpportunities.map((o) => {
+                const origIdx = [...opportunities, ...customOpportunities.map((t) => ({ type: "opportunity" as const, text: t }))].indexOf(o);
+                const id = `insight-opportunity-${origIdx}`;
+                return (
+                  <EditableInsight
+                    key={id}
+                    id={id}
+                    defaultText={o.text}
+                    borderClass="border-accent/40"
+                    isEditing={isEditing}
+                    getTextOverride={getTextOverride}
+                    setTextOverride={setTextOverride}
+                    onRemove={isEditing ? () => setDismissedIds((prev) => new Set(prev).add(id)) : undefined}
+                  />
+                );
+              })}
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground/50">No gaps identified — coverage strategy is well-rounded.</p>
