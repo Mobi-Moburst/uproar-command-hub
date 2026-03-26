@@ -2,7 +2,7 @@ import { formatNumber, formatDateShort } from "@/lib/format";
 import { TypeBadge } from "@/components/TypeBadge";
 import { EditableSection } from "./ReportEditControls";
 import { useReportEdit } from "@/contexts/ReportEditContext";
-import { Plus } from "lucide-react";
+import { Plus, Star } from "lucide-react";
 import { useState, useCallback } from "react";
 import type { MediaPlacement } from "@/data/types";
 
@@ -23,7 +23,9 @@ interface ReportHighlightsProps {
 export function ReportHighlights({ placements }: ReportHighlightsProps) {
   const { isEditing } = useReportEdit();
   const [manualEntries, setManualEntries] = useState<ManualEntry[]>([]);
+  const [heroOverride, setHeroOverride] = useState<ManualEntry | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [useAsHero, setUseAsHero] = useState(false);
   const [form, setForm] = useState<Omit<ManualEntry, "id">>({
     headline: "",
     outlet: "",
@@ -35,13 +37,16 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
 
   const handleAdd = useCallback(() => {
     if (!form.headline.trim() || !form.outlet.trim()) return;
-    setManualEntries((prev) => [
-      ...prev,
-      { ...form, id: `manual-${Date.now()}` },
-    ]);
+    const entry = { ...form, id: `manual-${Date.now()}` };
+    if (useAsHero) {
+      setHeroOverride(entry);
+    } else {
+      setManualEntries((prev) => [...prev, entry]);
+    }
     setForm({ headline: "", outlet: "", date: "", type: "Feature", reach: "", link: "" });
+    setUseAsHero(false);
     setShowForm(false);
-  }, [form]);
+  }, [form, useAsHero]);
 
   if (placements.length === 0 && manualEntries.length === 0) return null;
 
@@ -62,8 +67,32 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
         Coverage Highlights
       </h2>
 
-      {/* Hero placement */}
-      {hero && (
+      {/* Hero placement — manual override or top scored */}
+      {heroOverride ? (
+        <EditableSection id={`highlight-${heroOverride.id}`}>
+          <div className="rounded-lg border border-border bg-card p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-mono text-muted-foreground mb-1">
+                  {heroOverride.outlet}
+                  {heroOverride.date && ` · ${formatDateShort(heroOverride.date)}`}
+                </p>
+                {heroOverride.link ? (
+                  <a href={heroOverride.link} target="_blank" rel="noopener noreferrer" className="text-lg font-semibold text-foreground hover:text-primary transition-colors leading-snug">
+                    {heroOverride.headline}
+                  </a>
+                ) : (
+                  <p className="text-lg font-semibold text-foreground leading-snug">{heroOverride.headline}</p>
+                )}
+                <p className="mt-2 text-sm font-mono text-muted-foreground">
+                  {heroOverride.reach ? `${heroOverride.reach} reach` : "N/A impressions"}
+                </p>
+              </div>
+              <TypeBadge type={heroOverride.type} />
+            </div>
+          </div>
+        </EditableSection>
+      ) : hero ? (
         <EditableSection id={`highlight-${hero.id}`}>
           <div className="rounded-lg border border-border bg-card p-6">
             <div className="flex items-start justify-between gap-4">
@@ -87,7 +116,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
             </div>
           </div>
         </EditableSection>
-      )}
+      ) : null}
 
       {/* Remaining highlights */}
       <div className="mt-3 space-y-2">
@@ -200,6 +229,20 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
                 onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))}
                 className="col-span-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40"
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setUseAsHero((v) => !v)}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                  useAsHero
+                    ? "bg-primary/10 text-primary border border-primary/30"
+                    : "border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                }`}
+              >
+                <Star className={`h-3 w-3 ${useAsHero ? "fill-primary" : ""}`} />
+                Use as Top Highlight
+              </button>
             </div>
             <div className="flex gap-2 justify-end">
               <button
