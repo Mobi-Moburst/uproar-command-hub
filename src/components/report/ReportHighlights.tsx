@@ -67,8 +67,32 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
         Coverage Highlights
       </h2>
 
-      {/* Hero placement */}
-      {hero && (
+      {/* Hero placement — manual override or top scored */}
+      {heroOverride ? (
+        <EditableSection id={`highlight-${heroOverride.id}`}>
+          <div className="rounded-lg border border-border bg-card p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-mono text-muted-foreground mb-1">
+                  {heroOverride.outlet}
+                  {heroOverride.date && ` · ${formatDateShort(heroOverride.date)}`}
+                </p>
+                {heroOverride.link ? (
+                  <a href={heroOverride.link} target="_blank" rel="noopener noreferrer" className="text-lg font-semibold text-foreground hover:text-primary transition-colors leading-snug">
+                    {heroOverride.headline}
+                  </a>
+                ) : (
+                  <p className="text-lg font-semibold text-foreground leading-snug">{heroOverride.headline}</p>
+                )}
+                <p className="mt-2 text-sm font-mono text-muted-foreground">
+                  {heroOverride.reach ? `${heroOverride.reach} reach` : "N/A impressions"}
+                </p>
+              </div>
+              <TypeBadge type={heroOverride.type} />
+            </div>
+          </div>
+        </EditableSection>
+      ) : hero ? (
         <EditableSection id={`highlight-${hero.id}`}>
           <div className="rounded-lg border border-border bg-card p-6">
             <div className="flex items-start justify-between gap-4">
@@ -92,7 +116,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
             </div>
           </div>
         </EditableSection>
-      )}
+      ) : null}
 
       {/* Remaining highlights */}
       <div className="mt-3 space-y-2">
