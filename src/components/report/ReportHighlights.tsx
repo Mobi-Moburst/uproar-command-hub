@@ -10,10 +10,16 @@ interface ReportHighlightsProps {
 export function ReportHighlights({ placements }: ReportHighlightsProps) {
   if (placements.length === 0) return null;
 
-  // Hero = highest reach placement
-  const sorted = [...placements].sort((a, b) => b.readership_viewership - a.readership_viewership);
+  // Score placements by impact: type weight × reach
+  const typeWeight = (t: string) => {
+    const w: Record<string, number> = { Feature: 5, Announcement: 3, Contributed: 3, Interview: 4, Syndication: 1, Mention: 1 };
+    return w[t] ?? 2;
+  };
+  const sorted = [...placements].sort(
+    (a, b) => (typeWeight(b.type) * Math.max(b.readership_viewership, 1)) - (typeWeight(a.type) * Math.max(a.readership_viewership, 1))
+  );
   const hero = sorted[0];
-  const rest = placements.filter((p) => p.id !== hero.id);
+  const rest = sorted.slice(1);
 
   return (
     <section>
