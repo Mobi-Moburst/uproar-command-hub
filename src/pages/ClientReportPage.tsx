@@ -3,14 +3,19 @@ import { useSearchParams } from "react-router-dom";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
 import { useClients } from "@/hooks/useClients";
+import { useSamples } from "@/hooks/useSamples";
+import { useBriefings } from "@/hooks/useBriefings";
 import { ReportHero } from "@/components/report/ReportHero";
 import { ReportKpis } from "@/components/report/ReportKpis";
 import { ReportHighlights } from "@/components/report/ReportHighlights";
 import { ReportCoverageBreakdown } from "@/components/report/ReportCoverageBreakdown";
 import { ReportAwards } from "@/components/report/ReportAwards";
+import { ReportOutreachSummary } from "@/components/report/ReportOutreachSummary";
+import { ReportTopReporters } from "@/components/report/ReportTopReporters";
+import { ReportOutletMomentum } from "@/components/report/ReportOutletMomentum";
 import { ReportFooter } from "@/components/report/ReportFooter";
 import { ReportDateRange } from "@/components/report/ReportDateRange";
-import type { MediaPlacement, AwardSubmission } from "@/data/types";
+import type { MediaPlacement, AwardSubmission, Sample, Briefing } from "@/data/types";
 
 export default function ClientReportPage() {
   const [params, setParams] = useSearchParams();
@@ -21,8 +26,10 @@ export default function ClientReportPage() {
   const { data: placements = [], isLoading: loadingP } = usePlacements();
   const { data: awards = [], isLoading: loadingA } = useAwards();
   const { data: clients = [], isLoading: loadingC } = useClients();
+  const { data: samples = [], isLoading: loadingS } = useSamples();
+  const { data: briefings = [], isLoading: loadingB } = useBriefings();
 
-  const isLoading = loadingP || loadingA || loadingC;
+  const isLoading = loadingP || loadingA || loadingC || loadingS || loadingB;
 
   const client = useMemo(() => clients.find((c) => c.name === clientName), [clients, clientName]);
 
@@ -107,6 +114,33 @@ export default function ClientReportPage() {
     return months;
   }, [clientPlacements, fromDate, toDate]);
 
+  // Client samples & briefings with conversion matching
+  const CONVERSION_WINDOW = 90 * 86_400_000;
+
+  const clientSampleConversions = useMemo(() => {
+    const clientSamples = samples.filter((s) => s.client?.trim().toLowerCase() === clientName.trim().toLowerCase());
+    return clientSamples.map((s) => {
+      const reporter = s.reporter_name?.trim().toLowerCase() || "";
+      const itemDate = s.date_shipped || s.date_requested;
+      if (!itemDate || !reporter) return { type: "sample" as const, id: s.id, client: s.client, reporter: s.reporter_name, outlet: s.outlet, date: itemDate || "", converted: false, daysToCoverage: undefined };
+      const t = new Date(itemDate).getTime();
+      const match = clientPlacements.find((p) => p.date && p.reporter_name?.trim().toLowerCase() === reporter && new Date(p.date).getTime() >= t && new Date(p.date).getTime() <= t + CONVERSION_WINDOW);
+      return { type: "sample" as const, id: s.id, client: s.client, reporter: s.reporter_name, outlet: s.outlet || match?.outlet || "", date: itemDate, converted: !!match, placement: match, daysToCoverage: match ? Math.round((new Date(match.date).getTime() - t) / 86_400_000) : undefined };
+    });
+  }, [samples, clientName, clientPlacements]);
+
+  const clientBriefingConversions = useMemo(() => {
+    const clientBriefings = briefings.filter((b) => b.client?.trim().toLowerCase() === clientName.trim().toLowerCase());
+    return clientBriefings.map((b) => {
+      const reporter = b.reporter_name?.trim().toLowerCase() || "";
+      const itemDate = b.date_met;
+      if (!itemDate || !reporter) return { type: "briefing" as const, id: b.id, client: b.client, reporter: b.reporter_name, outlet: b.outlet, date: itemDate || "", converted: false, daysToCoverage: undefined };
+      const t = new Date(itemDate).getTime();
+      const match = clientPlacements.find((p) => p.date && p.reporter_name?.trim().toLowerCase() === reporter && new Date(p.date).getTime() >= t && new Date(p.date).getTime() <= t + CONVERSION_WINDOW);
+      return { type: "briefing" as const, id: b.id, client: b.client, reporter: b.reporter_name, outlet: b.outlet || match?.outlet || "", date: itemDate, converted: !!match, placement: match, daysToCoverage: match ? Math.round((new Date(match.date).getTime() - t) / 86_400_000) : undefined };
+    });
+  }, [briefings, clientName, clientPlacements]);
+
   const wonAwards = filteredAwards.filter((a) => a.status === "Won");
 
   const handleDateChange = (from: string, to: string) => {
@@ -176,6 +210,15 @@ export default function ClientReportPage() {
           topOutlets={topOutlets}
           monthlyReach={monthlyReach}
         />
+
+        <ReportOutreachSummary
+          sampleConversions={clientSampleConversions}
+          briefingConversions={clientBriefingConversions}
+        />
+
+        <ReportTopReporters conversions={[...clientSampleConversions, ...clientBriefingConversions]} />
+
+        <ReportOutletMomentum placements={clientPlacements} />
 
         <ReportAwards wonAwards={wonAwards} allAwards={filteredAwards} />
 
