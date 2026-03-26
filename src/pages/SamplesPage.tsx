@@ -27,21 +27,27 @@ export default function SamplesPage() {
 
   const filtered = useMemo(() => {
     if (!samples) return [];
-    return samples.filter((s) => {
-      if (clientFilter && s.client !== clientFilter) return false;
-      if (teamFilter && s.team !== teamFilter) return false;
-      if (statusFilter && s.status !== statusFilter) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        return (
-          s.client.toLowerCase().includes(q) ||
-          s.reporter_name.toLowerCase().includes(q) ||
-          s.outlet.toLowerCase().includes(q) ||
-          s.products.toLowerCase().includes(q)
-        );
-      }
-      return true;
-    });
+    return samples
+      .filter((s) => {
+        if (clientFilter && s.client !== clientFilter) return false;
+        if (teamFilter && s.team !== teamFilter) return false;
+        if (statusFilter && s.status !== statusFilter) return false;
+        if (search) {
+          const q = search.toLowerCase();
+          return (
+            s.client.toLowerCase().includes(q) ||
+            s.reporter_name.toLowerCase().includes(q) ||
+            s.outlet.toLowerCase().includes(q) ||
+            s.products.toLowerCase().includes(q)
+          );
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        const da = a.date_requested ? new Date(a.date_requested).getTime() : 0;
+        const db = b.date_requested ? new Date(b.date_requested).getTime() : 0;
+        return db - da;
+      });
   }, [samples, search, clientFilter, teamFilter, statusFilter]);
 
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
