@@ -24,7 +24,7 @@ export function EditableSection({
         <button
           onClick={() => hideSection(id)}
           className={cn(
-            "absolute -right-3 -top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-destructive/90 text-white shadow-md transition-all opacity-0 group-hover:opacity-100 hover:scale-110",
+            "absolute -right-3 -top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-all opacity-0 group-hover:opacity-100 hover:scale-110 hover:text-foreground",
             isHidden && "opacity-50"
           )}
           title="Remove from report"
