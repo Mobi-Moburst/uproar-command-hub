@@ -138,6 +138,27 @@ export function useSaveReport() {
   });
 }
 
+export function useDeleteReport() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (reportId: string) => {
+      const { error } = await supabase
+        .from("client_reports")
+        .delete()
+        .eq("id", reportId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-reports"] });
+      toast.success("Report deleted");
+    },
+    onError: (err: any) => {
+      toast.error("Failed to delete report: " + err.message);
+    },
+  });
+}
+
 export async function hashReportPassword(password: string): Promise<string> {
   const { data, error } = await supabase.functions.invoke("report-password", {
     body: { action: "hash", password },
