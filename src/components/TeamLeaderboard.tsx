@@ -113,10 +113,10 @@ export function TeamLeaderboard({ placements, awards, conversions, fromDate, toD
 
   if (rankings.length === 0) return null;
 
-  const medalColors = [
-    "gradient-brand text-white",
-    "bg-muted-foreground/20 text-foreground",
-    "bg-brand-coral/20 text-brand-coral",
+  const medalStyles = [
+    "bg-gradient-to-br from-primary to-accent text-white",
+    "bg-gradient-to-br from-primary/80 to-brand-yellow text-white",
+    "bg-gradient-to-br from-accent to-brand-yellow text-foreground",
   ];
 
   return (
