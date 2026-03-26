@@ -4,7 +4,8 @@ import { useClients } from "@/hooks/useClients";
 import { useClientReports, useDeleteReport, useUnpublishReport, type ClientReport } from "@/hooks/useClientReports";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, Globe, Pencil, Calendar, Trash2, Undo2 } from "lucide-react";
+import { Plus, FileText, Globe, Pencil, Calendar, Trash2, Undo2, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -233,9 +234,12 @@ function ReportCard({ report, onOpen, onDelete, onUnpublish }: { report: ClientR
             onClick={(e) => {
               e.stopPropagation();
               navigator.clipboard.writeText(publicUrl);
+              toast.success("Link copied to clipboard");
+              window.open(publicUrl, "_blank");
             }}
           >
-            Copy Link
+            <ExternalLink className="h-3.5 w-3.5" />
+            View in Browser
           </Button>
         )}
         <Button
