@@ -25,7 +25,7 @@ import { useAICoverageSummary } from "@/hooks/useAICoverageSummary";
 import type { MediaPlacement, AwardSubmission, Sample, Briefing } from "@/data/types";
 
 function SectionDivider() {
-  return <div className="h-px w-full gradient-brand opacity-20 print:opacity-40" />;
+  return <div className="mb-12 h-px w-full gradient-brand opacity-20 print:opacity-40" />;
 }
 
 export default function ClientReportPage() {
@@ -258,10 +258,10 @@ function ClientReportContent() {
             awardWins={wonAwards.length}
             periodLabel={periodLabel}
           />
-          <SectionDivider />
         </EditableSection>
 
         <EditableSection id="kpis">
+          <SectionDivider />
           <ReportKpis
             totalPlacements={clientPlacements.length}
             totalReach={clientPlacements.reduce((s, p) => s + p.readership_viewership, 0)}
@@ -270,10 +270,10 @@ function ClientReportContent() {
             ytdPlacements={clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).length}
             ytdReach={clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).reduce((s, p) => s + p.readership_viewership, 0)}
           />
-          <SectionDivider />
         </EditableSection>
 
         <EditableSection id="ai-summary">
+          <SectionDivider />
           <div className={!summary ? "print:hidden" : ""}>
             <ReportAISummary
               summary={summary}
@@ -281,57 +281,57 @@ function ClientReportContent() {
               onGenerate={handleGenerateSummary}
             />
           </div>
-          <SectionDivider />
         </EditableSection>
 
         <EditableSection id="insights">
+          <SectionDivider />
           <ReportInsights
             placements={clientPlacements}
             awardWins={wonAwards.length}
             sampleConversionRate={sampleConversionRate}
             briefingConversionRate={briefingConversionRate}
           />
-          <SectionDivider />
         </EditableSection>
 
         <EditableSection id="timeline">
-          <ReportTimeline placements={clientPlacements} />
           <SectionDivider />
+          <ReportTimeline placements={clientPlacements} />
         </EditableSection>
 
         <EditableSection id="highlights">
-          <ReportHighlights placements={clientPlacements} />
           <SectionDivider />
+          <ReportHighlights placements={clientPlacements} />
         </EditableSection>
 
         <EditableSection id="coverage-breakdown">
+          <SectionDivider />
           <ReportCoverageBreakdown
             typeBreakdown={typeBreakdown}
             topOutlets={topOutlets}
             monthlyReach={monthlyReach}
           />
-          <SectionDivider />
         </EditableSection>
 
         <EditableSection id="outreach">
+          <SectionDivider />
           <ReportOutreachSummary
             sampleConversions={clientSampleConversions}
             briefingConversions={clientBriefingConversions}
           />
-          <SectionDivider />
         </EditableSection>
 
         <EditableSection id="top-reporters">
-          <ReportTopReporters conversions={[...clientSampleConversions, ...clientBriefingConversions]} />
           <SectionDivider />
+          <ReportTopReporters conversions={[...clientSampleConversions, ...clientBriefingConversions]} />
         </EditableSection>
 
         <EditableSection id="outlet-momentum">
-          <ReportOutletMomentum placements={clientPlacements} fromDate={fromDate} toDate={toDate} />
           <SectionDivider />
+          <ReportOutletMomentum placements={clientPlacements} fromDate={fromDate} toDate={toDate} />
         </EditableSection>
 
         <EditableSection id="awards">
+          <SectionDivider />
           <ReportAwards wonAwards={wonAwards} allAwards={filteredAwards} />
         </EditableSection>
 
