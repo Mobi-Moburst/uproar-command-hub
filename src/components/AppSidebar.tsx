@@ -4,7 +4,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, BarChart3, Users, Newspaper, Trophy, Package, FileText, Star, UserSearch, Brain, Layers, UsersRound, ClipboardList } from "lucide-react";
+import { Sun, Moon, BarChart3, Users, Newspaper, Trophy, Package, FileText, Star, UserSearch, Brain, Layers, UsersRound, ClipboardList, Zap } from "lucide-react";
 
 const navItems = [
   { title: "Overview", path: "/", icon: BarChart3 },
@@ -16,6 +16,7 @@ const navItems = [
   { title: "Weekly Wins", path: "/weekly-wins", icon: Star },
   { title: "Reporter Analytics", path: "/reporters", icon: UserSearch },
   { title: "Intelligence", path: "/intelligence", icon: Brain },
+  { title: "Pulse Center", path: "/pulse", icon: Zap },
   { title: "Vertical Benchmarking", path: "/verticals", icon: Layers },
   { title: "Teams", path: "/teams", icon: UsersRound },
   { title: "Client Report", path: "/report", icon: ClipboardList },

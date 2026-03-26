@@ -17,6 +17,7 @@ const navItems = [
   { title: "Weekly Wins", path: "/weekly-wins" },
   { title: "Reporter Analytics", path: "/reporters" },
   { title: "Intelligence", path: "/intelligence" },
+  { title: "Pulse Center", path: "/pulse" },
   { title: "Vertical Benchmarking", path: "/verticals" },
   { title: "Teams", path: "/teams" },
   { title: "Client Report", path: "/report" },

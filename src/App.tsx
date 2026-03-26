@@ -19,6 +19,7 @@ import SamplesPage from "./pages/SamplesPage";
 import BriefingsPage from "./pages/BriefingsPage";
 import ClientReportPage from "./pages/ClientReportPage";
 import LoginPage from "./pages/LoginPage";
+import PulsePage from "./pages/PulsePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/weekly-wins" element={<ProtectedRoute><WeeklyWinsPage /></ProtectedRoute>} />
             <Route path="/reporters" element={<ProtectedRoute><ReportersPage /></ProtectedRoute>} />
             <Route path="/intelligence" element={<ProtectedRoute><IntelligencePage /></ProtectedRoute>} />
+            <Route path="/pulse" element={<ProtectedRoute><PulsePage /></ProtectedRoute>} />
             <Route path="/verticals" element={<ProtectedRoute><VerticalsPage /></ProtectedRoute>} />
             <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
             <Route path="/samples" element={<ProtectedRoute><SamplesPage /></ProtectedRoute>} />
