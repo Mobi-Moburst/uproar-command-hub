@@ -173,7 +173,7 @@ function ClientReportContent({
   const [activeReport, setActiveReport] = useState<ClientReport | null>(null);
 
   // Load draft if navigating with report ID
-  const reportId = params.get("reportId");
+  const reportId = embeddedReportId || params.get("reportId");
   const matchedReport = savedReports.find((r) => r.id === reportId);
   if (matchedReport && !activeReport) {
     setActiveReport(matchedReport);
