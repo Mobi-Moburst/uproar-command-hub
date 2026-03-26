@@ -1,4 +1,6 @@
 import { CheckCircle2, AlertCircle } from "lucide-react";
+import { useReportEdit } from "@/contexts/ReportEditContext";
+import { useCallback, useRef, useState, useEffect } from "react";
 import type { MediaPlacement } from "@/data/types";
 
 interface ReportInsightsProps {
@@ -14,6 +16,7 @@ interface Insight {
 }
 
 export function ReportInsights({ placements, awardWins, sampleConversionRate, briefingConversionRate }: ReportInsightsProps) {
+  const { isEditing, getTextOverride, setTextOverride } = useReportEdit();
   if (placements.length === 0) return null;
 
   const insights: Insight[] = [];
