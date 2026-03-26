@@ -211,6 +211,15 @@ export default function ClientReportPage() {
           monthlyReach={monthlyReach}
         />
 
+        <ReportOutreachSummary
+          sampleConversions={clientSampleConversions}
+          briefingConversions={clientBriefingConversions}
+        />
+
+        <ReportTopReporters conversions={[...clientSampleConversions, ...clientBriefingConversions]} />
+
+        <ReportOutletMomentum placements={clientPlacements} />
+
         <ReportAwards wonAwards={wonAwards} allAwards={filteredAwards} />
 
         <ReportFooter />
