@@ -197,6 +197,12 @@ export default function ClientReportPage() {
     return { earliest: dates[0] || "", latest: dates[dates.length - 1] || "" };
   }, [allClientPlacements]);
 
+  const periodLabel = useMemo(() => {
+    return fromDate || toDate
+      ? `${fromDate || dataDateRange.earliest} — ${toDate || dataDateRange.latest}`
+      : "All-Time";
+  }, [fromDate, toDate, dataDateRange]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -215,10 +221,6 @@ export default function ClientReportPage() {
       </div>
     );
   }
-
-  const periodLabel = fromDate || toDate
-    ? `${fromDate || dataDateRange.earliest} — ${toDate || dataDateRange.latest}`
-    : "All-Time";
 
   return (
     <div className="min-h-screen bg-background">
@@ -240,6 +242,13 @@ export default function ClientReportPage() {
           awardWins={wonAwards.length}
           ytdPlacements={clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).length}
           ytdReach={clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).reduce((s, p) => s + p.readership_viewership, 0)}
+        />
+
+
+        <ReportAISummary
+          summary={summary}
+          isGenerating={isGenerating}
+          onGenerate={handleGenerateSummary}
         />
 
         <ReportHighlights placements={clientPlacements.slice(0, 10)} />
