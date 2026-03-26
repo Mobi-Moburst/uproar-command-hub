@@ -45,6 +45,10 @@ export default function BriefingsPage() {
         );
       }
       return true;
+    }).sort((a, b) => {
+      const da = a.date_met ? new Date(a.date_met).getTime() : 0;
+      const db = b.date_met ? new Date(b.date_met).getTime() : 0;
+      return db - da;
     });
   }, [briefings, search, clientFilter, teamFilter, typeFilter, statusFilter]);
 
