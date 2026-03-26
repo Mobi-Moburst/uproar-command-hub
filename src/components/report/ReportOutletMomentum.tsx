@@ -9,7 +9,6 @@ interface ReportOutletMomentumProps {
 export function ReportOutletMomentum({ placements, toDate, fromDate }: ReportOutletMomentumProps) {
   if (placements.length < 3) return null;
 
-  // Use report date range midpoint to split into "recent" vs "prior" halves
   const end = toDate ? new Date(toDate) : new Date();
   const start = fromDate ? new Date(fromDate) : new Date(end.getFullYear(), end.getMonth() - 6, 1);
   const mid = new Date((start.getTime() + end.getTime()) / 2);
@@ -33,11 +32,11 @@ export function ReportOutletMomentum({ placements, toDate, fromDate }: ReportOut
     })
     .sort((a, b) => b.trend - a.trend);
 
-  const rising = momentum.filter((m) => m.trend > 0).slice(0, 5);
-  const declining = momentum.filter((m) => m.trend < 0).slice(0, 5);
+  const emerging = momentum.filter((m) => m.trend > 0).slice(0, 5);
+  const established = momentum.filter((m) => m.trend < 0).slice(0, 5);
   const steady = momentum.filter((m) => m.trend === 0 && m.total >= 2).slice(0, 5);
 
-  if (!rising.length && !declining.length && !steady.length) return null;
+  if (!emerging.length && !established.length && !steady.length) return null;
 
   const fmtDate = (d: Date) => d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
   const recentLabel = `${fmtDate(mid)} – ${fmtDate(end)}`;
@@ -56,12 +55,12 @@ export function ReportOutletMomentum({ placements, toDate, fromDate }: ReportOut
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {/* Rising */}
+        {/* Emerging */}
         <div className="rounded-lg border border-border bg-card p-5">
-          <p className="text-xs font-mono uppercase tracking-wide text-primary mb-3">↑ Rising</p>
-          {rising.length > 0 ? (
+          <p className="text-xs font-mono uppercase tracking-wide text-primary mb-3">↑ Emerging</p>
+          {emerging.length > 0 ? (
             <div className="space-y-2.5">
-              {rising.map((m) => (
+              {emerging.map((m) => (
                 <div key={m.outlet} className="flex items-center justify-between text-sm">
                   <div className="min-w-0 mr-3">
                     <span className="text-foreground truncate block">{m.outlet}</span>
@@ -72,47 +71,39 @@ export function ReportOutletMomentum({ placements, toDate, fromDate }: ReportOut
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground/50">No rising outlets</p>
+            <p className="text-sm text-muted-foreground/50">No emerging outlets</p>
           )}
         </div>
 
-        {/* Declining or Steady */}
+        {/* Established */}
         <div className="rounded-lg border border-border bg-card p-5">
-          {declining.length > 0 ? (
-            <>
-              <p className="text-xs font-mono uppercase tracking-wide text-destructive mb-3">↓ Declining</p>
-              <div className="space-y-2.5">
-                {declining.map((m) => (
-                  <div key={m.outlet} className="flex items-center justify-between text-sm">
-                    <div className="min-w-0 mr-3">
-                      <span className="text-foreground truncate block">{m.outlet}</span>
-                      <span className="text-[10px] font-mono text-muted-foreground/50">{m.prior} → {m.recent} hits</span>
-                    </div>
-                    <span className="font-semibold text-destructive whitespace-nowrap">{m.trend}%</span>
+          <p className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">● Established</p>
+          {established.length > 0 ? (
+            <div className="space-y-2.5">
+              {established.map((m) => (
+                <div key={m.outlet} className="flex items-center justify-between text-sm">
+                  <div className="min-w-0 mr-3">
+                    <span className="text-foreground truncate block">{m.outlet}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground/50">{m.prior} → {m.recent} hits</span>
                   </div>
-                ))}
-              </div>
-            </>
+                  <span className="font-mono text-muted-foreground whitespace-nowrap">{m.trend}%</span>
+                </div>
+              ))}
+            </div>
           ) : steady.length > 0 ? (
-            <>
-              <p className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">→ Steady</p>
-              <div className="space-y-2.5">
-                {steady.map((m) => (
-                  <div key={m.outlet} className="flex items-center justify-between text-sm">
-                    <div className="min-w-0 mr-3">
-                      <span className="text-foreground truncate block">{m.outlet}</span>
-                      <span className="text-[10px] font-mono text-muted-foreground/50">{m.total} hits total</span>
-                    </div>
-                    <span className="font-mono text-muted-foreground whitespace-nowrap">0%</span>
+            <div className="space-y-2.5">
+              {steady.map((m) => (
+                <div key={m.outlet} className="flex items-center justify-between text-sm">
+                  <div className="min-w-0 mr-3">
+                    <span className="text-foreground truncate block">{m.outlet}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground/50">{m.total} hits total</span>
                   </div>
-                ))}
-              </div>
-            </>
+                  <span className="font-mono text-muted-foreground whitespace-nowrap">0%</span>
+                </div>
+              ))}
+            </div>
           ) : (
-            <>
-              <p className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">↓ Declining</p>
-              <p className="text-sm text-muted-foreground/50">No declining outlets</p>
-            </>
+            <p className="text-sm text-muted-foreground/50">No established outlets</p>
           )}
         </div>
       </div>
