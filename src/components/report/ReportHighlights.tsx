@@ -2,7 +2,7 @@ import { formatNumber, formatDateShort } from "@/lib/format";
 import { TypeBadge } from "@/components/TypeBadge";
 import { EditableSection } from "./ReportEditControls";
 import { useReportEdit } from "@/contexts/ReportEditContext";
-import { Plus } from "lucide-react";
+import { Plus, Star } from "lucide-react";
 import { useState, useCallback } from "react";
 import type { MediaPlacement } from "@/data/types";
 
