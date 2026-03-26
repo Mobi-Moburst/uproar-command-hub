@@ -30,19 +30,31 @@ function SectionDivider() {
   return <div className="mb-12 h-px w-full gradient-brand opacity-20 print:opacity-40" />;
 }
 
-export default function ClientReportPage() {
+interface ClientReportPageProps {
+  embeddedClientName?: string;
+  embeddedFromDate?: string;
+  embeddedToDate?: string;
+  embeddedReportId?: string;
+}
+
+export default function ClientReportPage(props: ClientReportPageProps) {
   return (
     <ReportEditProvider>
-      <ClientReportContent />
+      <ClientReportContent {...props} />
     </ReportEditProvider>
   );
 }
 
-function ClientReportContent() {
+function ClientReportContent({
+  embeddedClientName,
+  embeddedFromDate,
+  embeddedToDate,
+  embeddedReportId,
+}: ClientReportPageProps) {
   const [params, setParams] = useSearchParams();
-  const clientName = params.get("client") || "A. Duie Pyle";
-  const fromDate = params.get("from") || "";
-  const toDate = params.get("to") || "";
+  const clientName = embeddedClientName || params.get("client") || "A. Duie Pyle";
+  const fromDate = embeddedFromDate || params.get("from") || "";
+  const toDate = embeddedToDate || params.get("to") || "";
 
   const { data: placements = [], isLoading: loadingP } = usePlacements();
   const { data: awards = [], isLoading: loadingA } = useAwards();
