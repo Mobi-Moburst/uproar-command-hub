@@ -14,7 +14,7 @@ import { ReportTopReporters } from "@/components/report/ReportTopReporters";
 import { ReportOutletMomentum } from "@/components/report/ReportOutletMomentum";
 import { ReportFooter } from "@/components/report/ReportFooter";
 import { ReportAISummary } from "@/components/report/ReportAISummary";
-import { ReportEditProvider } from "@/contexts/ReportEditContext";
+import { ReportEditProvider, useReportEdit } from "@/contexts/ReportEditContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
