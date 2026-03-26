@@ -57,7 +57,7 @@ export function ReportHero({ clientName, teamName, periodLabel }: ReportHeroProp
         <div className="mt-10 flex items-center gap-3">
           <div className="h-px flex-1 bg-white/15" />
           <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/50">
-            Uproar PR · Moburst
+            Uproar PR by Moburst
           </span>
           <div className="h-px flex-1 bg-white/15" />
         </div>
