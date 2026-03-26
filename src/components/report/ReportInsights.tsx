@@ -176,6 +176,7 @@ function EditableInsight({
   isEditing,
   getTextOverride,
   setTextOverride,
+  onRemove,
 }: {
   id: string;
   defaultText: string;
@@ -183,6 +184,7 @@ function EditableInsight({
   isEditing: boolean;
   getTextOverride: (id: string) => string | undefined;
   setTextOverride: (id: string, value: string) => void;
+  onRemove?: () => void;
 }) {
   const ref = useRef<HTMLLIElement>(null);
   const displayText = getTextOverride(id) ?? defaultText;
@@ -197,16 +199,26 @@ function EditableInsight({
   }, [id, defaultText, setTextOverride]);
 
   return (
-    <li
-      ref={ref}
-      contentEditable={isEditing}
-      suppressContentEditableWarning
-      onBlur={handleBlur}
-      className={`text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 ${borderClass} ${
-        isEditing ? "outline-none ring-1 ring-primary/20 rounded px-3 py-1 -mx-1 focus:ring-primary/50 transition-shadow cursor-text" : ""
-      }`}
-    >
-      {displayText}
+    <li className="relative group">
+      <div
+        ref={ref}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        onBlur={handleBlur}
+        className={`text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 ${borderClass} ${
+          isEditing ? "outline-none ring-1 ring-primary/20 rounded px-3 py-1 -mx-1 focus:ring-primary/50 transition-shadow cursor-text" : ""
+        }`}
+      >
+        {displayText}
+      </div>
+      {isEditing && onRemove && (
+        <button
+          onClick={onRemove}
+          className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive/80 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
     </li>
   );
 }
