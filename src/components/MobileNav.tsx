@@ -6,6 +6,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sun, Moon, Menu, X } from "lucide-react";
+import uproarLogo from "@/assets/uproar-dark-logo.png";
 
 const navItems = [
   { title: "Overview", path: "/" },
@@ -35,10 +36,7 @@ export function MobileNav() {
     <div className="lg:hidden">
       <header className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border bg-card/80 backdrop-blur-md px-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md gradient-brand">
-            <span className="text-xs font-bold text-white">U</span>
-          </div>
-          <h1 className="text-sm font-semibold text-foreground">Uproar</h1>
+          <img src={uproarLogo} alt="Uproar by Moburst" className="h-6 object-contain" />
         </div>
         <button
           onClick={() => setOpen(!open)}
