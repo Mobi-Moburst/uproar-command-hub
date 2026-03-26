@@ -283,6 +283,17 @@ export default function TeamsPage() {
           )}
         </FilterBar>
 
+        {/* Team Leaderboard */}
+        {!isLoading && !isError && placements.length > 0 && (
+          <TeamLeaderboard
+            placements={placements}
+            awards={awards}
+            conversions={conversions}
+            fromDate={fromDate}
+            toDate={toDate}
+          />
+        )}
+
         {isError ? (
           <ErrorState message="Failed to load teams." onRetry={() => refetch()} />
         ) : isLoading ? (
