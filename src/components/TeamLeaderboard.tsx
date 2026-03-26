@@ -113,10 +113,10 @@ export function TeamLeaderboard({ placements, awards, conversions, fromDate, toD
 
   if (rankings.length === 0) return null;
 
-  const medalColors = [
-    "gradient-brand text-white",
-    "bg-muted-foreground/20 text-foreground",
-    "bg-brand-coral/20 text-brand-coral",
+  const medalStyles = [
+    "bg-gradient-to-br from-primary to-accent text-white",
+    "bg-gradient-to-br from-primary/80 to-brand-yellow text-white",
+    "bg-gradient-to-br from-accent to-brand-yellow text-foreground",
   ];
 
   return (
@@ -137,7 +137,7 @@ export function TeamLeaderboard({ placements, awards, conversions, fromDate, toD
           >
             <div className="absolute inset-x-0 top-0 h-[2px] gradient-brand opacity-60" />
             <div className="flex items-center gap-3 mb-4">
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold ${medalColors[i]}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold ${medalStyles[i]}`}>
                 {i + 1}
               </div>
               <div>
