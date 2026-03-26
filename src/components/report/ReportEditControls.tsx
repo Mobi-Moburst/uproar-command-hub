@@ -16,10 +16,10 @@ export function EditableSection({
   const { isEditing, hiddenSections, hideSection } = useReportEdit();
   const isHidden = hiddenSections.has(id);
 
-  if (isHidden && !isEditing) return null;
+  if (isHidden) return null;
 
   return (
-    <div className={cn("relative group", isHidden && "opacity-30", className)}>
+    <div className={cn("relative group", className)}>
       {isEditing && (
         <button
           onClick={() => hideSection(id)}
