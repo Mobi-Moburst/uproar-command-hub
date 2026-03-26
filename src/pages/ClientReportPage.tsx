@@ -266,7 +266,17 @@ function ClientReportContent() {
             latest={dataDateRange.latest}
             onChange={handleDateChange}
           />
-          <ReportEditToolbar />
+          <div className="flex items-center gap-3">
+            <ReportEditToolbar />
+            <ReportSaveControls
+              clientName={clientName}
+              fromDate={fromDate}
+              toDate={toDate}
+              getCurationState={handleGetCuration}
+              existingReport={activeReport}
+              onSaved={(r) => setActiveReport(r)}
+            />
+          </div>
         </div>
 
         <EditableSection id="exec-summary">
