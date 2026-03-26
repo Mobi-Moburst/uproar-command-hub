@@ -114,6 +114,33 @@ export default function ClientReportPage() {
     return months;
   }, [clientPlacements, fromDate, toDate]);
 
+  // Client samples & briefings with conversion matching
+  const CONVERSION_WINDOW = 90 * 86_400_000;
+
+  const clientSampleConversions = useMemo(() => {
+    const clientSamples = samples.filter((s) => s.client?.trim().toLowerCase() === clientName.trim().toLowerCase());
+    return clientSamples.map((s) => {
+      const reporter = s.reporter_name?.trim().toLowerCase() || "";
+      const itemDate = s.date_shipped || s.date_requested;
+      if (!itemDate || !reporter) return { type: "sample" as const, id: s.id, client: s.client, reporter: s.reporter_name, outlet: s.outlet, date: itemDate || "", converted: false, daysToCoverage: undefined };
+      const t = new Date(itemDate).getTime();
+      const match = clientPlacements.find((p) => p.date && p.reporter_name?.trim().toLowerCase() === reporter && new Date(p.date).getTime() >= t && new Date(p.date).getTime() <= t + CONVERSION_WINDOW);
+      return { type: "sample" as const, id: s.id, client: s.client, reporter: s.reporter_name, outlet: s.outlet || match?.outlet || "", date: itemDate, converted: !!match, placement: match, daysToCoverage: match ? Math.round((new Date(match.date).getTime() - t) / 86_400_000) : undefined };
+    });
+  }, [samples, clientName, clientPlacements]);
+
+  const clientBriefingConversions = useMemo(() => {
+    const clientBriefings = briefings.filter((b) => b.client?.trim().toLowerCase() === clientName.trim().toLowerCase());
+    return clientBriefings.map((b) => {
+      const reporter = b.reporter_name?.trim().toLowerCase() || "";
+      const itemDate = b.date_met;
+      if (!itemDate || !reporter) return { type: "briefing" as const, id: b.id, client: b.client, reporter: b.reporter_name, outlet: b.outlet, date: itemDate || "", converted: false, daysToCoverage: undefined };
+      const t = new Date(itemDate).getTime();
+      const match = clientPlacements.find((p) => p.date && p.reporter_name?.trim().toLowerCase() === reporter && new Date(p.date).getTime() >= t && new Date(p.date).getTime() <= t + CONVERSION_WINDOW);
+      return { type: "briefing" as const, id: b.id, client: b.client, reporter: b.reporter_name, outlet: b.outlet || match?.outlet || "", date: itemDate, converted: !!match, placement: match, daysToCoverage: match ? Math.round((new Date(match.date).getTime() - t) / 86_400_000) : undefined };
+    });
+  }, [briefings, clientName, clientPlacements]);
+
   const wonAwards = filteredAwards.filter((a) => a.status === "Won");
 
   const handleDateChange = (from: string, to: string) => {
