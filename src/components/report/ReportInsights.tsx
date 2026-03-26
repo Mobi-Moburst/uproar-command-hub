@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, Plus, X } from "lucide-react";
 import { useReportEdit } from "@/contexts/ReportEditContext";
 import { useCallback, useRef, useState, useEffect } from "react";
 import type { MediaPlacement } from "@/data/types";
@@ -17,6 +17,9 @@ interface Insight {
 
 export function ReportInsights({ placements, awardWins, sampleConversionRate, briefingConversionRate }: ReportInsightsProps) {
   const { isEditing, getTextOverride, setTextOverride } = useReportEdit();
+  const [customStrengths, setCustomStrengths] = useState<string[]>([]);
+  const [customOpportunities, setCustomOpportunities] = useState<string[]>([]);
+
   if (placements.length === 0) return null;
 
   const insights: Insight[] = [];
