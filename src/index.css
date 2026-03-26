@@ -222,3 +222,31 @@
     background: hsl(var(--muted-foreground) / 0.35);
   }
 }
+
+/* Print styles for client reports */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .gradient-brand {
+    background: hsl(199 92% 56%) !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+  /* Page breaks */
+  section {
+    break-inside: avoid;
+  }
+  /* Hide interactive elements */
+  button, .print\\:hidden {
+    display: none !important;
+  }
+  /* Clean backgrounds */
+  .bg-card {
+    background: white !important;
+  }
+  /* Ensure borders print */
+  .border-border {
+    border-color: #e5e7eb !important;
+  }
+}
