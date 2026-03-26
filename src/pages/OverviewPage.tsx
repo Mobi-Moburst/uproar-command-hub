@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { useClients } from "@/hooks/useClients";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
+import { useCoverageIntelligence } from "@/hooks/useCoverageIntelligence";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { format, startOfMonth } from "date-fns";
 import type { Team } from "@/data/types";
@@ -17,6 +18,7 @@ export default function OverviewPage() {
   const { data: clients = [], isLoading: loadingClients, isError: errorClients, refetch: refetchClients } = useClients();
   const { data: placements = [], isLoading: loadingPlacements, isError: errorPlacements, refetch: refetchPlacements } = usePlacements();
   const { data: awards = [], isLoading: loadingAwards, isError: errorAwards, refetch: refetchAwards } = useAwards();
+  const { sampleConversionRate, briefingConversionRate, topConvertingReporter, isLoading: loadingIntel } = useCoverageIntelligence();
 
   const isLoading = loadingClients || loadingPlacements || loadingAwards;
 
@@ -98,6 +100,22 @@ export default function OverviewPage() {
               <KpiCard label="Award Wins This Month" value={wonAwards.length} />
             </>
           )}
+        </div>
+
+        {/* Coverage Intelligence KPIs */}
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Coverage Intelligence</h2>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+            {loadingIntel ? (
+              Array.from({ length: 3 }).map((_, i) => <KpiCardSkeleton key={i} />)
+            ) : (
+              <>
+                <KpiCard label="Sample Conversion" value={`${Math.round(sampleConversionRate * 100)}%`} detail="90-day window" />
+                <KpiCard label="Briefing Conversion" value={`${Math.round(briefingConversionRate * 100)}%`} detail="90-day window" />
+                <KpiCard label="Top Converting Reporter" value={topConvertingReporter} detail="By total conversions" />
+              </>
+            )}
+          </div>
         </div>
 
         {/* Recent Placements */}
