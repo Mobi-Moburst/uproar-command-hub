@@ -230,6 +230,20 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
                 className="col-span-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40"
               />
             </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setUseAsHero((v) => !v)}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                  useAsHero
+                    ? "bg-primary/10 text-primary border border-primary/30"
+                    : "border border-border text-muted-foreground hover:text-foreground hover:border-border"
+                }`}
+              >
+                <Star className={`h-3 w-3 ${useAsHero ? "fill-primary" : ""}`} />
+                Use as Top Highlight
+              </button>
+            </div>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowForm(false)}
