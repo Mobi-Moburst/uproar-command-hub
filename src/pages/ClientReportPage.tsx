@@ -305,7 +305,7 @@ function ClientReportContent() {
         <SectionDivider />
 
         <EditableSection id="highlights">
-          <ReportHighlights placements={clientPlacements.slice(0, 10)} />
+          <ReportHighlights placements={clientPlacements} />
         </EditableSection>
 
         <SectionDivider />

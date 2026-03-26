@@ -19,7 +19,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
     (a, b) => (typeWeight(b.type) * Math.max(b.readership_viewership, 1)) - (typeWeight(a.type) * Math.max(a.readership_viewership, 1))
   );
   const hero = sorted[0];
-  const rest = sorted.slice(1);
+  const rest = sorted.slice(1, 15);
 
   return (
     <section>
