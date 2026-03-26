@@ -15,27 +15,37 @@ interface TypeTrendChartProps {
   placements: MediaPlacement[];
 }
 
+/* Brand-aligned palette: blue → lime → yellow → coral spectrum */
 const TYPE_COLORS: Record<string, string> = {
-  Feature: "hsl(160, 84%, 30%)",
-  Mention: "hsl(217, 91%, 60%)",
-  Interview: "hsl(38, 92%, 50%)",
-  Broadcast: "hsl(340, 65%, 55%)",
-  Byline: "hsl(270, 60%, 55%)",
-  Quote: "hsl(30, 80%, 55%)",
-  Announcement: "hsl(200, 70%, 45%)",
-  Award: "hsl(50, 85%, 50%)",
-  "Calendar listing": "hsl(180, 50%, 45%)",
-  "Contributed content": "hsl(310, 55%, 50%)",
-  Data: "hsl(100, 50%, 40%)",
-  Online: "hsl(15, 75%, 50%)",
-  Other: "hsl(220, 15%, 65%)",
-  "Product review": "hsl(140, 60%, 40%)",
-  Roundup: "hsl(280, 50%, 60%)",
-  "Social media": "hsl(350, 70%, 55%)",
-  Syndication: "hsl(190, 65%, 40%)",
+  Feature:              "hsl(160, 65%, 38%)",
+  Interview:            "hsl(38, 85%, 52%)",
+  Broadcast:            "hsl(350, 68%, 55%)",
+  "Product review":     "hsl(140, 55%, 42%)",
+  "Contributed content": "hsl(280, 50%, 55%)",
+  Announcement:         "hsl(199, 80%, 50%)",
+  Data:                 "hsl(100, 50%, 45%)",
+  Award:                "hsl(50, 85%, 52%)",
+  "Calendar listing":   "hsl(180, 50%, 48%)",
+  Mention:              "hsl(217, 75%, 58%)",
+  Online:               "hsl(25, 80%, 52%)",
+  Other:                "hsl(220, 12%, 62%)",
+  Roundup:              "hsl(270, 50%, 58%)",
+  "Social media":       "hsl(345, 65%, 55%)",
+  Syndication:          "hsl(190, 60%, 42%)",
 };
 
-const DEFAULT_COLOR = "hsl(220, 20%, 55%)";
+const DEFAULT_COLOR = "hsl(220, 15%, 58%)";
+
+/* Shared tooltip styling using CSS variables */
+const tooltipStyle = {
+  backgroundColor: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
+  borderRadius: 10,
+  fontSize: 12,
+  fontFamily: "Geist Mono, monospace",
+  padding: "10px 14px",
+  boxShadow: "0 4px 16px -4px rgba(0,0,0,0.12)",
+};
 
 export function TypeTrendChart({ placements }: TypeTrendChartProps) {
   const { chartData, types } = useMemo(() => {
@@ -44,7 +54,7 @@ export function TypeTrendChart({ placements }: TypeTrendChartProps) {
 
     for (const p of placements) {
       if (!p.date) continue;
-      const month = p.date.slice(0, 7); // YYYY-MM
+      const month = p.date.slice(0, 7);
       const type = p.type || "Other";
       typeSet.add(type);
 
@@ -54,7 +64,6 @@ export function TypeTrendChart({ placements }: TypeTrendChartProps) {
     }
 
     const sortedMonths = [...monthMap.keys()].sort();
-    // Show last 18 months max
     const recent = sortedMonths.slice(-18);
 
     const types = [...typeSet].sort();
@@ -74,36 +83,31 @@ export function TypeTrendChart({ placements }: TypeTrendChartProps) {
   if (chartData.length === 0) return null;
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <h3 className="text-sm font-semibold text-foreground mb-6">
         Coverage Type Breakdown Over Time
       </h3>
-      <div className="h-[280px]">
+      <div className="h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 91%)" vertical={false} />
+          <BarChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 11, fill: "hsl(220, 9%, 46%)" }}
+              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "Geist Mono, monospace" }}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "hsl(220, 9%, 46%)" }}
+              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "Geist Mono, monospace" }}
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "hsl(210, 20%, 98%)",
-                border: "1px solid hsl(220, 13%, 91%)",
-                borderRadius: 8,
-                fontSize: 12,
-              }}
-            />
+            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "hsl(var(--muted) / 0.4)" }} />
             <Legend
-              wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+              wrapperStyle={{ fontSize: 11, paddingTop: 12, fontFamily: "Geist, sans-serif" }}
+              iconType="circle"
+              iconSize={8}
             />
             {types.map((type) => (
               <Bar

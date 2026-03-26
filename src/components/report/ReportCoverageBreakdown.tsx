@@ -35,18 +35,18 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Coverage Type Mix */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Coverage by Type</h3>
-          <div className="space-y-3">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="text-sm font-semibold text-foreground mb-5">Coverage by Type</h3>
+          <div className="space-y-3.5">
             {typeBreakdown.map(({ type, count, pct }) => (
               <div key={type}>
-                <div className="flex items-center justify-between text-sm mb-1">
+                <div className="flex items-center justify-between text-sm mb-1.5">
                   <span className="font-medium text-foreground">{type}</span>
-                  <span className="font-mono text-muted-foreground">{count} ({pct}%)</span>
+                  <span className="font-mono text-xs text-muted-foreground">{count} ({pct}%)</span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-primary transition-all"
+                    className="h-full rounded-full gradient-brand transition-all"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -56,17 +56,17 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
         </div>
 
         {/* Top Outlets */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Top Outlets by Reach</h3>
-          <div className="space-y-2.5">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="text-sm font-semibold text-foreground mb-5">Top Outlets by Reach</h3>
+          <div className="space-y-3">
             {topOutlets.map(({ outlet, count, reach }, i) => (
               <div key={outlet} className="flex items-center gap-3">
-                <span className="w-5 text-xs font-mono text-muted-foreground text-right">{i + 1}</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">{i + 1}</span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground truncate">{outlet}</p>
                 </div>
                 <span className="text-xs font-mono text-muted-foreground">{count} hits</span>
-                <span className="text-xs font-mono text-foreground font-medium w-16 text-right">{formatNumber(reach)}</span>
+                <span className="text-xs font-mono text-foreground font-semibold w-16 text-right">{formatNumber(reach)}</span>
               </div>
             ))}
           </div>
@@ -74,16 +74,16 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
       </div>
 
       {/* Monthly Reach Trend */}
-      <div className="mt-6 rounded-lg border border-border bg-card p-6">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Monthly Reach — Last 12 Months</h3>
-        <div className="flex items-end gap-1.5 h-32">
+      <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-sm">
+        <h3 className="text-sm font-semibold text-foreground mb-5">Monthly Reach — Last 12 Months</h3>
+        <div className="flex items-end gap-2 h-36">
           {monthlyReach.map((m) => (
             <div key={m.label} className="flex-1 flex flex-col items-center gap-1">
               <span className="text-[9px] font-mono text-muted-foreground">
                 {m.reach > 0 ? formatNumber(m.reach) : ""}
               </span>
               <div
-                className="w-full rounded-t bg-primary/80 transition-all min-h-[2px]"
+                className="w-full rounded-t gradient-brand transition-all min-h-[2px]"
                 style={{ height: `${Math.max((m.reach / maxReach) * 100, 2)}%` }}
               />
               <span className="text-[9px] font-mono text-muted-foreground">{m.label}</span>

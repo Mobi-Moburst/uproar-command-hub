@@ -113,32 +113,32 @@ export default function PlacementsPage() {
           <EmptyState message="No placements match your filters." columns={10} />
         ) : (
           <>
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted">
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Client</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Outlet</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Reporter</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Headline</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Vertical</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Topic/Product</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Reach</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Ad Value</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Secured By</th>
+                  <tr className="border-b border-border bg-muted/50">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Outlet</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reporter</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Headline</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Vertical</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Topic/Product</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reach</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ad Value</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Secured By</th>
                   </tr>
                 </thead>
                 <tbody className="font-mono">
                   {pageRows.map((p) => (
-                    <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                    <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
                       <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-foreground">{p.outlet || "–"}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{p.reporter_name || "–"}</td>
                       <td className="max-w-[280px] truncate px-4 py-3">
-                        <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-emerald hover:underline font-sans">
+                        <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 hover:underline font-sans">
                           {p.headline}
                         </a>
                       </td>
