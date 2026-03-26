@@ -20,6 +20,7 @@ import BriefingsPage from "./pages/BriefingsPage";
 import ClientReportPage from "./pages/ClientReportPage";
 import LoginPage from "./pages/LoginPage";
 import PulsePage from "./pages/PulsePage";
+import PublicReportPage from "./pages/PublicReportPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/r/:slug" element={<PublicReportPage />} />
             <Route path="/" element={<ProtectedRoute><OverviewPage /></ProtectedRoute>} />
             <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
             <Route path="/placements" element={<ProtectedRoute><PlacementsPage /></ProtectedRoute>} />
