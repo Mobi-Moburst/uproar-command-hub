@@ -4,7 +4,7 @@ export function ReportFooter() {
   return (
     <footer className="border-t border-border pt-8 pb-12 text-center">
       <div className="flex justify-center mb-4">
-        <img src={uproarLogo} alt="Uproar PR by Moburst" className="h-8 object-contain dark:invert-0 invert brightness-0" />
+        <img src={uproarLogo} alt="Uproar PR by Moburst" className="h-8 object-contain" style={{ filter: "invert(0.85)" }} />
       </div>
       <p className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground/60">
         Confidential — Prepared by Uproar PR
