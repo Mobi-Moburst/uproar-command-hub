@@ -142,7 +142,13 @@ function ClientReportContent({
   const CONVERSION_WINDOW = 90 * 86_400_000;
 
   const clientSampleConversions = useMemo(() => {
-    const clientSamples = samples.filter((s) => s.client?.trim().toLowerCase() === clientName.trim().toLowerCase());
+    const clientSamples = samples.filter((s) => {
+      if (s.client?.trim().toLowerCase() !== clientName.trim().toLowerCase()) return false;
+      const d = s.date_shipped || s.date_requested || "";
+      if (fromDate && d < fromDate) return false;
+      if (toDate && d > toDate) return false;
+      return true;
+    });
     return clientSamples.map((s) => {
       const reporter = s.reporter_name?.trim().toLowerCase() || "";
       const itemDate = s.date_shipped || s.date_requested;
@@ -151,10 +157,16 @@ function ClientReportContent({
       const match = clientPlacements.find((p) => p.date && p.reporter_name?.trim().toLowerCase() === reporter && new Date(p.date).getTime() >= t && new Date(p.date).getTime() <= t + CONVERSION_WINDOW);
       return { type: "sample" as const, id: s.id, client: s.client, reporter: s.reporter_name, outlet: s.outlet || match?.outlet || "", date: itemDate, converted: !!match, placement: match, daysToCoverage: match ? Math.round((new Date(match.date).getTime() - t) / 86_400_000) : undefined };
     });
-  }, [samples, clientName, clientPlacements]);
+  }, [samples, clientName, clientPlacements, fromDate, toDate]);
 
   const clientBriefingConversions = useMemo(() => {
-    const clientBriefings = briefings.filter((b) => b.client?.trim().toLowerCase() === clientName.trim().toLowerCase());
+    const clientBriefings = briefings.filter((b) => {
+      if (b.client?.trim().toLowerCase() !== clientName.trim().toLowerCase()) return false;
+      const d = b.date_met || "";
+      if (fromDate && d < fromDate) return false;
+      if (toDate && d > toDate) return false;
+      return true;
+    });
     return clientBriefings.map((b) => {
       const reporter = b.reporter_name?.trim().toLowerCase() || "";
       const itemDate = b.date_met;
@@ -163,7 +175,7 @@ function ClientReportContent({
       const match = clientPlacements.find((p) => p.date && p.reporter_name?.trim().toLowerCase() === reporter && new Date(p.date).getTime() >= t && new Date(p.date).getTime() <= t + CONVERSION_WINDOW);
       return { type: "briefing" as const, id: b.id, client: b.client, reporter: b.reporter_name, outlet: b.outlet || match?.outlet || "", date: itemDate, converted: !!match, placement: match, daysToCoverage: match ? Math.round((new Date(match.date).getTime() - t) / 86_400_000) : undefined };
     });
-  }, [briefings, clientName, clientPlacements]);
+  }, [briefings, clientName, clientPlacements, fromDate, toDate]);
 
   const wonAwards = filteredAwards.filter((a) => a.status === "Won");
 
