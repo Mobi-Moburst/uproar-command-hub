@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { X } from "lucide-react";
 import { formatNumber } from "@/lib/format";
 import { useReportEdit } from "@/contexts/ReportEditContext";
@@ -11,14 +10,14 @@ interface ReportOutreachSummaryProps {
 
 function DismissibleCard({
   id,
-  dismissed,
+  dismissedCards,
   onDismiss,
   isEditing,
   children,
   className = "",
 }: {
   id: string;
-  dismissed: Set<string>;
+  dismissedCards: Set<string>;
   onDismiss: (id: string) => void;
   isEditing: boolean;
   children: React.ReactNode;
