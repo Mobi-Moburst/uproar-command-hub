@@ -1,111 +1,80 @@
 
 
-# Plan: Store Future Ideas + Create Recommendations Document
+# Coverage Intelligence — Embedded Metrics + Dedicated Intelligence Page
 
-## Overview
+## What We're Building
 
-Two deliverables:
-1. Update `.lovable/plan.md` with the two future feature ideas (HubSpot integration and client enrichment table)
-2. Generate a polished `.docx` recommendations document for sharing with the team
+Two layers of coverage intelligence using data already flowing through the app (placements, samples, briefings):
 
-## What goes in the document
-
-**"Uproar Command Hub — Platform Roadmap Recommendations"**
-
-Three sections:
-
-### 1. HubSpot CRM Integration
-- Connect Clients to HubSpot Companies (deal stage, revenue, activity history)
-- Connect Reporters to HubSpot Contacts (engagement history, email opens, relationship context)
-- Matching strategy (name-based or explicit HubSpot IDs)
-- What it unlocks: CRM context alongside media performance data
-
-### 2. Client Enrichment Table
-- New persistent database table storing client context beyond what Airtable provides
-- Fields: description/boilerplate, key products, target verticals, messaging priorities, pitch angles, industry tags
-- Editable from within the client detail panel
-- Foundation for AI-powered features
-
-### 3. AI-Powered Pitch Intelligence (enabled by #2)
-- Smart pitch generation: combine client messaging pillars with reporter beat history
-- Reporter matching: cross-reference client focus areas with samples/briefings/placement history to recommend best reporters
-- Narrative reporting: auto-generate executive summaries tailored to client goals
-- Requires the enrichment table as a prerequisite
-
-Each section will include: what it is, why it matters, what data it needs, and open questions for team feedback.
-
-## Technical steps
-
-1. **Update `.lovable/plan.md`** — append a "Future Ideas" section documenting both concepts
-2. **Generate `.docx`** using `docx-js` with professional styling, written in a team-friendly tone (not technical), saved to `/mnt/documents/uproar_platform_recommendations.docx`
+1. **Embedded conversion metrics** on existing pages (Overview, Clients, Reporters)
+2. **New Intelligence page** with cross-cutting analysis tools
 
 ---
 
-## Future Ideas
+## Phase 1: Core Intelligence Hook
 
-### 1. HubSpot CRM Integration
+Create a `useCoverageIntelligence` hook that cross-references samples, briefings, and placements to compute:
 
-**Concept:** Connect the Command Hub to HubSpot to enrich client and reporter data with CRM context.
+- **Conversion rates** — samples/briefings that resulted in coverage (matched by reporter + client + date proximity)
+- **Reporter affinity scores** — which reporters convert best for which verticals/clients
+- **Outlet momentum** — which outlets are trending up/down in placement volume over rolling 3-month windows
 
-**Clients → HubSpot Companies:**
-- Match clients by company name or a stored HubSpot Company ID
-- Pull in deal stage, revenue, activity history, and account owner
-- Surface CRM context in the client detail panel alongside media performance data
-
-**Reporters → HubSpot Contacts:**
-- Match reporters by name/email or a stored HubSpot Contact ID
-- Surface engagement history (email opens, meeting activity, relationship context)
-- Enrich the Reporter Analytics page with outreach history
-
-**Implementation approach:**
-- HubSpot REST API via a backend proxy function (same pattern as the Airtable proxy)
-- Name-based fuzzy matching initially, with optional explicit HubSpot ID fields for reliable linking
-- Read-only initially; two-way sync could come later
-
-**What it unlocks:**
-- Full-funnel visibility: CRM pipeline + media performance in one view
-- Identify which reporters have existing relationships in HubSpot before outreach
-- Correlate media wins with sales pipeline movement
+Matching logic: A sample or briefing "converts" when a placement exists for the same reporter + client within 90 days after the sample/briefing date.
 
 ---
 
-### 2. Client Enrichment Table
+## Phase 2: Embedded Metrics on Existing Pages
 
-**Concept:** Create a persistent database table to store client-specific context that doesn't exist in Airtable — things like messaging priorities, key products, target verticals, and pitch angles.
+### Overview Page
+- Add a "Coverage Intelligence" section with 3 KPI cards: Sample Conversion Rate, Briefing Conversion Rate, Top Converting Reporter (this month)
 
-**Proposed fields:**
-- `description` / boilerplate — what the company does
-- `key_products` — flagship products or services
-- `target_verticals` — which media verticals matter most
-- `messaging_priorities` — current strategic messaging themes
-- `pitch_angles` — active pitch angles the team is pushing
-- `industry_tags` — for cross-client analysis
+### Reporters Page
+- Add a "Conversion" column showing each reporter's sample/briefing → coverage conversion rate
+- Add vertical affinity tags showing which verticals each reporter converts best in
 
-**How it works:**
-- Editable directly from within the client detail panel in the Command Hub
-- Sits alongside the existing Airtable-derived placement/award/sample/briefing data
-- Provides the foundation for AI-powered features (see below)
+### Clients Page (detail panel)
+- Add a mini conversion funnel showing: Samples Sent → Covered, Briefings Sent → Covered
 
 ---
 
-### 3. AI-Powered Pitch Intelligence (requires #2)
+## Phase 3: New Intelligence Page
 
-**Concept:** Use the enrichment data from the client table, combined with placement history and reporter analytics, to power intelligent pitch generation and reporter matching.
+Add `/intelligence` to the sidebar. The page will have three sections:
 
-**Smart pitch generation:**
-- Combine client messaging pillars + recent news hooks + reporter beat history
-- Generate tailored pitch drafts for specific reporter/client combinations
+### Conversion Funnel
+- Filterable by client, team, vertical, date range
+- Bar chart showing samples sent vs. covered, briefings sent vs. covered
+- Table of individual conversions with reporter, outlet, days-to-coverage
 
-**Reporter matching:**
-- Cross-reference client focus areas with reporter coverage history, samples sent, and briefing outcomes
-- Recommend the best reporters for a given pitch angle based on historical conversion data
+### Reporter Affinity Matrix
+- Heatmap-style grid: reporters (rows) × verticals (columns)
+- Cell value = conversion rate or placement count
+- Click a cell to see the underlying placements
+- Sortable by total conversions, recency, or specific vertical
 
-**Narrative reporting:**
-- Auto-generate executive summaries for client reports
-- Tailor the narrative to the client's specific goals and messaging themes rather than generic metrics
+### Outlet Momentum
+- Rolling 3-month trend chart showing which outlets are increasing/decreasing in coverage volume
+- Filterable by vertical
+- Highlight outlets with >20% month-over-month change
 
-**Prerequisites:**
-- Client enrichment table must be populated first
-- Works best with clean, consistent data in samples and briefings tables
+---
 
+## Technical Details
+
+### New files
+- `src/hooks/useCoverageIntelligence.ts` — core analytics engine
+- `src/pages/IntelligencePage.tsx` — dedicated page
+- `src/components/intelligence/ConversionFunnel.tsx` — funnel visualization
+- `src/components/intelligence/ReporterAffinityMatrix.tsx` — heatmap component
+- `src/components/intelligence/OutletMomentum.tsx` — trend chart
+
+### Modified files
+- `src/components/AppSidebar.tsx` + `MobileNav.tsx` — add "Intelligence" nav item
+- `src/App.tsx` — add `/intelligence` route
+- `src/pages/OverviewPage.tsx` — add intelligence KPI cards
+- `src/pages/ReportersPage.tsx` + `useReporterAnalytics.ts` — add conversion column
+- `src/pages/ClientsPage.tsx` — add conversion funnel to detail panel
+
+### Data dependencies
+All computed from existing hooks (`usePlacements`, `useSamples`, `useBriefings`) — no new API calls or database tables needed.
 
