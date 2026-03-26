@@ -1,4 +1,6 @@
 import { CheckCircle2, AlertCircle } from "lucide-react";
+import { useReportEdit } from "@/contexts/ReportEditContext";
+import { useCallback, useRef, useState, useEffect } from "react";
 import type { MediaPlacement } from "@/data/types";
 
 interface ReportInsightsProps {
@@ -14,6 +16,7 @@ interface Insight {
 }
 
 export function ReportInsights({ placements, awardWins, sampleConversionRate, briefingConversionRate }: ReportInsightsProps) {
+  const { isEditing, getTextOverride, setTextOverride } = useReportEdit();
   if (placements.length === 0) return null;
 
   const insights: Insight[] = [];
@@ -97,9 +100,15 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
           {strengths.length > 0 ? (
             <ul className="space-y-3">
               {strengths.map((s, i) => (
-                <li key={i} className="text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 border-primary/30">
-                  {s.text}
-                </li>
+                <EditableInsight
+                  key={i}
+                  id={`insight-strength-${i}`}
+                  defaultText={s.text}
+                  borderClass="border-primary/30"
+                  isEditing={isEditing}
+                  getTextOverride={getTextOverride}
+                  setTextOverride={setTextOverride}
+                />
               ))}
             </ul>
           ) : (
@@ -116,9 +125,15 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
           {opportunities.length > 0 ? (
             <ul className="space-y-3">
               {opportunities.map((o, i) => (
-                <li key={i} className="text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 border-accent/40">
-                  {o.text}
-                </li>
+                <EditableInsight
+                  key={i}
+                  id={`insight-opportunity-${i}`}
+                  defaultText={o.text}
+                  borderClass="border-accent/40"
+                  isEditing={isEditing}
+                  getTextOverride={getTextOverride}
+                  setTextOverride={setTextOverride}
+                />
               ))}
             </ul>
           ) : (
@@ -127,5 +142,47 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
         </div>
       </div>
     </section>
+  );
+}
+
+function EditableInsight({
+  id,
+  defaultText,
+  borderClass,
+  isEditing,
+  getTextOverride,
+  setTextOverride,
+}: {
+  id: string;
+  defaultText: string;
+  borderClass: string;
+  isEditing: boolean;
+  getTextOverride: (id: string) => string | undefined;
+  setTextOverride: (id: string, value: string) => void;
+}) {
+  const ref = useRef<HTMLLIElement>(null);
+  const displayText = getTextOverride(id) ?? defaultText;
+
+  const handleBlur = useCallback(() => {
+    if (ref.current) {
+      const text = ref.current.innerText.trim();
+      if (text !== defaultText) {
+        setTextOverride(id, text);
+      }
+    }
+  }, [id, defaultText, setTextOverride]);
+
+  return (
+    <li
+      ref={ref}
+      contentEditable={isEditing}
+      suppressContentEditableWarning
+      onBlur={handleBlur}
+      className={`text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 ${borderClass} ${
+        isEditing ? "outline-none ring-1 ring-primary/20 rounded px-3 py-1 -mx-1 focus:ring-primary/50 transition-shadow cursor-text" : ""
+      }`}
+    >
+      {displayText}
+    </li>
   );
 }
