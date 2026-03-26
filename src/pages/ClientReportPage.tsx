@@ -182,6 +182,44 @@ function ClientReportContent({
 
 
 
+  const handleGetCuration = useCallback(() => {
+    const curation = getCurationState(summary);
+    const snapshot = {
+      clientName,
+      teamName: client?.team_name || "",
+      periodLabel,
+      totalPlacements: clientPlacements.length,
+      totalReach: clientPlacements.reduce((s, p) => s + p.readership_viewership, 0),
+      totalAdValue: clientPlacements.reduce((s, p) => s + p.ad_value, 0),
+      awardWins: wonAwards.length,
+      ytdPlacements: clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).length,
+      ytdReach: clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).reduce((s, p) => s + p.readership_viewership, 0),
+      typeBreakdown,
+      topOutlets,
+      monthlyReach,
+      highlights: clientPlacements.slice(0, 20).map((p) => ({
+        id: p.id, headline: p.headline, outlet: p.outlet, date: p.date || "", type: p.type, reach: p.readership_viewership, link: p.link,
+      })),
+      sampleConversions: clientSampleConversions.map((c) => ({
+        type: "sample" as const, id: c.id, client: c.client || "", reporter: c.reporter || "", outlet: c.outlet || "", date: c.date, converted: c.converted, daysToCoverage: c.daysToCoverage,
+      })),
+      briefingConversions: clientBriefingConversions.map((c) => ({
+        type: "briefing" as const, id: c.id, client: c.client || "", reporter: c.reporter || "", outlet: c.outlet || "", date: c.date, converted: c.converted, daysToCoverage: c.daysToCoverage,
+      })),
+      sampleConversionRate,
+      briefingConversionRate,
+      wonAwards: wonAwards.map((a) => ({
+        id: a.id, award_name: a.award_name, submission_title: a.submission_title, status: a.status, submitted_date: a.submitted_date, due_date: a.due_date, client_name: a.client_name,
+      })),
+      allFilteredAwards: filteredAwards.map((a) => ({
+        id: a.id, award_name: a.award_name, submission_title: a.submission_title, status: a.status, submitted_date: a.submitted_date, due_date: a.due_date, client_name: a.client_name,
+      })),
+      placements: clientPlacements.map((p) => ({
+        id: p.id, headline: p.headline, outlet: p.outlet, date: p.date || "", type: p.type, readership_viewership: p.readership_viewership, ad_value: p.ad_value, reporter_name: p.reporter_name, link: p.link, topic_product: p.topic_product, secured_by: p.secured_by,
+      })),
+    };
+    return { ...curation, snapshot };
+  }, [getCurationState, summary, clientName, client, periodLabel, clientPlacements, wonAwards, filteredAwards, typeBreakdown, topOutlets, monthlyReach, clientSampleConversions, clientBriefingConversions, sampleConversionRate, briefingConversionRate]);
 
   const dataDateRange = useMemo(() => {
     const dates = allClientPlacements.map((p) => p.date).filter(Boolean).sort();
