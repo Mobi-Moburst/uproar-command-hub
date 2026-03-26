@@ -194,7 +194,15 @@ export default function ClientReportPage() {
     });
   }, [clientName, periodLabel, clientPlacements, wonAwards, typeBreakdown, topOutlets, clientSampleConversions, clientBriefingConversions, topReportersForAI, monthlyReach, generate]);
 
-  if (isLoading) {
+  const handleDateChange = (from: string, to: string) => {
+    const next = new URLSearchParams(params);
+    if (from) next.set("from", from);
+    else next.delete("from");
+    if (to) next.set("to", to);
+    else next.delete("to");
+    setParams(next, { replace: true });
+  };
+
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
