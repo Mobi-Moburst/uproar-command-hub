@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, Plus, X } from "lucide-react";
 import { useReportEdit } from "@/contexts/ReportEditContext";
 import { useCallback, useRef, useState, useEffect } from "react";
 import type { MediaPlacement } from "@/data/types";
@@ -17,6 +17,9 @@ interface Insight {
 
 export function ReportInsights({ placements, awardWins, sampleConversionRate, briefingConversionRate }: ReportInsightsProps) {
   const { isEditing, getTextOverride, setTextOverride } = useReportEdit();
+  const [customStrengths, setCustomStrengths] = useState<string[]>([]);
+  const [customOpportunities, setCustomOpportunities] = useState<string[]>([]);
+
   if (placements.length === 0) return null;
 
   const insights: Insight[] = [];
@@ -82,7 +85,10 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
   const strengths = insights.filter((i) => i.type === "strength");
   const opportunities = insights.filter((i) => i.type === "opportunity");
 
-  if (strengths.length === 0 && opportunities.length === 0) return null;
+  const allStrengths = [...strengths, ...customStrengths.map((t) => ({ type: "strength" as const, text: t }))];
+  const allOpportunities = [...opportunities, ...customOpportunities.map((t) => ({ type: "opportunity" as const, text: t }))];
+
+  if (allStrengths.length === 0 && allOpportunities.length === 0 && !isEditing) return null;
 
   return (
     <section>
@@ -90,16 +96,16 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
         What's Working & Opportunities
       </h2>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 items-start">
         {/* Strengths */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 className="h-4 w-4 text-primary" />
             <p className="text-xs font-mono uppercase tracking-wide text-primary font-semibold">What's Working</p>
           </div>
-          {strengths.length > 0 ? (
+          {allStrengths.length > 0 ? (
             <ul className="space-y-3">
-              {strengths.map((s, i) => (
+              {allStrengths.map((s, i) => (
                 <EditableInsight
                   key={i}
                   id={`insight-strength-${i}`}
@@ -108,11 +114,20 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
                   isEditing={isEditing}
                   getTextOverride={getTextOverride}
                   setTextOverride={setTextOverride}
+                  onRemove={i >= strengths.length ? () => setCustomStrengths((prev) => prev.filter((_, j) => j !== i - strengths.length)) : undefined}
                 />
               ))}
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground/50">Building momentum — insights will appear with more data.</p>
+          )}
+          {isEditing && (
+            <button
+              onClick={() => setCustomStrengths((prev) => [...prev, "New strength…"])}
+              className="mt-3 flex items-center gap-1.5 text-xs text-primary/70 hover:text-primary transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add insight
+            </button>
           )}
         </div>
 
@@ -122,9 +137,9 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
             <AlertCircle className="h-4 w-4 text-amber-600" />
             <p className="text-xs font-mono uppercase tracking-wide text-amber-700 font-semibold">Opportunities</p>
           </div>
-          {opportunities.length > 0 ? (
+          {allOpportunities.length > 0 ? (
             <ul className="space-y-3">
-              {opportunities.map((o, i) => (
+              {allOpportunities.map((o, i) => (
                 <EditableInsight
                   key={i}
                   id={`insight-opportunity-${i}`}
@@ -133,11 +148,20 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
                   isEditing={isEditing}
                   getTextOverride={getTextOverride}
                   setTextOverride={setTextOverride}
+                  onRemove={i >= opportunities.length ? () => setCustomOpportunities((prev) => prev.filter((_, j) => j !== i - opportunities.length)) : undefined}
                 />
               ))}
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground/50">No gaps identified — coverage strategy is well-rounded.</p>
+          )}
+          {isEditing && (
+            <button
+              onClick={() => setCustomOpportunities((prev) => [...prev, "New opportunity…"])}
+              className="mt-3 flex items-center gap-1.5 text-xs text-amber-600/70 hover:text-amber-600 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add insight
+            </button>
           )}
         </div>
       </div>
@@ -152,6 +176,7 @@ function EditableInsight({
   isEditing,
   getTextOverride,
   setTextOverride,
+  onRemove,
 }: {
   id: string;
   defaultText: string;
@@ -159,8 +184,9 @@ function EditableInsight({
   isEditing: boolean;
   getTextOverride: (id: string) => string | undefined;
   setTextOverride: (id: string, value: string) => void;
+  onRemove?: () => void;
 }) {
-  const ref = useRef<HTMLLIElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const displayText = getTextOverride(id) ?? defaultText;
 
   const handleBlur = useCallback(() => {
@@ -173,16 +199,26 @@ function EditableInsight({
   }, [id, defaultText, setTextOverride]);
 
   return (
-    <li
-      ref={ref}
-      contentEditable={isEditing}
-      suppressContentEditableWarning
-      onBlur={handleBlur}
-      className={`text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 ${borderClass} ${
-        isEditing ? "outline-none ring-1 ring-primary/20 rounded px-3 py-1 -mx-1 focus:ring-primary/50 transition-shadow cursor-text" : ""
-      }`}
-    >
-      {displayText}
+    <li className="relative group">
+      <div
+        ref={ref}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        onBlur={handleBlur}
+        className={`text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 ${borderClass} ${
+          isEditing ? "outline-none ring-1 ring-primary/20 rounded px-3 py-1 -mx-1 focus:ring-primary/50 transition-shadow cursor-text" : ""
+        }`}
+      >
+        {displayText}
+      </div>
+      {isEditing && onRemove && (
+        <button
+          onClick={onRemove}
+          className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive/80 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
     </li>
   );
 }
