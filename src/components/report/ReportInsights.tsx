@@ -96,16 +96,16 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
         What's Working & Opportunities
       </h2>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 items-start">
         {/* Strengths */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 className="h-4 w-4 text-primary" />
             <p className="text-xs font-mono uppercase tracking-wide text-primary font-semibold">What's Working</p>
           </div>
-          {strengths.length > 0 ? (
+          {allStrengths.length > 0 ? (
             <ul className="space-y-3">
-              {strengths.map((s, i) => (
+              {allStrengths.map((s, i) => (
                 <EditableInsight
                   key={i}
                   id={`insight-strength-${i}`}
@@ -114,11 +114,20 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
                   isEditing={isEditing}
                   getTextOverride={getTextOverride}
                   setTextOverride={setTextOverride}
+                  onRemove={i >= strengths.length ? () => setCustomStrengths((prev) => prev.filter((_, j) => j !== i - strengths.length)) : undefined}
                 />
               ))}
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground/50">Building momentum — insights will appear with more data.</p>
+          )}
+          {isEditing && (
+            <button
+              onClick={() => setCustomStrengths((prev) => [...prev, "New strength…"])}
+              className="mt-3 flex items-center gap-1.5 text-xs text-primary/70 hover:text-primary transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add insight
+            </button>
           )}
         </div>
 
@@ -128,9 +137,9 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
             <AlertCircle className="h-4 w-4 text-amber-600" />
             <p className="text-xs font-mono uppercase tracking-wide text-amber-700 font-semibold">Opportunities</p>
           </div>
-          {opportunities.length > 0 ? (
+          {allOpportunities.length > 0 ? (
             <ul className="space-y-3">
-              {opportunities.map((o, i) => (
+              {allOpportunities.map((o, i) => (
                 <EditableInsight
                   key={i}
                   id={`insight-opportunity-${i}`}
@@ -139,11 +148,20 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
                   isEditing={isEditing}
                   getTextOverride={getTextOverride}
                   setTextOverride={setTextOverride}
+                  onRemove={i >= opportunities.length ? () => setCustomOpportunities((prev) => prev.filter((_, j) => j !== i - opportunities.length)) : undefined}
                 />
               ))}
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground/50">No gaps identified — coverage strategy is well-rounded.</p>
+          )}
+          {isEditing && (
+            <button
+              onClick={() => setCustomOpportunities((prev) => [...prev, "New opportunity…"])}
+              className="mt-3 flex items-center gap-1.5 text-xs text-amber-600/70 hover:text-amber-600 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add insight
+            </button>
           )}
         </div>
       </div>
