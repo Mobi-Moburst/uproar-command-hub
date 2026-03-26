@@ -22,6 +22,7 @@ export default function ReportsPage() {
   }>({ mode: "hub" });
 
   const { data: reports = [], isLoading: loadingReports } = useClientReports(selectedClient || undefined);
+  const deleteReport = useDeleteReport();
 
   const clientNames = useMemo(() => {
     return [...new Set(clients.map((c) => c.name))].sort();
@@ -132,6 +133,7 @@ export default function ReportsPage() {
                       key={report.id}
                       report={report}
                       onOpen={handleOpenReport}
+                      onDelete={(id) => deleteReport.mutate(id)}
                     />
                   ))}
                 </div>
@@ -158,6 +160,8 @@ export default function ReportsPage() {
                       key={report.id}
                       report={report}
                       onOpen={handleOpenReport}
+                      onDelete={(id) => deleteReport.mutate(id)}
+                    />
                     />
                   ))}
                 </div>
