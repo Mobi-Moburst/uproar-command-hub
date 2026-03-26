@@ -74,23 +74,26 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
       </div>
 
       {/* Monthly Reach Trend */}
-      <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-foreground mb-5">Monthly Reach — Last 12 Months</h3>
-        <div className="flex items-end gap-2 h-36">
-          {monthlyReach.map((m) => (
-            <div key={m.label} className="flex-1 flex flex-col items-center gap-1">
-              <span className="text-[9px] font-mono text-muted-foreground">
-                {m.reach > 0 ? formatNumber(m.reach) : ""}
-              </span>
-              <div
-                className="w-full rounded-t gradient-brand transition-all min-h-[2px]"
-                style={{ height: `${Math.max((m.reach / maxReach) * 100, 2)}%` }}
-              />
-              <span className="text-[9px] font-mono text-muted-foreground">{m.label}</span>
-            </div>
-          ))}
+      {monthlyReach.filter((m) => m.reach > 0 || m.count > 0).length > 0 && (
+        <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="text-sm font-semibold text-foreground mb-5">Monthly Reach — Selected Period</h3>
+          <div className="flex items-end gap-2 h-36">
+            {monthlyReach.filter((m) => m.reach > 0 || m.count > 0).map((m) => (
+              <div key={m.label} className="flex-1 flex flex-col items-center gap-1">
+                <span className="text-[9px] font-mono text-muted-foreground">
+                  {m.reach > 0 ? formatNumber(m.reach) : ""}
+                </span>
+                <div
+                  className="w-full rounded-t gradient-brand transition-all min-h-[2px]"
+                  style={{ height: `${Math.max((m.reach / maxReach) * 100, 2)}%` }}
+                />
+                <span className="text-[10px] font-mono text-muted-foreground">{m.label}</span>
+                <span className="text-[9px] font-mono text-muted-foreground/60">{m.count} hits</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }
