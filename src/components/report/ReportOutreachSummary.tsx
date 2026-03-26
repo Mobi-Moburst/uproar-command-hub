@@ -24,7 +24,7 @@ function DismissibleCard({
   children: React.ReactNode;
   className?: string;
 }) {
-  if (dismissed.has(id)) return null;
+  if (dismissedCards.has(id)) return null;
   return (
     <div className={`relative group ${className}`}>
       {children}
@@ -102,7 +102,7 @@ export function ReportOutreachSummary({ sampleConversions, briefingConversions }
       {visibleTop.length > 0 && (
         <div className={`grid gap-4 ${visibleTop.length === 1 ? "grid-cols-1" : visibleTop.length === 2 ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3"}`}>
           {topCards.map((card) => (
-            <DismissibleCard key={card.id} id={card.id} dismissed={dismissed} onDismiss={dismiss} isEditing={isEditing} className="rounded-lg border border-border bg-card p-5">
+            <DismissibleCard key={card.id} id={card.id} dismissed={dismissedCards} onDismiss={dismiss} isEditing={isEditing} className="rounded-lg border border-border bg-card p-5">
               {card.content}
             </DismissibleCard>
           ))}
@@ -111,12 +111,12 @@ export function ReportOutreachSummary({ sampleConversions, briefingConversions }
 
       {/* Secondary row */}
       <div className="mt-4 grid grid-cols-2 gap-4">
-        <DismissibleCard id="outreach-briefing-conversion" dismissed={dismissed} onDismiss={dismiss} isEditing={isEditing} className="rounded-lg border border-primary/20 bg-emerald-light p-5">
+        <DismissibleCard id="outreach-briefing-conversion" dismissed={dismissedCards} onDismiss={dismiss} isEditing={isEditing} className="rounded-lg border border-primary/20 bg-emerald-light p-5">
           <p className="text-xs font-mono text-primary uppercase tracking-wide">Briefing Conversion</p>
           <p className="mt-1 font-tight text-3xl font-bold text-foreground">{briefingRate}%</p>
         </DismissibleCard>
         {avgDays !== null && (
-          <DismissibleCard id="outreach-avg-days" dismissed={dismissed} onDismiss={dismiss} isEditing={isEditing} className="rounded-lg border border-primary/20 bg-emerald-light p-5">
+          <DismissibleCard id="outreach-avg-days" dismissed={dismissedCards} onDismiss={dismiss} isEditing={isEditing} className="rounded-lg border border-primary/20 bg-emerald-light p-5">
             <p className="text-xs font-mono text-primary uppercase tracking-wide">Avg. Days to Coverage</p>
             <p className="mt-1 font-tight text-3xl font-bold text-foreground">{avgDays}</p>
           </DismissibleCard>
