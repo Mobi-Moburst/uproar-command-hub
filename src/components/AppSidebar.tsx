@@ -19,7 +19,7 @@ const navItems = [
   { title: "Pulse Center", path: "/pulse", icon: Zap },
   { title: "Vertical Benchmarking", path: "/verticals", icon: Layers },
   { title: "Teams", path: "/teams", icon: UsersRound },
-  { title: "Client Report", path: "/report", icon: ClipboardList },
+  { title: "Reports", path: "/reports", icon: ClipboardList },
 ];
 
 export function AppSidebar() {
