@@ -2,8 +2,10 @@ import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Sun, Moon } from "lucide-react";
 
 const navItems = [
   { title: "Overview", path: "/" },
@@ -24,6 +26,7 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const { user, profile, signOut } = useAuthContext();
+  const { theme, toggleTheme } = useTheme();
 
   const displayName = profile?.display_name || user?.email || "";
 
@@ -64,7 +67,13 @@ export function MobileNav() {
               })}
             </ul>
           </nav>
-          <div className="mt-6 border-t border-border pt-4">
+          <div className="mt-6 border-t border-border pt-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Theme</span>
+              <Button variant="ghost" size="sm" onClick={toggleTheme} className="h-7 w-7 p-0">
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+            </div>
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={profile?.avatar_url} />
@@ -83,7 +92,6 @@ export function MobileNav() {
               </Button>
             </div>
           </div>
-        </div>
       )}
     </div>
   );
