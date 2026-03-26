@@ -116,6 +116,32 @@ export default function OverviewPage() {
               </>
             )}
           </div>
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              Pitch Intelligence
+              <span className="inline-flex items-center rounded-full bg-status-drafting/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-status-drafting">
+                Coming Soon
+              </span>
+            </h3>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+                <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Pitch → Response Rate</p>
+                <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-muted-foreground/40">—</p>
+              </div>
+              <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+                <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Pitch → Coverage Rate</p>
+                <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-muted-foreground/40">—</p>
+              </div>
+              <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+                <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Avg. Open Rate</p>
+                <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-muted-foreground/40">—</p>
+              </div>
+              <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+                <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Best Outreach Window</p>
+                <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-muted-foreground/40">—</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Recent Placements */}
