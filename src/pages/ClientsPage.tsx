@@ -16,6 +16,7 @@ import { useBriefings } from "@/hooks/useBriefings";
 import { useCoverageIntelligence } from "@/hooks/useCoverageIntelligence";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Info } from "lucide-react";
+import { ClientLogoUpload } from "@/components/ClientLogoUpload";
 import type { Client } from "@/data/types";
 import type { AwardSubmission } from "@/data/types";
 
@@ -180,15 +181,20 @@ export default function ClientsPage() {
             {selectedClient && (
               <TooltipProvider>
                 <div className="fixed right-0 top-0 z-40 h-screen w-full overflow-y-auto border-l border-border bg-background p-6 shadow-xl animate-slide-in-right lg:w-1/2">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-foreground">{selectedClient.name}</h2>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <ClientLogoUpload clientName={selectedClient.name} size="md" />
+                      <div>
+                        <h2 className="text-xl font-semibold text-foreground">{selectedClient.name}</h2>
+                        <div className="mt-1 flex items-center gap-2">
+                          <StatusBadge status={selectedClient.status} />
+                          <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
+                        </div>
+                      </div>
+                    </div>
                     <button onClick={() => setSelectedClient(null)} className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
                       Close
                     </button>
-                  </div>
-                  <div className="mt-1 flex items-center gap-2">
-                    <StatusBadge status={selectedClient.status} />
-                    <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
                   </div>
 
                   <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
