@@ -1,4 +1,5 @@
 import { formatNumber } from "@/lib/format";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface TypeBreakdown {
   type: string;
