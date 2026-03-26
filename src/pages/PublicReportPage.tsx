@@ -14,7 +14,7 @@ import { ReportTopReporters } from "@/components/report/ReportTopReporters";
 import { ReportOutletMomentum } from "@/components/report/ReportOutletMomentum";
 import { ReportFooter } from "@/components/report/ReportFooter";
 import { ReportAISummary } from "@/components/report/ReportAISummary";
-import { ReportEditProvider } from "@/contexts/ReportEditContext";
+import { ReportEditProvider, useReportEdit } from "@/contexts/ReportEditContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
@@ -123,6 +123,12 @@ function PublicReportContent({ report }: { report: NonNullable<ReturnType<typeof
   const curation = report.curation_state as CurationState;
   const snapshot = curation.snapshot as ReportSnapshot | undefined;
   const hiddenSet = new Set(curation.hiddenSections || []);
+  const { loadCurationState } = useReportEdit();
+
+  // Load hidden sections into context so child EditableSection components respect them
+  useState(() => {
+    loadCurationState(curation);
+  });
 
   // If no snapshot exists (legacy reports), show a message
   if (!snapshot) {
