@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import type { CurationState } from "@/hooks/useClientReports";
 
 interface ReportEditState {
   isEditing: boolean;
@@ -10,6 +11,8 @@ interface ReportEditState {
   textOverrides: Map<string, string>;
   setTextOverride: (id: string, value: string) => void;
   getTextOverride: (id: string) => string | undefined;
+  getCurationState: (aiSummary?: string) => CurationState;
+  loadCurationState: (state: CurationState) => void;
 }
 
 const ReportEditContext = createContext<ReportEditState | null>(null);
@@ -41,9 +44,23 @@ export function ReportEditProvider({ children }: { children: ReactNode }) {
 
   const getTextOverride = useCallback((id: string) => textOverrides.get(id), [textOverrides]);
 
+  const getCurationState = useCallback((aiSummary?: string): CurationState => {
+    return {
+      hiddenSections: Array.from(hiddenSections),
+      textOverrides: Object.fromEntries(textOverrides),
+      manualHighlights: [],
+      aiSummary,
+    };
+  }, [hiddenSections, textOverrides]);
+
+  const loadCurationState = useCallback((state: CurationState) => {
+    setHiddenSections(new Set(state.hiddenSections || []));
+    setTextOverrides(new Map(Object.entries(state.textOverrides || {})));
+  }, []);
+
   return (
     <ReportEditContext.Provider
-      value={{ isEditing, toggleEdit, hiddenSections, hideSection, showSection, resetHidden, textOverrides, setTextOverride, getTextOverride }}
+      value={{ isEditing, toggleEdit, hiddenSections, hideSection, showSection, resetHidden, textOverrides, setTextOverride, getTextOverride, getCurationState, loadCurationState }}
     >
       {children}
     </ReportEditContext.Provider>
