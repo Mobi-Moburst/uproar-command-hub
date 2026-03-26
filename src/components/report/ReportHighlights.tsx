@@ -9,9 +9,10 @@ interface ReportHighlightsProps {
 export function ReportHighlights({ placements }: ReportHighlightsProps) {
   if (placements.length === 0) return null;
 
-  // First placement as hero highlight
-  const hero = placements[0];
-  const rest = placements.slice(1);
+  // Hero = highest reach placement
+  const sorted = [...placements].sort((a, b) => b.readership_viewership - a.readership_viewership);
+  const hero = sorted[0];
+  const rest = placements.filter((p) => p.id !== hero.id);
 
   return (
     <section>
