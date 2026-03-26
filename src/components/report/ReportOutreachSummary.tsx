@@ -45,7 +45,7 @@ export function ReportOutreachSummary({ sampleConversions, briefingConversions }
 
         {/* Briefing funnel */}
         <div className="rounded-lg border border-border bg-card p-5">
-          <p className="text-xs font-medium text-muted-foreground">Briefings Held</p>
+          <p className="text-xs font-medium text-muted-foreground">Briefings Sent</p>
           <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-foreground">{briefingsSent}</p>
           <p className="mt-1 text-[11px] font-mono text-muted-foreground/70">{briefingsConverted} → coverage</p>
         </div>
