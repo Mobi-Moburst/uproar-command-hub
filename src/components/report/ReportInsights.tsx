@@ -100,9 +100,15 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
           {strengths.length > 0 ? (
             <ul className="space-y-3">
               {strengths.map((s, i) => (
-                <li key={i} className="text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 border-primary/30">
-                  {s.text}
-                </li>
+                <EditableInsight
+                  key={i}
+                  id={`insight-strength-${i}`}
+                  defaultText={s.text}
+                  borderClass="border-primary/30"
+                  isEditing={isEditing}
+                  getTextOverride={getTextOverride}
+                  setTextOverride={setTextOverride}
+                />
               ))}
             </ul>
           ) : (
@@ -119,9 +125,15 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
           {opportunities.length > 0 ? (
             <ul className="space-y-3">
               {opportunities.map((o, i) => (
-                <li key={i} className="text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 border-accent/40">
-                  {o.text}
-                </li>
+                <EditableInsight
+                  key={i}
+                  id={`insight-opportunity-${i}`}
+                  defaultText={o.text}
+                  borderClass="border-accent/40"
+                  isEditing={isEditing}
+                  getTextOverride={getTextOverride}
+                  setTextOverride={setTextOverride}
+                />
               ))}
             </ul>
           ) : (
