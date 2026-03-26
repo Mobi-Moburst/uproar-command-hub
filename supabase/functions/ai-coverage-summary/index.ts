@@ -21,7 +21,9 @@ serve(async (req) => {
 Write a concise, insight-driven monthly/periodic coverage summary for a client. 
 
 Guidelines:
-- Write in a professional but conversational tone — like a senior account lead briefing the team
+- Write in a professional but conversational tone — as if Uproar PR is presenting results to the client
+- Use "we" and "our" to refer to Uproar's efforts (e.g. "we secured," "our outreach," "we recommend")
+- Use the client's name or "your brand" when referring to the client's outcomes
 - Lead with the most impactful insight or trend
 - Call out specific outlets, reporters, or coverage types that drove results
 - Note any concerns (declining momentum, low conversion rates, gaps in coverage types)
