@@ -23,6 +23,7 @@ export default function ReportsPage() {
 
   const { data: reports = [], isLoading: loadingReports } = useClientReports(selectedClient || undefined);
   const deleteReport = useDeleteReport();
+  const unpublishReport = useUnpublishReport();
 
   const clientNames = useMemo(() => {
     return [...new Set(clients.map((c) => c.name))].sort();
