@@ -67,6 +67,10 @@ export interface CurationState {
   hiddenSections: string[];
   dismissedCards: string[];
   textOverrides: Record<string, string>;
+  customInsights?: {
+    strengths: Array<{ id: string; text: string }>;
+    opportunities: Array<{ id: string; text: string }>;
+  };
   manualHighlights: Array<{
     id: string;
     headline: string;
@@ -75,6 +79,7 @@ export interface CurationState {
     type: string;
     reach: string;
     link: string;
+    isHero?: boolean;
   }>;
   aiSummary?: string;
   snapshot?: ReportSnapshot;

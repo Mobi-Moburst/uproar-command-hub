@@ -14,6 +14,7 @@ interface ManualEntry {
   type: string;
   reach: string;
   link: string;
+  isHero?: boolean;
 }
 
 interface ReportHighlightsProps {
@@ -21,12 +22,10 @@ interface ReportHighlightsProps {
 }
 
 export function ReportHighlights({ placements }: ReportHighlightsProps) {
-  const { isEditing } = useReportEdit();
-  const [manualEntries, setManualEntries] = useState<ManualEntry[]>([]);
-  const [heroOverride, setHeroOverride] = useState<ManualEntry | null>(null);
+  const { isEditing, manualHighlights, setManualHighlights } = useReportEdit();
   const [showForm, setShowForm] = useState(false);
   const [useAsHero, setUseAsHero] = useState(false);
-  const [form, setForm] = useState<Omit<ManualEntry, "id">>({
+  const [form, setForm] = useState<Omit<ManualEntry, "id" | "isHero">>({
     headline: "",
     outlet: "",
     date: "",
@@ -35,29 +34,41 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
     link: "",
   });
 
+  const heroOverride = manualHighlights.find((m) => m.isHero);
+  const manualEntries = manualHighlights.filter((m) => !m.isHero);
+
   const handleAdd = useCallback(() => {
     if (!form.headline.trim() || !form.outlet.trim()) return;
-    const entry = { ...form, id: `manual-${Date.now()}` };
-    if (useAsHero) {
-      setHeroOverride(entry);
-    } else {
-      setManualEntries((prev) => [...prev, entry]);
-    }
+
+    const entry: ManualEntry = {
+      ...form,
+      id: `manual-${Date.now()}`,
+      isHero: useAsHero,
+    };
+
+    setManualHighlights((prev) => {
+      if (useAsHero) {
+        return [...prev.filter((p) => !p.isHero), entry];
+      }
+      return [...prev, entry];
+    });
+
     setForm({ headline: "", outlet: "", date: "", type: "Feature", reach: "", link: "" });
     setUseAsHero(false);
     setShowForm(false);
-  }, [form, useAsHero]);
+  }, [form, useAsHero, setManualHighlights]);
 
-  if (placements.length === 0 && manualEntries.length === 0) return null;
+  if (placements.length === 0 && manualHighlights.length === 0) return null;
 
-  // Score placements by impact: type weight × reach
   const typeWeight = (t: string) => {
     const w: Record<string, number> = { Feature: 5, Announcement: 3, Contributed: 3, Interview: 4, Syndication: 1, Mention: 1 };
     return w[t] ?? 2;
   };
+
   const sorted = [...placements].sort(
     (a, b) => (typeWeight(b.type) * Math.max(b.readership_viewership, 1)) - (typeWeight(a.type) * Math.max(a.readership_viewership, 1))
   );
+
   const hero = sorted[0];
   const rest = sorted.slice(1, 15);
 
@@ -67,7 +78,6 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
         Coverage Highlights
       </h2>
 
-      {/* Hero placement — manual override or top scored */}
       {heroOverride ? (
         <EditableSection id={`highlight-${heroOverride.id}`}>
           <div className="rounded-lg border border-border bg-card p-6">
@@ -118,7 +128,6 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
         </EditableSection>
       ) : null}
 
-      {/* Remaining highlights */}
       <div className="mt-3 space-y-2">
         {rest.map((p) => (
           <EditableSection key={p.id} id={`highlight-${p.id}`}>
@@ -141,7 +150,6 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
           </EditableSection>
         ))}
 
-        {/* Manual entries */}
         {manualEntries.map((m) => (
           <EditableSection key={m.id} id={`highlight-${m.id}`}>
             <div className="flex items-center gap-4 rounded-lg border border-primary/20 bg-card px-5 py-3">
@@ -169,7 +177,6 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
           </EditableSection>
         ))}
 
-        {/* Add coverage — edit mode only */}
         {isEditing && !showForm && (
           <button
             onClick={() => setShowForm(true)}
