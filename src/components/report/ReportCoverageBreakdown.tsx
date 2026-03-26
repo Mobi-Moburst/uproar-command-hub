@@ -78,21 +78,24 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
       {monthlyReach.filter((m) => m.reach > 0 || m.count > 0).length > 0 && (
         <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-5">Monthly Reach — Selected Period</h3>
-          <div className="flex items-end gap-2 h-36">
-            {monthlyReach.filter((m) => m.reach > 0 || m.count > 0).map((m) => (
-              <div key={m.label} className="flex-1 flex flex-col items-center gap-1">
-                <span className="text-[9px] font-mono text-muted-foreground">
-                  {m.reach > 0 ? formatNumber(m.reach) : ""}
-                </span>
-                <div
-                  className="w-full rounded-t gradient-brand transition-all min-h-[2px]"
-                  style={{ height: `${Math.max((m.reach / maxReach) * 100, 2)}%` }}
-                />
-                <span className="text-[10px] font-mono text-muted-foreground">{m.label}</span>
-                <span className="text-[9px] font-mono text-muted-foreground/60">{m.count} hits</span>
-              </div>
-            ))}
-          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={monthlyReach.filter((m) => m.reach > 0 || m.count > 0)} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} className="text-muted-foreground" />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatNumber(v)} className="text-muted-foreground" />
+              <Tooltip
+                formatter={(value: number, name: string) => [
+                  name === "reach" ? formatNumber(value) : value,
+                  name === "reach" ? "Reach" : "Placements",
+                ]}
+                contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(var(--border))" }}
+              />
+              <Bar dataKey="reach" name="reach" radius={[4, 4, 0, 0]}>
+                {monthlyReach.filter((m) => m.reach > 0 || m.count > 0).map((_, i) => (
+                  <Cell key={i} fill="hsl(var(--primary))" />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
     </section>
