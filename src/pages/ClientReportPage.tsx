@@ -26,8 +26,10 @@ export default function ClientReportPage() {
   const { data: placements = [], isLoading: loadingP } = usePlacements();
   const { data: awards = [], isLoading: loadingA } = useAwards();
   const { data: clients = [], isLoading: loadingC } = useClients();
+  const { data: samples = [], isLoading: loadingS } = useSamples();
+  const { data: briefings = [], isLoading: loadingB } = useBriefings();
 
-  const isLoading = loadingP || loadingA || loadingC;
+  const isLoading = loadingP || loadingA || loadingC || loadingS || loadingB;
 
   const client = useMemo(() => clients.find((c) => c.name === clientName), [clients, clientName]);
 
