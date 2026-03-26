@@ -41,13 +41,7 @@ export function AppSidebar() {
       <div className="relative flex h-16 items-center px-5">
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-sidebar-primary/40 to-transparent" />
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-brand">
-            <span className="text-sm font-bold text-white">U</span>
-          </div>
-          <div>
-            <h1 className="text-sm font-semibold text-sidebar-foreground">Uproar</h1>
-            <p className="text-[10px] font-mono text-sidebar-muted tracking-wider uppercase">Command Center</p>
-          </div>
+          <img src={uproarLogo} alt="Uproar by Moburst" className="h-8 object-contain" />
         </div>
       </div>
 
