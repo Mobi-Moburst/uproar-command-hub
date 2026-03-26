@@ -266,7 +266,7 @@ export default function ClientReportPage() {
 
         <ReportTopReporters conversions={[...clientSampleConversions, ...clientBriefingConversions]} />
 
-        <ReportOutletMomentum placements={clientPlacements} />
+        <ReportOutletMomentum placements={clientPlacements} fromDate={fromDate} toDate={toDate} />
 
         <ReportAwards wonAwards={wonAwards} allAwards={filteredAwards} />
 
