@@ -6,9 +6,12 @@ import { useClients } from "@/hooks/useClients";
 import { useSamples } from "@/hooks/useSamples";
 import { useBriefings } from "@/hooks/useBriefings";
 import { ReportHero } from "@/components/report/ReportHero";
+import { ReportExecSummary } from "@/components/report/ReportExecSummary";
 import { ReportKpis } from "@/components/report/ReportKpis";
 import { ReportHighlights } from "@/components/report/ReportHighlights";
 import { ReportCoverageBreakdown } from "@/components/report/ReportCoverageBreakdown";
+import { ReportTimeline } from "@/components/report/ReportTimeline";
+import { ReportInsights } from "@/components/report/ReportInsights";
 import { ReportAwards } from "@/components/report/ReportAwards";
 import { ReportOutreachSummary } from "@/components/report/ReportOutreachSummary";
 import { ReportTopReporters } from "@/components/report/ReportTopReporters";
@@ -18,6 +21,11 @@ import { ReportDateRange } from "@/components/report/ReportDateRange";
 import { ReportAISummary } from "@/components/report/ReportAISummary";
 import { useAICoverageSummary } from "@/hooks/useAICoverageSummary";
 import type { MediaPlacement, AwardSubmission, Sample, Briefing } from "@/data/types";
+
+/* Section divider */
+function SectionDivider() {
+  return <div className="h-px w-full gradient-brand opacity-20 print:opacity-40" />;
+}
 
 export default function ClientReportPage() {
   const [params, setParams] = useSearchParams();
@@ -35,13 +43,11 @@ export default function ClientReportPage() {
 
   const client = useMemo(() => clients.find((c) => c.name === clientName), [clients, clientName]);
 
-  // All placements for this client (unfiltered by date)
   const allClientPlacements = useMemo(
     () => placements.filter((p) => p.client_name === clientName).sort((a, b) => (b.date || "").localeCompare(a.date || "")),
     [placements, clientName]
   );
 
-  // Date-filtered placements
   const clientPlacements = useMemo(() => {
     return allClientPlacements.filter((p) => {
       if (!p.date) return false;
@@ -51,13 +57,11 @@ export default function ClientReportPage() {
     });
   }, [allClientPlacements, fromDate, toDate]);
 
-  // All awards for this client
   const clientAwards = useMemo(
     () => awards.filter((a) => a.client_name === clientName),
     [awards, clientName]
   );
 
-  // Date-filtered awards
   const filteredAwards = useMemo(() => {
     return clientAwards.filter((a) => {
       const d = a.submitted_date || a.due_date || "";
@@ -68,7 +72,6 @@ export default function ClientReportPage() {
     });
   }, [clientAwards, fromDate, toDate]);
 
-  // Coverage type breakdown
   const typeBreakdown = useMemo(() => {
     const counts = new Map<string, number>();
     clientPlacements.forEach((p) => {
@@ -80,7 +83,6 @@ export default function ClientReportPage() {
       .sort((a, b) => b.count - a.count);
   }, [clientPlacements]);
 
-  // Top outlets
   const topOutlets = useMemo(() => {
     const counts = new Map<string, { count: number; reach: number }>();
     clientPlacements.forEach((p) => {
@@ -94,13 +96,11 @@ export default function ClientReportPage() {
       .slice(0, 8);
   }, [clientPlacements]);
 
-  // Monthly reach trend within the date range
   const monthlyReach = useMemo(() => {
     const months: { label: string; reach: number; count: number }[] = [];
     const now = new Date();
     const endDate = toDate ? new Date(toDate) : now;
     const startDate = fromDate ? new Date(fromDate) : new Date(now.getFullYear(), now.getMonth() - 11, 1);
-    
     const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
     while (cursor <= endDate) {
       const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`;
@@ -116,7 +116,6 @@ export default function ClientReportPage() {
     return months;
   }, [clientPlacements, fromDate, toDate]);
 
-  // Client samples & briefings with conversion matching
   const CONVERSION_WINDOW = 90 * 86_400_000;
 
   const clientSampleConversions = useMemo(() => {
@@ -147,7 +146,6 @@ export default function ClientReportPage() {
 
   const { summary, isGenerating, generate } = useAICoverageSummary();
 
-  // Derive date range from data if not set
   const dataDateRange = useMemo(() => {
     const dates = allClientPlacements.map((p) => p.date).filter(Boolean).sort();
     return { earliest: dates[0] || "", latest: dates[dates.length - 1] || "" };
@@ -159,7 +157,6 @@ export default function ClientReportPage() {
       : "All-Time";
   }, [fromDate, toDate, dataDateRange]);
 
-  // Top reporters for AI summary
   const topReportersForAI = useMemo(() => {
     const reporterMap = new Map<string, number>();
     [...clientSampleConversions, ...clientBriefingConversions]
@@ -170,6 +167,13 @@ export default function ClientReportPage() {
       .sort((a, b) => b.conversions - a.conversions)
       .slice(0, 5);
   }, [clientSampleConversions, clientBriefingConversions]);
+
+  const sampleConversionRate = clientSampleConversions.length > 0
+    ? Math.round((clientSampleConversions.filter((c) => c.converted).length / clientSampleConversions.length) * 100)
+    : 0;
+  const briefingConversionRate = clientBriefingConversions.length > 0
+    ? Math.round((clientBriefingConversions.filter((c) => c.converted).length / clientBriefingConversions.length) * 100)
+    : 0;
 
   const handleGenerateSummary = useCallback(() => {
     const samplesConverted = clientSampleConversions.filter((c) => c.converted).length;
@@ -185,14 +189,14 @@ export default function ClientReportPage() {
       topOutlets,
       samplesSent: clientSampleConversions.length,
       samplesConverted,
-      sampleConversionRate: clientSampleConversions.length > 0 ? Math.round((samplesConverted / clientSampleConversions.length) * 100) : 0,
+      sampleConversionRate,
       briefingsHeld: clientBriefingConversions.length,
       briefingsConverted,
-      briefingConversionRate: clientBriefingConversions.length > 0 ? Math.round((briefingsConverted / clientBriefingConversions.length) * 100) : 0,
+      briefingConversionRate,
       topReporters: topReportersForAI,
       monthlyReach,
     });
-  }, [clientName, periodLabel, clientPlacements, wonAwards, typeBreakdown, topOutlets, clientSampleConversions, clientBriefingConversions, topReportersForAI, monthlyReach, generate]);
+  }, [clientName, periodLabel, clientPlacements, wonAwards, typeBreakdown, topOutlets, clientSampleConversions, clientBriefingConversions, topReportersForAI, monthlyReach, generate, sampleConversionRate, briefingConversionRate]);
 
   const handleDateChange = (from: string, to: string) => {
     const next = new URLSearchParams(params);
@@ -223,17 +227,29 @@ export default function ClientReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background print:bg-white">
       <ReportHero clientName={client.name} teamName={client.team_name} periodLabel={periodLabel} />
 
-      <div className="mx-auto max-w-5xl px-6 py-12 space-y-16">
-        <ReportDateRange
-          fromDate={fromDate}
-          toDate={toDate}
-          earliest={dataDateRange.earliest}
-          latest={dataDateRange.latest}
-          onChange={handleDateChange}
+      <div className="mx-auto max-w-5xl px-6 py-12 space-y-12 print:space-y-8 print:px-4">
+        {/* Date selector — hidden in print */}
+        <div className="print:hidden">
+          <ReportDateRange
+            fromDate={fromDate}
+            toDate={toDate}
+            earliest={dataDateRange.earliest}
+            latest={dataDateRange.latest}
+            onChange={handleDateChange}
+          />
+        </div>
+
+        {/* Executive Summary */}
+        <ReportExecSummary
+          placements={clientPlacements}
+          awardWins={wonAwards.length}
+          periodLabel={periodLabel}
         />
+
+        <SectionDivider />
 
         <ReportKpis
           totalPlacements={clientPlacements.length}
@@ -244,14 +260,37 @@ export default function ClientReportPage() {
           ytdReach={clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).reduce((s, p) => s + p.readership_viewership, 0)}
         />
 
+        <SectionDivider />
 
-        <ReportAISummary
-          summary={summary}
-          isGenerating={isGenerating}
-          onGenerate={handleGenerateSummary}
+        {/* AI Summary — hidden in print unless generated */}
+        <div className={!summary ? "print:hidden" : ""}>
+          <ReportAISummary
+            summary={summary}
+            isGenerating={isGenerating}
+            onGenerate={handleGenerateSummary}
+          />
+        </div>
+
+        <SectionDivider />
+
+        {/* What's Working / Opportunities */}
+        <ReportInsights
+          placements={clientPlacements}
+          awardWins={wonAwards.length}
+          sampleConversionRate={sampleConversionRate}
+          briefingConversionRate={briefingConversionRate}
         />
 
+        <SectionDivider />
+
+        {/* Coverage Timeline */}
+        <ReportTimeline placements={clientPlacements} />
+
+        <SectionDivider />
+
         <ReportHighlights placements={clientPlacements.slice(0, 10)} />
+
+        <SectionDivider />
 
         <ReportCoverageBreakdown
           typeBreakdown={typeBreakdown}
@@ -259,14 +298,22 @@ export default function ClientReportPage() {
           monthlyReach={monthlyReach}
         />
 
+        <SectionDivider />
+
         <ReportOutreachSummary
           sampleConversions={clientSampleConversions}
           briefingConversions={clientBriefingConversions}
         />
 
+        <SectionDivider />
+
         <ReportTopReporters conversions={[...clientSampleConversions, ...clientBriefingConversions]} />
 
+        <SectionDivider />
+
         <ReportOutletMomentum placements={clientPlacements} fromDate={fromDate} toDate={toDate} />
+
+        <SectionDivider />
 
         <ReportAwards wonAwards={wonAwards} allAwards={filteredAwards} />
 
