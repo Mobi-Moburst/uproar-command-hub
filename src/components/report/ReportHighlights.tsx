@@ -21,10 +21,9 @@ interface ReportHighlightsProps {
 }
 
 export function ReportHighlights({ placements }: ReportHighlightsProps) {
-  const { isEditing } = useReportEdit();
-  const [manualEntries, setManualEntries] = useState<ManualEntry[]>([]);
-  const [heroOverride, setHeroOverride] = useState<ManualEntry | null>(null);
+  const { isEditing, manualHighlights, setManualHighlights } = useReportEdit();
   const [showForm, setShowForm] = useState(false);
+  const [useAsHero, setUseAsHero] = useState(false);
   const [useAsHero, setUseAsHero] = useState(false);
   const [form, setForm] = useState<Omit<ManualEntry, "id">>({
     headline: "",
