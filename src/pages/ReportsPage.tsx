@@ -162,6 +162,7 @@ export default function ReportsPage() {
                       report={report}
                       onOpen={handleOpenReport}
                       onDelete={(id) => deleteReport.mutate(id)}
+                      onUnpublish={(id) => unpublishReport.mutate(id)}
                     />
                   ))}
                 </div>
@@ -184,7 +185,7 @@ export default function ReportsPage() {
   );
 }
 
-function ReportCard({ report, onOpen, onDelete }: { report: ClientReport; onOpen: (r: ClientReport) => void; onDelete: (id: string) => void }) {
+function ReportCard({ report, onOpen, onDelete, onUnpublish }: { report: ClientReport; onOpen: (r: ClientReport) => void; onDelete: (id: string) => void; onUnpublish?: (id: string) => void }) {
   const periodLabel = report.from_date || report.to_date
     ? `${report.from_date || "Start"} — ${report.to_date || "Present"}`
     : "All-Time";
