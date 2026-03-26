@@ -35,7 +35,7 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
             <Sparkles className="h-4.5 w-4.5 text-primary" />
           </div>
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-foreground">Coverage Summary</h2>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">Coverage Summary</h2>
           </div>
         </div>
         <Button
