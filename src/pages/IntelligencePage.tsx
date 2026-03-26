@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConversionFunnel } from "@/components/intelligence/ConversionFunnel";
 import { ReporterAffinityMatrix } from "@/components/intelligence/ReporterAffinityMatrix";
 import { OutletMomentum } from "@/components/intelligence/OutletMomentum";
+import { SmartReporterMatcher } from "@/components/intelligence/SmartReporterMatcher";
 import { useCoverageIntelligence } from "@/hooks/useCoverageIntelligence";
 
 export default function IntelligencePage() {
@@ -84,12 +85,17 @@ export default function IntelligencePage() {
           </div>
         </div>
 
-        <Tabs defaultValue="funnel" className="space-y-6">
+        <Tabs defaultValue="matcher" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="matcher">Reporter Matcher</TabsTrigger>
             <TabsTrigger value="funnel">Conversion Funnel</TabsTrigger>
             <TabsTrigger value="affinity">Reporter Affinity</TabsTrigger>
             <TabsTrigger value="momentum">Outlet Momentum</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="matcher">
+            <SmartReporterMatcher />
+          </TabsContent>
 
           <TabsContent value="funnel">
             <ConversionFunnel conversions={conversions} />
