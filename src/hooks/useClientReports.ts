@@ -65,6 +65,7 @@ export interface ReportSnapshot {
 
 export interface CurationState {
   hiddenSections: string[];
+  dismissedCards: string[];
   textOverrides: Record<string, string>;
   manualHighlights: Array<{
     id: string;
