@@ -68,8 +68,8 @@ export interface CurationState {
   dismissedCards: string[];
   textOverrides: Record<string, string>;
   customInsights?: {
-    strengths: string[];
-    opportunities: string[];
+    strengths: Array<{ id: string; text: string }>;
+    opportunities: Array<{ id: string; text: string }>;
   };
   manualHighlights: Array<{
     id: string;
