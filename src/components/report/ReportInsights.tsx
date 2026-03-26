@@ -16,10 +16,9 @@ interface Insight {
 }
 
 export function ReportInsights({ placements, awardWins, sampleConversionRate, briefingConversionRate }: ReportInsightsProps) {
-  const { isEditing, getTextOverride, setTextOverride } = useReportEdit();
+  const { isEditing, getTextOverride, setTextOverride, dismissedCards, dismissCard } = useReportEdit();
   const [customStrengths, setCustomStrengths] = useState<string[]>([]);
   const [customOpportunities, setCustomOpportunities] = useState<string[]>([]);
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
   if (placements.length === 0) return null;
 
@@ -87,9 +86,9 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
   const opportunities = insights.filter((i) => i.type === "opportunity");
 
   const allStrengths = [...strengths, ...customStrengths.map((t) => ({ type: "strength" as const, text: t }))]
-    .filter((_, i) => !dismissedIds.has(`insight-strength-${i}`));
+    .filter((_, i) => !dismissedCards.has(`insight-strength-${i}`));
   const allOpportunities = [...opportunities, ...customOpportunities.map((t) => ({ type: "opportunity" as const, text: t }))]
-    .filter((_, i) => !dismissedIds.has(`insight-opportunity-${i}`));
+    .filter((_, i) => !dismissedCards.has(`insight-opportunity-${i}`));
 
   if (allStrengths.length === 0 && allOpportunities.length === 0 && !isEditing) return null;
 
