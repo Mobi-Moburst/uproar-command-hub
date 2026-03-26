@@ -1,4 +1,5 @@
 import { formatNumber, formatCurrency } from "@/lib/format";
+import { EditableSection } from "./ReportEditControls";
 
 interface ReportKpisProps {
   totalPlacements: number;
@@ -27,22 +28,34 @@ export function ReportKpis({
 
       {/* Primary KPIs */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <KpiBlock label="Total Placements" value={formatNumber(totalPlacements)} sub="All-Time" />
-        <KpiBlock label="Total Reach" value={formatNumber(totalReach)} sub="Impressions" />
-        <KpiBlock label="Ad Value" value={formatCurrency(totalAdValue)} sub="Estimated" />
-        <KpiBlock label="Awards Won" value={String(awardWins)} sub="All-Time" />
+        <EditableSection id="kpi-total-placements">
+          <KpiBlock label="Total Placements" value={formatNumber(totalPlacements)} sub="All-Time" />
+        </EditableSection>
+        <EditableSection id="kpi-total-reach">
+          <KpiBlock label="Total Reach" value={formatNumber(totalReach)} sub="Impressions" />
+        </EditableSection>
+        <EditableSection id="kpi-ad-value">
+          <KpiBlock label="Ad Value" value={formatCurrency(totalAdValue)} sub="Estimated" />
+        </EditableSection>
+        <EditableSection id="kpi-awards-won">
+          <KpiBlock label="Awards Won" value={String(awardWins)} sub="All-Time" />
+        </EditableSection>
       </div>
 
       {/* YTD callout */}
       <div className="mt-4 grid grid-cols-2 gap-4">
-        <div className="rounded-lg border border-primary/20 bg-emerald-light p-5">
-          <p className="text-xs font-mono text-primary uppercase tracking-wide">{currentYear} YTD Placements</p>
-          <p className="mt-1 font-tight text-3xl font-bold text-foreground">{ytdPlacements}</p>
-        </div>
-        <div className="rounded-lg border border-primary/20 bg-emerald-light p-5">
-          <p className="text-xs font-mono text-primary uppercase tracking-wide">{currentYear} YTD Reach</p>
-          <p className="mt-1 font-tight text-3xl font-bold text-foreground">{formatNumber(ytdReach)}</p>
-        </div>
+        <EditableSection id="kpi-ytd-placements">
+          <div className="rounded-lg border border-primary/20 bg-emerald-light p-5">
+            <p className="text-xs font-mono text-primary uppercase tracking-wide">{currentYear} YTD Placements</p>
+            <p className="mt-1 font-tight text-3xl font-bold text-foreground">{ytdPlacements}</p>
+          </div>
+        </EditableSection>
+        <EditableSection id="kpi-ytd-reach">
+          <div className="rounded-lg border border-primary/20 bg-emerald-light p-5">
+            <p className="text-xs font-mono text-primary uppercase tracking-wide">{currentYear} YTD Reach</p>
+            <p className="mt-1 font-tight text-3xl font-bold text-foreground">{formatNumber(ytdReach)}</p>
+          </div>
+        </EditableSection>
       </div>
     </section>
   );
