@@ -123,6 +123,12 @@ function PublicReportContent({ report }: { report: NonNullable<ReturnType<typeof
   const curation = report.curation_state as CurationState;
   const snapshot = curation.snapshot as ReportSnapshot | undefined;
   const hiddenSet = new Set(curation.hiddenSections || []);
+  const { loadCurationState } = useReportEdit();
+
+  // Load hidden sections into context so child EditableSection components respect them
+  useState(() => {
+    loadCurationState(curation);
+  });
 
   // If no snapshot exists (legacy reports), show a message
   if (!snapshot) {
