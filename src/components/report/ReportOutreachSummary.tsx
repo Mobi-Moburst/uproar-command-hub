@@ -41,9 +41,8 @@ function DismissibleCard({
 }
 
 export function ReportOutreachSummary({ sampleConversions, briefingConversions }: ReportOutreachSummaryProps) {
-  const { isEditing } = useReportEdit();
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-  const dismiss = (id: string) => setDismissed((prev) => new Set(prev).add(id));
+  const { isEditing, dismissedCards, dismissCard } = useReportEdit();
+  const dismiss = (id: string) => dismissCard(id);
 
   const CONVERSION_WINDOW = 90 * 86_400_000;
   const now = Date.now();
