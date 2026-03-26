@@ -162,7 +162,6 @@ export default function ReportsPage() {
                       onOpen={handleOpenReport}
                       onDelete={(id) => deleteReport.mutate(id)}
                     />
-                    />
                   ))}
                 </div>
               )}
