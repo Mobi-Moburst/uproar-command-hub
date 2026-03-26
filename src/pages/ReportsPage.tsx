@@ -1,12 +1,13 @@
 import { useState, useMemo, useCallback } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useClients } from "@/hooks/useClients";
-import { useClientReports, type ClientReport } from "@/hooks/useClientReports";
+import { useClientReports, useDeleteReport, type ClientReport } from "@/hooks/useClientReports";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Plus, FileText, Globe, Pencil, Calendar, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import ClientReportEditor from "@/pages/ClientReportPage";
 
 export default function ReportsPage() {
@@ -21,6 +22,7 @@ export default function ReportsPage() {
   }>({ mode: "hub" });
 
   const { data: reports = [], isLoading: loadingReports } = useClientReports(selectedClient || undefined);
+  const deleteReport = useDeleteReport();
 
   const clientNames = useMemo(() => {
     return [...new Set(clients.map((c) => c.name))].sort();
@@ -131,6 +133,7 @@ export default function ReportsPage() {
                       key={report.id}
                       report={report}
                       onOpen={handleOpenReport}
+                      onDelete={(id) => deleteReport.mutate(id)}
                     />
                   ))}
                 </div>
@@ -157,6 +160,7 @@ export default function ReportsPage() {
                       key={report.id}
                       report={report}
                       onOpen={handleOpenReport}
+                      onDelete={(id) => deleteReport.mutate(id)}
                     />
                   ))}
                 </div>
@@ -179,7 +183,7 @@ export default function ReportsPage() {
   );
 }
 
-function ReportCard({ report, onOpen }: { report: ClientReport; onOpen: (r: ClientReport) => void }) {
+function ReportCard({ report, onOpen, onDelete }: { report: ClientReport; onOpen: (r: ClientReport) => void; onDelete: (id: string) => void }) {
   const periodLabel = report.from_date || report.to_date
     ? `${report.from_date || "Start"} — ${report.to_date || "Present"}`
     : "All-Time";
@@ -240,6 +244,35 @@ function ReportCard({ report, onOpen }: { report: ClientReport; onOpen: (r: Clie
         >
           {report.status === "draft" ? "Edit" : "View"}
         </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs text-destructive hover:text-destructive"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete report?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete "{report.title || `${report.client_name} Report`}". This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => onDelete(report.id)}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
