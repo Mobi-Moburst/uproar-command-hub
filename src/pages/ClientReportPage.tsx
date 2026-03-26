@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
@@ -15,6 +15,8 @@ import { ReportTopReporters } from "@/components/report/ReportTopReporters";
 import { ReportOutletMomentum } from "@/components/report/ReportOutletMomentum";
 import { ReportFooter } from "@/components/report/ReportFooter";
 import { ReportDateRange } from "@/components/report/ReportDateRange";
+import { ReportAISummary } from "@/components/report/ReportAISummary";
+import { useAICoverageSummary } from "@/hooks/useAICoverageSummary";
 import type { MediaPlacement, AwardSubmission, Sample, Briefing } from "@/data/types";
 
 export default function ClientReportPage() {
@@ -143,6 +145,55 @@ export default function ClientReportPage() {
 
   const wonAwards = filteredAwards.filter((a) => a.status === "Won");
 
+  const { summary, isGenerating, generate } = useAICoverageSummary();
+
+  // Derive date range from data if not set
+  const dataDateRange = useMemo(() => {
+    const dates = allClientPlacements.map((p) => p.date).filter(Boolean).sort();
+    return { earliest: dates[0] || "", latest: dates[dates.length - 1] || "" };
+  }, [allClientPlacements]);
+
+  const periodLabel = useMemo(() => {
+    return fromDate || toDate
+      ? `${fromDate || dataDateRange.earliest} — ${toDate || dataDateRange.latest}`
+      : "All-Time";
+  }, [fromDate, toDate, dataDateRange]);
+
+  // Top reporters for AI summary
+  const topReportersForAI = useMemo(() => {
+    const reporterMap = new Map<string, number>();
+    [...clientSampleConversions, ...clientBriefingConversions]
+      .filter((c) => c.converted && c.reporter)
+      .forEach((c) => reporterMap.set(c.reporter!, (reporterMap.get(c.reporter!) || 0) + 1));
+    return [...reporterMap.entries()]
+      .map(([name, conversions]) => ({ name, conversions }))
+      .sort((a, b) => b.conversions - a.conversions)
+      .slice(0, 5);
+  }, [clientSampleConversions, clientBriefingConversions]);
+
+  const handleGenerateSummary = useCallback(() => {
+    const samplesConverted = clientSampleConversions.filter((c) => c.converted).length;
+    const briefingsConverted = clientBriefingConversions.filter((c) => c.converted).length;
+
+    generate(clientName, periodLabel, {
+      totalPlacements: clientPlacements.length,
+      totalReach: clientPlacements.reduce((s, p) => s + p.readership_viewership, 0),
+      totalAdValue: clientPlacements.reduce((s, p) => s + p.ad_value, 0),
+      awardWins: wonAwards.length,
+      ytdPlacements: clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).length,
+      typeBreakdown,
+      topOutlets,
+      samplesSent: clientSampleConversions.length,
+      samplesConverted,
+      sampleConversionRate: clientSampleConversions.length > 0 ? Math.round((samplesConverted / clientSampleConversions.length) * 100) : 0,
+      briefingsHeld: clientBriefingConversions.length,
+      briefingsConverted,
+      briefingConversionRate: clientBriefingConversions.length > 0 ? Math.round((briefingsConverted / clientBriefingConversions.length) * 100) : 0,
+      topReporters: topReportersForAI,
+      monthlyReach,
+    });
+  }, [clientName, periodLabel, clientPlacements, wonAwards, typeBreakdown, topOutlets, clientSampleConversions, clientBriefingConversions, topReportersForAI, monthlyReach, generate]);
+
   const handleDateChange = (from: string, to: string) => {
     const next = new URLSearchParams(params);
     if (from) next.set("from", from);
@@ -151,12 +202,6 @@ export default function ClientReportPage() {
     else next.delete("to");
     setParams(next, { replace: true });
   };
-
-  // Derive date range from data if not set
-  const dataDateRange = useMemo(() => {
-    const dates = allClientPlacements.map((p) => p.date).filter(Boolean).sort();
-    return { earliest: dates[0] || "", latest: dates[dates.length - 1] || "" };
-  }, [allClientPlacements]);
 
   if (isLoading) {
     return (
@@ -176,10 +221,6 @@ export default function ClientReportPage() {
       </div>
     );
   }
-
-  const periodLabel = fromDate || toDate
-    ? `${fromDate || dataDateRange.earliest} — ${toDate || dataDateRange.latest}`
-    : "All-Time";
 
   return (
     <div className="min-h-screen bg-background">
@@ -201,6 +242,13 @@ export default function ClientReportPage() {
           awardWins={wonAwards.length}
           ytdPlacements={clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).length}
           ytdReach={clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).reduce((s, p) => s + p.readership_viewership, 0)}
+        />
+
+
+        <ReportAISummary
+          summary={summary}
+          isGenerating={isGenerating}
+          onGenerate={handleGenerateSummary}
         />
 
         <ReportHighlights placements={clientPlacements.slice(0, 10)} />

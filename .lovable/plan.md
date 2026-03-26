@@ -4,6 +4,7 @@
 - Coverage Intelligence (conversion funnels, reporter affinity, outlet momentum)
 - Client report with outreach/conversion sections
 - Moburst brand overhaul (light/dark mode, data viz)
+- AI Coverage Summaries (edge function + streaming UI on client report)
 
 ## In Progress — Phase 2 Enhancements
 
