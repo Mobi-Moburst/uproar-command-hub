@@ -10,42 +10,43 @@ export function ReportHero({ clientName, teamName, periodLabel }: ReportHeroProp
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <header className="relative overflow-hidden border-b border-border gradient-brand px-6 py-16 text-primary-foreground">
-      {/* Subtle geometric accent */}
-      <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/10" />
-      <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-white/5" />
+    <header className="relative overflow-hidden gradient-brand px-6 py-20 text-white">
+      {/* Layered geometric accents */}
+      <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-2xl" />
+      <div className="absolute -left-12 bottom-0 h-48 w-48 rounded-full bg-white/5 blur-xl" />
+      <div className="absolute right-1/4 top-1/3 h-32 w-32 rounded-full bg-white/5" />
 
       <div className="relative mx-auto max-w-5xl">
-        <p className="text-xs font-mono uppercase tracking-[0.2em] text-primary/80">
+        <p className="text-[11px] font-mono uppercase tracking-[0.25em] text-white/60">
           Media & Awards Performance Report
         </p>
-        <h1 className="mt-4 font-tight text-5xl font-bold tracking-tight sm:text-6xl">
+        <h1 className="mt-5 font-tight text-5xl font-bold tracking-tight sm:text-6xl text-white">
           {clientName}
         </h1>
-        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
-          <span className="font-mono text-primary-foreground/60">
+        <div className="mt-5 flex flex-wrap items-center gap-4 text-sm">
+          <span className="font-mono text-white/60">
             Prepared {formatDate(today)}
           </span>
-          <span className="text-primary-foreground/30">·</span>
-          <span className="font-mono text-primary-foreground/60">
+          <span className="text-white/25">·</span>
+          <span className="font-mono text-white/60">
             Team: {teamName}
           </span>
           {periodLabel && (
             <>
-              <span className="text-primary-foreground/30">·</span>
-              <span className="font-mono text-primary-foreground/60">
+              <span className="text-white/25">·</span>
+              <span className="font-mono text-white/60">
                 Period: {periodLabel}
               </span>
             </>
           )}
         </div>
 
-        <div className="mt-8 flex items-center gap-3">
-          <div className="h-px flex-1 bg-primary-foreground/10" />
-          <span className="text-xs font-mono uppercase tracking-[0.15em] text-primary/70">
-            Uproar PR
+        <div className="mt-10 flex items-center gap-3">
+          <div className="h-px flex-1 bg-white/15" />
+          <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/50">
+            Uproar PR · Moburst
           </span>
-          <div className="h-px flex-1 bg-primary-foreground/10" />
+          <div className="h-px flex-1 bg-white/15" />
         </div>
       </div>
     </header>

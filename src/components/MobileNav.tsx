@@ -5,7 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Menu, X } from "lucide-react";
 
 const navItems = [
   { title: "Overview", path: "/" },
@@ -32,19 +32,24 @@ export function MobileNav() {
 
   return (
     <div className="lg:hidden">
-      <header className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4">
-        <h1 className="text-sm font-semibold text-foreground">Uproar Command Center</h1>
+      <header className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border bg-card/80 backdrop-blur-md px-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md gradient-brand">
+            <span className="text-xs font-bold text-white">U</span>
+          </div>
+          <h1 className="text-sm font-semibold text-foreground">Uproar</h1>
+        </div>
         <button
           onClick={() => setOpen(!open)}
-          className="rounded-md px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
+          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
         >
-          {open ? "Close" : "Menu"}
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </header>
       {open && (
-        <div className="fixed inset-0 top-14 z-30 bg-background p-4">
+        <div className="fixed inset-0 top-14 z-30 bg-background/95 backdrop-blur-sm p-4 overflow-y-auto">
           <nav>
-            <ul className="space-y-1">
+            <ul className="space-y-0.5">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -52,10 +57,10 @@ export function MobileNav() {
                     <NavLink
                       to={item.path}
                       end
-                      className={`block rounded-md px-3 py-2.5 text-sm font-medium ${
+                      className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                         isActive
-                          ? "bg-emerald-light text-emerald"
-                          : "text-muted-foreground hover:bg-muted"
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                       activeClassName=""
                       onClick={() => setOpen(false)}
@@ -69,7 +74,7 @@ export function MobileNav() {
           </nav>
           <div className="mt-6 border-t border-border pt-4 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Theme</span>
+              <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Theme</span>
               <Button variant="ghost" size="sm" onClick={toggleTheme} className="h-7 w-7 p-0">
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>

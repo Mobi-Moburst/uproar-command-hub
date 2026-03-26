@@ -144,26 +144,26 @@ export default function OverviewPage() {
           ) : topPlacements.length === 0 ? (
             <EmptyState message="No placements recorded yet." columns={6} />
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted">
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Client</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Outlet</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Headline</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Reach</th>
+                  <tr className="border-b border-border bg-muted/50">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Outlet</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Headline</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reach</th>
                   </tr>
                 </thead>
                 <tbody className="font-mono">
                   {topPlacements.map((p) => (
-                    <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                    <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
                       <td className="px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
                       <td className="px-4 py-3 text-foreground">{p.outlet}</td>
                       <td className="max-w-xs truncate px-4 py-3">
-                        <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-emerald hover:underline font-sans">
+                        <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 hover:underline font-sans">
                           {p.headline}
                         </a>
                       </td>
@@ -195,12 +195,12 @@ export default function OverviewPage() {
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {weeklyWins.map((win) => (
-                <div key={win.id} className="rounded-lg border border-border bg-card p-5">
+                <div key={win.id} className="rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between">
                     <p className="text-sm font-medium text-foreground">{win.client_name}</p>
                     <TypeBadge type={win.type} />
                   </div>
-                  <a href={win.link} target="_blank" rel="noopener noreferrer" className="mt-2 block text-sm text-emerald hover:underline">
+                  <a href={win.link} target="_blank" rel="noopener noreferrer" className="mt-2 block text-sm text-primary hover:text-primary/80 hover:underline">
                     {win.headline}
                   </a>
                   <p className="mt-2 text-xs font-mono text-muted-foreground">
