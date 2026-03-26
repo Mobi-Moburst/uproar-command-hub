@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useClients } from "@/hooks/useClients";
-import { useClientReports, useDeleteReport, type ClientReport } from "@/hooks/useClientReports";
+import { useClientReports, useDeleteReport, useUnpublishReport, type ClientReport } from "@/hooks/useClientReports";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, Globe, Pencil, Calendar, Trash2 } from "lucide-react";
+import { Plus, FileText, Globe, Pencil, Calendar, Trash2, Undo2 } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -23,6 +23,7 @@ export default function ReportsPage() {
 
   const { data: reports = [], isLoading: loadingReports } = useClientReports(selectedClient || undefined);
   const deleteReport = useDeleteReport();
+  const unpublishReport = useUnpublishReport();
 
   const clientNames = useMemo(() => {
     return [...new Set(clients.map((c) => c.name))].sort();
@@ -161,6 +162,7 @@ export default function ReportsPage() {
                       report={report}
                       onOpen={handleOpenReport}
                       onDelete={(id) => deleteReport.mutate(id)}
+                      onUnpublish={(id) => unpublishReport.mutate(id)}
                     />
                   ))}
                 </div>
@@ -183,7 +185,7 @@ export default function ReportsPage() {
   );
 }
 
-function ReportCard({ report, onOpen, onDelete }: { report: ClientReport; onOpen: (r: ClientReport) => void; onDelete: (id: string) => void }) {
+function ReportCard({ report, onOpen, onDelete, onUnpublish }: { report: ClientReport; onOpen: (r: ClientReport) => void; onDelete: (id: string) => void; onUnpublish?: (id: string) => void }) {
   const periodLabel = report.from_date || report.to_date
     ? `${report.from_date || "Start"} — ${report.to_date || "Present"}`
     : "All-Time";
@@ -244,6 +246,20 @@ function ReportCard({ report, onOpen, onDelete }: { report: ClientReport; onOpen
         >
           {report.status === "draft" ? "Edit" : "View"}
         </Button>
+        {report.status === "published" && onUnpublish && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs gap-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              onUnpublish(report.id);
+            }}
+          >
+            <Undo2 className="h-3.5 w-3.5" />
+            Unpublish
+          </Button>
+        )}
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button

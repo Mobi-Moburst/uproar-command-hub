@@ -200,6 +200,27 @@ export function useSaveReport() {
   });
 }
 
+export function useUnpublishReport() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (reportId: string) => {
+      const { error } = await supabase
+        .from("client_reports")
+        .update({ status: "draft", updated_at: new Date().toISOString() })
+        .eq("id", reportId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-reports"] });
+      toast.success("Report moved back to drafts");
+    },
+    onError: (err: any) => {
+      toast.error("Failed to unpublish: " + err.message);
+    },
+  });
+}
+
 export function useDeleteReport() {
   const queryClient = useQueryClient();
 
