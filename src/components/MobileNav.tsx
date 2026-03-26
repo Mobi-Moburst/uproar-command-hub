@@ -20,7 +20,7 @@ const navItems = [
   { title: "Pulse Center", path: "/pulse" },
   { title: "Vertical Benchmarking", path: "/verticals" },
   { title: "Teams", path: "/teams" },
-  { title: "Client Report", path: "/report" },
+  { title: "Reports", path: "/reports" },
 ];
 
 export function MobileNav() {
