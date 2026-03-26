@@ -1,5 +1,5 @@
 import { NavLink } from "@/components/NavLink";
-import uproarLogo from "@/assets/uproar-dark-logo.png";
+import uproarLogo from "@/assets/uproar-white-logo.svg";
 import { useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
