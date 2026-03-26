@@ -118,6 +118,8 @@ export default function TeamsPage() {
   const { data: teams = [], isLoading, isError, refetch } = useTeams();
   const { data: clients = [] } = useClients();
   const { data: placements = [] } = usePlacements();
+  const { data: awards = [] } = useAwards();
+  const { conversions } = useCoverageIntelligence();
 
   const [teamFilter, setTeamFilter] = useState("");
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
