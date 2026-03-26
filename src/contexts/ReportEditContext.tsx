@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, Dispatch, SetStateAction } from "react";
 import type { CurationState } from "@/hooks/useClientReports";
 
 interface ReportEditState {
@@ -15,12 +15,41 @@ interface ReportEditState {
   dismissCard: (id: string) => void;
   restoreCard: (id: string) => void;
   manualHighlights: CurationState["manualHighlights"];
-  setManualHighlights: (highlights: CurationState["manualHighlights"]) => void;
+  setManualHighlights: Dispatch<SetStateAction<CurationState["manualHighlights"]>>;
+  customInsights: NonNullable<CurationState["customInsights"]>;
+  setCustomInsights: Dispatch<SetStateAction<NonNullable<CurationState["customInsights"]>>>;
   getCurationState: (aiSummary?: string) => CurationState;
   loadCurationState: (state: CurationState) => void;
 }
 
 const ReportEditContext = createContext<ReportEditState | null>(null);
+
+const DEFAULT_CUSTOM_INSIGHTS: NonNullable<CurationState["customInsights"]> = {
+  strengths: [],
+  opportunities: [],
+};
+
+function normalizeCustomInsightList(
+  list: unknown,
+  prefix: string
+): Array<{ id: string; text: string }> {
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((item, index) => {
+      if (typeof item === "string") {
+        return { id: `${prefix}-legacy-${index}`, text: item };
+      }
+      if (item && typeof item === "object") {
+        const maybe = item as { id?: string; text?: string };
+        return {
+          id: maybe.id || `${prefix}-${index}`,
+          text: maybe.text || "",
+        };
+      }
+      return null;
+    })
+    .filter((item): item is { id: string; text: string } => !!item);
+}
 
 export function ReportEditProvider({ children }: { children: ReactNode }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -28,6 +57,7 @@ export function ReportEditProvider({ children }: { children: ReactNode }) {
   const [textOverrides, setTextOverrides] = useState<Map<string, string>>(new Map());
   const [dismissedCards, setDismissedCards] = useState<Set<string>>(new Set());
   const [manualHighlights, setManualHighlights] = useState<CurationState["manualHighlights"]>([]);
+  const [customInsights, setCustomInsights] = useState<NonNullable<CurationState["customInsights"]>>(DEFAULT_CUSTOM_INSIGHTS);
 
   const toggleEdit = useCallback(() => setIsEditing((v) => !v), []);
 
@@ -69,20 +99,46 @@ export function ReportEditProvider({ children }: { children: ReactNode }) {
       dismissedCards: Array.from(dismissedCards),
       textOverrides: Object.fromEntries(textOverrides),
       manualHighlights,
+      customInsights,
       aiSummary,
     };
-  }, [hiddenSections, dismissedCards, textOverrides, manualHighlights]);
+  }, [hiddenSections, dismissedCards, textOverrides, manualHighlights, customInsights]);
 
   const loadCurationState = useCallback((state: CurationState) => {
     setHiddenSections(new Set(state.hiddenSections || []));
     setDismissedCards(new Set(state.dismissedCards || []));
     setTextOverrides(new Map(Object.entries(state.textOverrides || {})));
     setManualHighlights(state.manualHighlights || []);
+
+    const rawCustom = state.customInsights || DEFAULT_CUSTOM_INSIGHTS;
+    setCustomInsights({
+      strengths: normalizeCustomInsightList(rawCustom.strengths, "strength"),
+      opportunities: normalizeCustomInsightList(rawCustom.opportunities, "opportunity"),
+    });
   }, []);
 
   return (
     <ReportEditContext.Provider
-      value={{ isEditing, toggleEdit, hiddenSections, hideSection, showSection, resetHidden, textOverrides, setTextOverride, getTextOverride, dismissedCards, dismissCard, restoreCard, manualHighlights, setManualHighlights, getCurationState, loadCurationState }}
+      value={{
+        isEditing,
+        toggleEdit,
+        hiddenSections,
+        hideSection,
+        showSection,
+        resetHidden,
+        textOverrides,
+        setTextOverride,
+        getTextOverride,
+        dismissedCards,
+        dismissCard,
+        restoreCard,
+        manualHighlights,
+        setManualHighlights,
+        customInsights,
+        setCustomInsights,
+        getCurationState,
+        loadCurationState,
+      }}
     >
       {children}
     </ReportEditContext.Provider>

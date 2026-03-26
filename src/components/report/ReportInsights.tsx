@@ -1,6 +1,6 @@
 import { CheckCircle2, AlertCircle, Plus, X } from "lucide-react";
 import { useReportEdit } from "@/contexts/ReportEditContext";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef } from "react";
 import type { MediaPlacement } from "@/data/types";
 
 interface ReportInsightsProps {
@@ -16,81 +16,109 @@ interface Insight {
 }
 
 export function ReportInsights({ placements, awardWins, sampleConversionRate, briefingConversionRate }: ReportInsightsProps) {
-  const { isEditing, getTextOverride, setTextOverride, dismissedCards, dismissCard } = useReportEdit();
-  const [customStrengths, setCustomStrengths] = useState<string[]>([]);
-  const [customOpportunities, setCustomOpportunities] = useState<string[]>([]);
-
-  if (placements.length === 0) return null;
+  const {
+    isEditing,
+    getTextOverride,
+    setTextOverride,
+    dismissedCards,
+    dismissCard,
+    customInsights,
+    setCustomInsights,
+  } = useReportEdit();
 
   const insights: Insight[] = [];
 
-  // --- Strengths ---
-  const featureCount = placements.filter((p) => p.type === "Feature").length;
-  const featurePct = Math.round((featureCount / placements.length) * 100);
+  if (placements.length > 0) {
+    const featureCount = placements.filter((p) => p.type === "Feature").length;
+    const featurePct = Math.round((featureCount / placements.length) * 100);
 
-  if (featurePct >= 40) {
-    insights.push({ type: "strength", text: `Feature stories represent ${featurePct}% of coverage — strong narrative-driven media.` });
+    if (featurePct >= 40) {
+      insights.push({ type: "strength", text: `Feature stories represent ${featurePct}% of coverage — strong narrative-driven media.` });
+    }
+
+    const uniqueOutlets = new Set(placements.map((p) => p.outlet)).size;
+    if (uniqueOutlets >= 10) {
+      insights.push({ type: "strength", text: `Coverage spans ${uniqueOutlets} unique outlets — broad media footprint.` });
+    }
+
+    if (sampleConversionRate >= 30) {
+      insights.push({ type: "strength", text: `Sample-to-coverage conversion at ${sampleConversionRate}% — outreach is converting well.` });
+    }
+
+    if (briefingConversionRate >= 30) {
+      insights.push({ type: "strength", text: `Briefing conversion at ${briefingConversionRate}% — reporter meetings are producing results.` });
+    }
+
+    if (awardWins >= 2) {
+      insights.push({ type: "strength", text: `${awardWins} award wins this period — third-party validation reinforcing brand authority.` });
+    }
+
+    const totalReach = placements.reduce((s, p) => s + p.readership_viewership, 0);
+    if (totalReach > 50_000_000) {
+      insights.push({ type: "strength", text: `Total reach exceeds ${Math.round(totalReach / 1_000_000)}M impressions — exceptional visibility.` });
+    }
+
+    if (featurePct < 20 && placements.length >= 5) {
+      insights.push({ type: "opportunity", text: `Features represent only ${featurePct}% of coverage. Consider pitching more in-depth story angles.` });
+    }
+
+    const contributedCount = placements.filter((p) => p.type === "Contributed content").length;
+    if (contributedCount <= 1 && placements.length >= 10) {
+      insights.push({ type: "opportunity", text: `Only ${contributedCount} contributed content piece${contributedCount === 1 ? "" : "s"} — thought leadership articles could boost expert positioning.` });
+    }
+
+    if (awardWins === 0 && placements.length >= 5) {
+      insights.push({ type: "opportunity", text: `No award wins this period. A targeted submission campaign could add third-party credibility.` });
+    }
+
+    if (sampleConversionRate > 0 && sampleConversionRate < 15) {
+      insights.push({ type: "opportunity", text: `Sample conversion at ${sampleConversionRate}% — consider tightening targeting or follow-up cadence.` });
+    }
+
+    if (uniqueOutlets < 5 && placements.length >= 5) {
+      insights.push({ type: "opportunity", text: `Coverage concentrated in ${uniqueOutlets} outlet${uniqueOutlets === 1 ? "" : "s"} — diversifying media mix would reduce dependency.` });
+    }
+
+    const types = new Set(placements.map((p) => p.type));
+    if (types.size <= 2 && placements.length >= 10) {
+      insights.push({ type: "opportunity", text: `Coverage limited to ${types.size} type${types.size === 1 ? "" : "s"}. Expanding to interviews, contributed content, or broadcast could broaden impact.` });
+    }
   }
 
-  const uniqueOutlets = new Set(placements.map((p) => p.outlet)).size;
-  if (uniqueOutlets >= 10) {
-    insights.push({ type: "strength", text: `Coverage spans ${uniqueOutlets} unique outlets — broad media footprint.` });
-  }
+  const autoStrengths = insights
+    .filter((i) => i.type === "strength")
+    .map((i, idx) => ({
+      id: `insight-strength-${idx}`,
+      text: i.text,
+      isCustom: false as const,
+    }))
+    .filter((i) => !dismissedCards.has(i.id));
 
-  if (sampleConversionRate >= 30) {
-    insights.push({ type: "strength", text: `Sample-to-coverage conversion at ${sampleConversionRate}% — outreach is converting well.` });
-  }
+  const autoOpportunities = insights
+    .filter((i) => i.type === "opportunity")
+    .map((i, idx) => ({
+      id: `insight-opportunity-${idx}`,
+      text: i.text,
+      isCustom: false as const,
+    }))
+    .filter((i) => !dismissedCards.has(i.id));
 
-  if (briefingConversionRate >= 30) {
-    insights.push({ type: "strength", text: `Briefing conversion at ${briefingConversionRate}% — reporter meetings are producing results.` });
-  }
+  const customStrengths = customInsights.strengths.map((i) => ({
+    id: `insight-strength-custom-${i.id}`,
+    text: i.text,
+    isCustom: true as const,
+  }));
 
-  if (awardWins >= 2) {
-    insights.push({ type: "strength", text: `${awardWins} award wins this period — third-party validation reinforcing brand authority.` });
-  }
+  const customOpportunities = customInsights.opportunities.map((i) => ({
+    id: `insight-opportunity-custom-${i.id}`,
+    text: i.text,
+    isCustom: true as const,
+  }));
 
-  const totalReach = placements.reduce((s, p) => s + p.readership_viewership, 0);
-  if (totalReach > 50_000_000) {
-    insights.push({ type: "strength", text: `Total reach exceeds ${Math.round(totalReach / 1_000_000)}M impressions — exceptional visibility.` });
-  }
+  const allStrengths = [...autoStrengths, ...customStrengths];
+  const allOpportunities = [...autoOpportunities, ...customOpportunities];
 
-  // --- Opportunities ---
-  if (featurePct < 20 && placements.length >= 5) {
-    insights.push({ type: "opportunity", text: `Features represent only ${featurePct}% of coverage. Consider pitching more in-depth story angles.` });
-  }
-
-  const contributedCount = placements.filter((p) => p.type === "Contributed content").length;
-  if (contributedCount <= 1 && placements.length >= 10) {
-    insights.push({ type: "opportunity", text: `Only ${contributedCount} contributed content piece${contributedCount === 1 ? "" : "s"} — thought leadership articles could boost expert positioning.` });
-  }
-
-  if (awardWins === 0 && placements.length >= 5) {
-    insights.push({ type: "opportunity", text: `No award wins this period. A targeted submission campaign could add third-party credibility.` });
-  }
-
-  if (sampleConversionRate > 0 && sampleConversionRate < 15) {
-    insights.push({ type: "opportunity", text: `Sample conversion at ${sampleConversionRate}% — consider tightening targeting or follow-up cadence.` });
-  }
-
-  if (uniqueOutlets < 5 && placements.length >= 5) {
-    insights.push({ type: "opportunity", text: `Coverage concentrated in ${uniqueOutlets} outlet${uniqueOutlets === 1 ? "" : "s"} — diversifying media mix would reduce dependency.` });
-  }
-
-  // Check for type diversity
-  const types = new Set(placements.map((p) => p.type));
-  if (types.size <= 2 && placements.length >= 10) {
-    insights.push({ type: "opportunity", text: `Coverage limited to ${types.size} type${types.size === 1 ? "" : "s"}. Expanding to interviews, contributed content, or broadcast could broaden impact.` });
-  }
-
-  const strengths = insights.filter((i) => i.type === "strength");
-  const opportunities = insights.filter((i) => i.type === "opportunity");
-
-  const allStrengths = [...strengths, ...customStrengths.map((t) => ({ type: "strength" as const, text: t }))]
-    .filter((_, i) => !dismissedCards.has(`insight-strength-${i}`));
-  const allOpportunities = [...opportunities, ...customOpportunities.map((t) => ({ type: "opportunity" as const, text: t }))]
-    .filter((_, i) => !dismissedCards.has(`insight-opportunity-${i}`));
-
-  if (allStrengths.length === 0 && allOpportunities.length === 0 && !isEditing) return null;
+  if (!isEditing && allStrengths.length === 0 && allOpportunities.length === 0) return null;
 
   return (
     <section>
@@ -99,7 +127,6 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
       </h2>
 
       <div className="grid gap-4 sm:grid-cols-2 items-start">
-        {/* Strengths */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -107,29 +134,39 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
           </div>
           {allStrengths.length > 0 ? (
             <ul className="space-y-3">
-              {allStrengths.map((s) => {
-                const origIdx = [...strengths, ...customStrengths.map((t) => ({ type: "strength" as const, text: t }))].indexOf(s);
-                const id = `insight-strength-${origIdx}`;
-                return (
-                  <EditableInsight
-                    key={id}
-                    id={id}
-                    defaultText={s.text}
-                    borderClass="border-primary/30"
-                    isEditing={isEditing}
-                    getTextOverride={getTextOverride}
-                    setTextOverride={setTextOverride}
-                    onRemove={isEditing ? () => dismissCard(id) : undefined}
-                  />
-                );
-              })}
+              {allStrengths.map((s) => (
+                <EditableInsight
+                  key={s.id}
+                  id={s.id}
+                  defaultText={s.text}
+                  borderClass="border-primary/30"
+                  isEditing={isEditing}
+                  getTextOverride={getTextOverride}
+                  setTextOverride={setTextOverride}
+                  onRemove={
+                    isEditing
+                      ? s.isCustom
+                        ? () => setCustomInsights((prev) => ({
+                            ...prev,
+                            strengths: prev.strengths.filter((item) => `insight-strength-custom-${item.id}` !== s.id),
+                          }))
+                        : () => dismissCard(s.id)
+                      : undefined
+                  }
+                />
+              ))}
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground/50">Building momentum — insights will appear with more data.</p>
           )}
           {isEditing && (
             <button
-              onClick={() => setCustomStrengths((prev) => [...prev, "New strength…"])}
+              onClick={() =>
+                setCustomInsights((prev) => ({
+                  ...prev,
+                  strengths: [...prev.strengths, { id: `strength-${Date.now()}`, text: "New strength…" }],
+                }))
+              }
               className="mt-3 flex items-center gap-1.5 text-xs text-primary/70 hover:text-primary transition-colors"
             >
               <Plus className="h-3.5 w-3.5" /> Add insight
@@ -137,38 +174,47 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
           )}
         </div>
 
-        {/* Opportunities */}
         <div className="rounded-xl border border-accent/30 bg-accent/5 p-5">
           <div className="flex items-center gap-2 mb-4">
-            <AlertCircle className="h-4 w-4 text-amber-600" />
-            <p className="text-xs font-mono uppercase tracking-wide text-amber-700 font-semibold">Opportunities</p>
+            <AlertCircle className="h-4 w-4 text-primary" />
+            <p className="text-xs font-mono uppercase tracking-wide text-primary font-semibold">Opportunities</p>
           </div>
           {allOpportunities.length > 0 ? (
             <ul className="space-y-3">
-              {allOpportunities.map((o) => {
-                const origIdx = [...opportunities, ...customOpportunities.map((t) => ({ type: "opportunity" as const, text: t }))].indexOf(o);
-                const id = `insight-opportunity-${origIdx}`;
-                return (
-                  <EditableInsight
-                    key={id}
-                    id={id}
-                    defaultText={o.text}
-                    borderClass="border-accent/40"
-                    isEditing={isEditing}
-                    getTextOverride={getTextOverride}
-                    setTextOverride={setTextOverride}
-                    onRemove={isEditing ? () => dismissCard(id) : undefined}
-                  />
-                );
-              })}
+              {allOpportunities.map((o) => (
+                <EditableInsight
+                  key={o.id}
+                  id={o.id}
+                  defaultText={o.text}
+                  borderClass="border-accent/40"
+                  isEditing={isEditing}
+                  getTextOverride={getTextOverride}
+                  setTextOverride={setTextOverride}
+                  onRemove={
+                    isEditing
+                      ? o.isCustom
+                        ? () => setCustomInsights((prev) => ({
+                            ...prev,
+                            opportunities: prev.opportunities.filter((item) => `insight-opportunity-custom-${item.id}` !== o.id),
+                          }))
+                        : () => dismissCard(o.id)
+                      : undefined
+                  }
+                />
+              ))}
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground/50">No gaps identified — coverage strategy is well-rounded.</p>
           )}
           {isEditing && (
             <button
-              onClick={() => setCustomOpportunities((prev) => [...prev, "New opportunity…"])}
-              className="mt-3 flex items-center gap-1.5 text-xs text-amber-600/70 hover:text-amber-600 transition-colors"
+              onClick={() =>
+                setCustomInsights((prev) => ({
+                  ...prev,
+                  opportunities: [...prev.opportunities, { id: `opportunity-${Date.now()}`, text: "New opportunity…" }],
+                }))
+              }
+              className="mt-3 flex items-center gap-1.5 text-xs text-primary/70 hover:text-primary transition-colors"
             >
               <Plus className="h-3.5 w-3.5" /> Add insight
             </button>
