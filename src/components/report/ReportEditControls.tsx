@@ -97,7 +97,7 @@ export function ReportEditToolbar() {
             : "border border-border bg-card text-foreground hover:bg-muted"
         )}
       >
-        {isEditing ? "Done Editing" : "✏️ Edit Report"}
+        {isEditing ? "Done Editing" : "Edit Report"}
       </button>
 
       {isEditing && hiddenSections.size > 0 && (
