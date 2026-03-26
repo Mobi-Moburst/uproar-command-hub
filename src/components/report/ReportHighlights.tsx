@@ -23,7 +23,9 @@ interface ReportHighlightsProps {
 export function ReportHighlights({ placements }: ReportHighlightsProps) {
   const { isEditing } = useReportEdit();
   const [manualEntries, setManualEntries] = useState<ManualEntry[]>([]);
+  const [heroOverride, setHeroOverride] = useState<ManualEntry | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [useAsHero, setUseAsHero] = useState(false);
   const [form, setForm] = useState<Omit<ManualEntry, "id">>({
     headline: "",
     outlet: "",
@@ -35,13 +37,16 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
 
   const handleAdd = useCallback(() => {
     if (!form.headline.trim() || !form.outlet.trim()) return;
-    setManualEntries((prev) => [
-      ...prev,
-      { ...form, id: `manual-${Date.now()}` },
-    ]);
+    const entry = { ...form, id: `manual-${Date.now()}` };
+    if (useAsHero) {
+      setHeroOverride(entry);
+    } else {
+      setManualEntries((prev) => [...prev, entry]);
+    }
     setForm({ headline: "", outlet: "", date: "", type: "Feature", reach: "", link: "" });
+    setUseAsHero(false);
     setShowForm(false);
-  }, [form]);
+  }, [form, useAsHero]);
 
   if (placements.length === 0 && manualEntries.length === 0) return null;
 
