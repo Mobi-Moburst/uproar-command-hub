@@ -119,7 +119,7 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
                     isEditing={isEditing}
                     getTextOverride={getTextOverride}
                     setTextOverride={setTextOverride}
-                    onRemove={isEditing ? () => setDismissedIds((prev) => new Set(prev).add(id)) : undefined}
+                    onRemove={isEditing ? () => dismissCard(id) : undefined}
                   />
                 );
               })}
@@ -157,7 +157,7 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
                     isEditing={isEditing}
                     getTextOverride={getTextOverride}
                     setTextOverride={setTextOverride}
-                    onRemove={isEditing ? () => setDismissedIds((prev) => new Set(prev).add(id)) : undefined}
+                    onRemove={isEditing ? () => dismissCard(id) : undefined}
                   />
                 );
               })}
