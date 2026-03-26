@@ -4,12 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Zap, Radar, ExternalLink, UserCheck, X, Plus, Save, Loader2, Info, Tag } from "lucide-react";
 import { usePulseSignals, useClaimSignal, useDismissSignal, useScanPulse, useClientEnrichments, useSaveEnrichment, type PulseSignal } from "@/hooks/usePulse";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useClients } from "@/hooks/useClients";
 import { EmptyState } from "@/components/EmptyState";
 
 function SignalCard({ signal }: { signal: PulseSignal }) {
@@ -124,6 +126,7 @@ function SignalCard({ signal }: { signal: PulseSignal }) {
 
 function EnrichmentManager() {
   const { data: enrichments = [] } = useClientEnrichments();
+  const { data: clients = [] } = useClients();
   const saveMutation = useSaveEnrichment();
 
   const [editClient, setEditClient] = useState("");
@@ -131,14 +134,26 @@ function EnrichmentManager() {
   const [keywords, setKeywords] = useState("");
   const [competitors, setCompetitors] = useState("");
 
-  const handleEdit = (e: any) => {
-    const found = enrichments.find((en) => en.client_name === e.client_name);
+  // Get client names from placements data, deduplicated
+  const clientNames = [...new Set(clients.map((c) => c.name))].sort();
+
+  const handleSelectClient = (name: string) => {
+    setEditClient(name);
+    // Pre-fill if enrichment already exists
+    const found = enrichments.find((en) => en.client_name === name);
     if (found) {
-      setEditClient(found.client_name);
       setIndustries(found.industries.join(", "));
       setKeywords(found.keywords.join(", "));
       setCompetitors(found.competitors.join(", "));
+    } else {
+      setIndustries("");
+      setKeywords("");
+      setCompetitors("");
     }
+  };
+
+  const handleEdit = (e: any) => {
+    handleSelectClient(e.client_name);
   };
 
   const handleSave = () => {
@@ -172,12 +187,26 @@ function EnrichmentManager() {
         <CardContent className="p-4 space-y-3">
           <div>
             <label className="text-xs font-medium text-foreground mb-1 block">Client Name</label>
-            <Input
-              value={editClient}
-              onChange={(e) => setEditClient(e.target.value)}
-              placeholder="e.g. ACME Corp"
-              className="h-8 text-sm"
-            />
+            <Select value={editClient} onValueChange={handleSelectClient}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue placeholder="Select a client..." />
+              </SelectTrigger>
+              <SelectContent>
+                {clientNames.map((name) => {
+                  const hasEnrichment = enrichments.some((en) => en.client_name === name);
+                  return (
+                    <SelectItem key={name} value={name}>
+                      <span className="flex items-center gap-2">
+                        {name}
+                        {hasEnrichment && (
+                          <span className="text-[10px] text-accent">● configured</span>
+                        )}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <label className="text-xs font-medium text-foreground mb-1 block">Industries</label>
