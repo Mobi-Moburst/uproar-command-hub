@@ -5,7 +5,20 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import type { MediaPlacement, AwardSubmission } from "@/data/types";
 import type { ConversionRecord } from "@/hooks/useCoverageIntelligence";
 
-interface TeamRanking {
+function InfoBadge({ tip }: { tip: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Info className="h-3 w-3 text-muted-foreground/60 hover:text-primary cursor-help inline-block" />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[220px] text-xs font-normal normal-case tracking-normal">
+        {tip}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+
   team: string;
   placements: number;
   reach: number;
