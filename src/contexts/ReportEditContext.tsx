@@ -11,6 +11,9 @@ interface ReportEditState {
   textOverrides: Map<string, string>;
   setTextOverride: (id: string, value: string) => void;
   getTextOverride: (id: string) => string | undefined;
+  dismissedCards: Set<string>;
+  dismissCard: (id: string) => void;
+  restoreCard: (id: string) => void;
   getCurationState: (aiSummary?: string) => CurationState;
   loadCurationState: (state: CurationState) => void;
 }
