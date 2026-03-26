@@ -137,7 +137,7 @@ export function TeamLeaderboard({ placements, awards, conversions, fromDate, toD
           >
             <div className="absolute inset-x-0 top-0 h-[2px] gradient-brand opacity-60" />
             <div className="flex items-center gap-3 mb-4">
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold ${medalColors[i]}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold ${medalStyles[i]}`}>
                 {i + 1}
               </div>
               <div>
