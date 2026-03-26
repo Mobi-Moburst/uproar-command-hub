@@ -147,6 +147,18 @@ export default function ClientReportPage() {
 
   const { summary, isGenerating, generate } = useAICoverageSummary();
 
+  // Derive date range from data if not set
+  const dataDateRange = useMemo(() => {
+    const dates = allClientPlacements.map((p) => p.date).filter(Boolean).sort();
+    return { earliest: dates[0] || "", latest: dates[dates.length - 1] || "" };
+  }, [allClientPlacements]);
+
+  const periodLabel = useMemo(() => {
+    return fromDate || toDate
+      ? `${fromDate || dataDateRange.earliest} — ${toDate || dataDateRange.latest}`
+      : "All-Time";
+  }, [fromDate, toDate, dataDateRange]);
+
   // Top reporters for AI summary
   const topReportersForAI = useMemo(() => {
     const reporterMap = new Map<string, number>();
@@ -181,27 +193,6 @@ export default function ClientReportPage() {
       monthlyReach,
     });
   }, [clientName, periodLabel, clientPlacements, wonAwards, typeBreakdown, topOutlets, clientSampleConversions, clientBriefingConversions, topReportersForAI, monthlyReach, generate]);
-
-  const handleDateChange = (from: string, to: string) => {
-    const next = new URLSearchParams(params);
-    if (from) next.set("from", from);
-    else next.delete("from");
-    if (to) next.set("to", to);
-    else next.delete("to");
-    setParams(next, { replace: true });
-  };
-
-  // Derive date range from data if not set
-  const dataDateRange = useMemo(() => {
-    const dates = allClientPlacements.map((p) => p.date).filter(Boolean).sort();
-    return { earliest: dates[0] || "", latest: dates[dates.length - 1] || "" };
-  }, [allClientPlacements]);
-
-  const periodLabel = useMemo(() => {
-    return fromDate || toDate
-      ? `${fromDate || dataDateRange.earliest} — ${toDate || dataDateRange.latest}`
-      : "All-Time";
-  }, [fromDate, toDate, dataDateRange]);
 
   if (isLoading) {
     return (
