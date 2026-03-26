@@ -110,8 +110,8 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
         {/* Opportunities */}
         <div className="rounded-xl border border-accent/30 bg-accent/5 p-5">
           <div className="flex items-center gap-2 mb-4">
-            <AlertCircle className="h-4 w-4 text-accent-foreground" />
-            <p className="text-xs font-mono uppercase tracking-wide text-accent-foreground font-semibold">Opportunities</p>
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <p className="text-xs font-mono uppercase tracking-wide text-amber-700 font-semibold">Opportunities</p>
           </div>
           {opportunities.length > 0 ? (
             <ul className="space-y-3">
