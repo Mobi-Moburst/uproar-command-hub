@@ -181,6 +181,34 @@ function ClientReportContent({
   }
 
 
+  const dataDateRange = useMemo(() => {
+    const dates = allClientPlacements.map((p) => p.date).filter(Boolean).sort();
+    return { earliest: dates[0] || "", latest: dates[dates.length - 1] || "" };
+  }, [allClientPlacements]);
+
+  const periodLabel = useMemo(() => {
+    return fromDate || toDate
+      ? `${fromDate || dataDateRange.earliest} — ${toDate || dataDateRange.latest}`
+      : "All-Time";
+  }, [fromDate, toDate, dataDateRange]);
+
+  const topReportersForAI = useMemo(() => {
+    const reporterMap = new Map<string, number>();
+    [...clientSampleConversions, ...clientBriefingConversions]
+      .filter((c) => c.converted && c.reporter)
+      .forEach((c) => reporterMap.set(c.reporter!, (reporterMap.get(c.reporter!) || 0) + 1));
+    return [...reporterMap.entries()]
+      .map(([name, conversions]) => ({ name, conversions }))
+      .sort((a, b) => b.conversions - a.conversions)
+      .slice(0, 5);
+  }, [clientSampleConversions, clientBriefingConversions]);
+
+  const sampleConversionRate = clientSampleConversions.length > 0
+    ? Math.round((clientSampleConversions.filter((c) => c.converted).length / clientSampleConversions.length) * 100)
+    : 0;
+  const briefingConversionRate = clientBriefingConversions.length > 0
+    ? Math.round((clientBriefingConversions.filter((c) => c.converted).length / clientBriefingConversions.length) * 100)
+    : 0;
 
   const handleGetCuration = useCallback(() => {
     const curation = getCurationState(summary);
@@ -220,35 +248,6 @@ function ClientReportContent({
     };
     return { ...curation, snapshot };
   }, [getCurationState, summary, clientName, client, periodLabel, clientPlacements, wonAwards, filteredAwards, typeBreakdown, topOutlets, monthlyReach, clientSampleConversions, clientBriefingConversions, sampleConversionRate, briefingConversionRate]);
-
-  const dataDateRange = useMemo(() => {
-    const dates = allClientPlacements.map((p) => p.date).filter(Boolean).sort();
-    return { earliest: dates[0] || "", latest: dates[dates.length - 1] || "" };
-  }, [allClientPlacements]);
-
-  const periodLabel = useMemo(() => {
-    return fromDate || toDate
-      ? `${fromDate || dataDateRange.earliest} — ${toDate || dataDateRange.latest}`
-      : "All-Time";
-  }, [fromDate, toDate, dataDateRange]);
-
-  const topReportersForAI = useMemo(() => {
-    const reporterMap = new Map<string, number>();
-    [...clientSampleConversions, ...clientBriefingConversions]
-      .filter((c) => c.converted && c.reporter)
-      .forEach((c) => reporterMap.set(c.reporter!, (reporterMap.get(c.reporter!) || 0) + 1));
-    return [...reporterMap.entries()]
-      .map(([name, conversions]) => ({ name, conversions }))
-      .sort((a, b) => b.conversions - a.conversions)
-      .slice(0, 5);
-  }, [clientSampleConversions, clientBriefingConversions]);
-
-  const sampleConversionRate = clientSampleConversions.length > 0
-    ? Math.round((clientSampleConversions.filter((c) => c.converted).length / clientSampleConversions.length) * 100)
-    : 0;
-  const briefingConversionRate = clientBriefingConversions.length > 0
-    ? Math.round((clientBriefingConversions.filter((c) => c.converted).length / clientBriefingConversions.length) * 100)
-    : 0;
 
   const handleGenerateSummary = useCallback(() => {
     const samplesConverted = clientSampleConversions.filter((c) => c.converted).length;
