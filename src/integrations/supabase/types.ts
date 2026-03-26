@@ -44,6 +44,51 @@ export type Database = {
         }
         Relationships: []
       }
+      client_reports: {
+        Row: {
+          client_name: string
+          created_at: string
+          created_by: string | null
+          curation_state: Json
+          from_date: string | null
+          id: string
+          password_hash: string | null
+          slug: string
+          status: string
+          title: string | null
+          to_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          created_by?: string | null
+          curation_state?: Json
+          from_date?: string | null
+          id?: string
+          password_hash?: string | null
+          slug?: string
+          status?: string
+          title?: string | null
+          to_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          curation_state?: Json
+          from_date?: string | null
+          id?: string
+          password_hash?: string | null
+          slug?: string
+          status?: string
+          title?: string | null
+          to_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       placements_archive: {
         Row: {
           ad_value: number
