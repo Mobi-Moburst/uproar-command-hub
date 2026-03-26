@@ -19,6 +19,7 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
   const { isEditing, getTextOverride, setTextOverride } = useReportEdit();
   const [customStrengths, setCustomStrengths] = useState<string[]>([]);
   const [customOpportunities, setCustomOpportunities] = useState<string[]>([]);
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
   if (placements.length === 0) return null;
 
