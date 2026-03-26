@@ -74,9 +74,7 @@ export default function PublicReportPage() {
         <div className="w-full max-w-sm mx-auto px-6">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
-              <div className="rounded-xl bg-foreground/90 px-6 py-3">
-                <img src={uproarLogo} alt="Uproar PR by Moburst" className="h-6 object-contain" />
-              </div>
+              <img src={uproarLogo} alt="Uproar PR by Moburst" className="h-8 object-contain" />
             </div>
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <Lock className="h-5 w-5 text-primary" />
