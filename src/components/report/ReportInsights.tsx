@@ -186,7 +186,7 @@ function EditableInsight({
   setTextOverride: (id: string, value: string) => void;
   onRemove?: () => void;
 }) {
-  const ref = useRef<HTMLLIElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const displayText = getTextOverride(id) ?? defaultText;
 
   const handleBlur = useCallback(() => {
