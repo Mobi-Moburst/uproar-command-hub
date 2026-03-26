@@ -75,6 +75,7 @@ export interface CurationState {
     type: string;
     reach: string;
     link: string;
+    isHero?: boolean;
   }>;
   aiSummary?: string;
   snapshot?: ReportSnapshot;

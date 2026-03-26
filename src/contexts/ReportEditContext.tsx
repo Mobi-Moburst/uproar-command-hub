@@ -14,6 +14,8 @@ interface ReportEditState {
   dismissedCards: Set<string>;
   dismissCard: (id: string) => void;
   restoreCard: (id: string) => void;
+  manualHighlights: CurationState["manualHighlights"];
+  setManualHighlights: (highlights: CurationState["manualHighlights"]) => void;
   getCurationState: (aiSummary?: string) => CurationState;
   loadCurationState: (state: CurationState) => void;
 }
