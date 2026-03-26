@@ -145,6 +145,43 @@ export default function ClientReportPage() {
 
   const wonAwards = filteredAwards.filter((a) => a.status === "Won");
 
+  const { summary, isGenerating, generate } = useAICoverageSummary();
+
+  // Top reporters for AI summary
+  const topReportersForAI = useMemo(() => {
+    const reporterMap = new Map<string, number>();
+    [...clientSampleConversions, ...clientBriefingConversions]
+      .filter((c) => c.converted && c.reporter)
+      .forEach((c) => reporterMap.set(c.reporter!, (reporterMap.get(c.reporter!) || 0) + 1));
+    return [...reporterMap.entries()]
+      .map(([name, conversions]) => ({ name, conversions }))
+      .sort((a, b) => b.conversions - a.conversions)
+      .slice(0, 5);
+  }, [clientSampleConversions, clientBriefingConversions]);
+
+  const handleGenerateSummary = useCallback(() => {
+    const samplesConverted = clientSampleConversions.filter((c) => c.converted).length;
+    const briefingsConverted = clientBriefingConversions.filter((c) => c.converted).length;
+
+    generate(clientName, periodLabel, {
+      totalPlacements: clientPlacements.length,
+      totalReach: clientPlacements.reduce((s, p) => s + p.readership_viewership, 0),
+      totalAdValue: clientPlacements.reduce((s, p) => s + p.ad_value, 0),
+      awardWins: wonAwards.length,
+      ytdPlacements: clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).length,
+      typeBreakdown,
+      topOutlets,
+      samplesSent: clientSampleConversions.length,
+      samplesConverted,
+      sampleConversionRate: clientSampleConversions.length > 0 ? Math.round((samplesConverted / clientSampleConversions.length) * 100) : 0,
+      briefingsHeld: clientBriefingConversions.length,
+      briefingsConverted,
+      briefingConversionRate: clientBriefingConversions.length > 0 ? Math.round((briefingsConverted / clientBriefingConversions.length) * 100) : 0,
+      topReporters: topReportersForAI,
+      monthlyReach,
+    });
+  }, [clientName, periodLabel, clientPlacements, wonAwards, typeBreakdown, topOutlets, clientSampleConversions, clientBriefingConversions, topReportersForAI, monthlyReach, generate]);
+
   const handleDateChange = (from: string, to: string) => {
     const next = new URLSearchParams(params);
     if (from) next.set("from", from);
