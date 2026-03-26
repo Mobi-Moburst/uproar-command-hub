@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { Trophy, Target, TrendingUp, Award, Zap } from "lucide-react";
+import { Trophy, Target, TrendingUp, Award, Zap, Info } from "lucide-react";
 import { formatNumber, formatCurrency } from "@/lib/format";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { MediaPlacement, AwardSubmission } from "@/data/types";
 import type { ConversionRecord } from "@/hooks/useCoverageIntelligence";
 
