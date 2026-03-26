@@ -2,6 +2,67 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+export interface ReportSnapshot {
+  clientName: string;
+  teamName: string;
+  periodLabel: string;
+  totalPlacements: number;
+  totalReach: number;
+  totalAdValue: number;
+  awardWins: number;
+  ytdPlacements: number;
+  ytdReach: number;
+  typeBreakdown: Array<{ type: string; count: number; pct: number }>;
+  topOutlets: Array<{ outlet: string; count: number; reach: number }>;
+  monthlyReach: Array<{ label: string; reach: number; count: number }>;
+  highlights: Array<{
+    id: string;
+    headline: string;
+    outlet: string;
+    date: string;
+    type: string;
+    reach: number;
+    link: string;
+  }>;
+  sampleConversions: Array<{
+    type: "sample";
+    id: string;
+    client: string;
+    reporter: string;
+    outlet: string;
+    date: string;
+    converted: boolean;
+    daysToCoverage?: number;
+  }>;
+  briefingConversions: Array<{
+    type: "briefing";
+    id: string;
+    client: string;
+    reporter: string;
+    outlet: string;
+    date: string;
+    converted: boolean;
+    daysToCoverage?: number;
+  }>;
+  sampleConversionRate: number;
+  briefingConversionRate: number;
+  wonAwards: Array<{ id: string; award_name: string; submission_title: string; status: string; submitted_date?: string | null; due_date?: string; client_name: string }>;
+  allFilteredAwards: Array<{ id: string; award_name: string; submission_title: string; status: string; submitted_date?: string | null; due_date?: string; client_name: string }>;
+  placements: Array<{
+    id: string;
+    headline: string;
+    outlet: string;
+    date: string;
+    type: string;
+    readership_viewership: number;
+    ad_value: number;
+    reporter_name: string;
+    link: string;
+    topic_product: string;
+    secured_by: string;
+  }>;
+}
+
 export interface CurationState {
   hiddenSections: string[];
   textOverrides: Record<string, string>;
@@ -15,6 +76,7 @@ export interface CurationState {
     link: string;
   }>;
   aiSummary?: string;
+  snapshot?: ReportSnapshot;
 }
 
 export interface ClientReport {

@@ -1,11 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { usePublicReport, verifyReportPassword, type CurationState } from "@/hooks/useClientReports";
-import { usePlacements } from "@/hooks/usePlacements";
-import { useAwards } from "@/hooks/useAwards";
-import { useClients } from "@/hooks/useClients";
-import { useSamples } from "@/hooks/useSamples";
-import { useBriefings } from "@/hooks/useBriefings";
+import { usePublicReport, verifyReportPassword, type CurationState, type ReportSnapshot } from "@/hooks/useClientReports";
 import { ReportHero } from "@/components/report/ReportHero";
 import { ReportExecSummary } from "@/components/report/ReportExecSummary";
 import { ReportKpis } from "@/components/report/ReportKpis";
@@ -126,120 +121,27 @@ export default function PublicReportPage() {
 
 function PublicReportContent({ report }: { report: NonNullable<ReturnType<typeof usePublicReport>["data"]> }) {
   const curation = report.curation_state as CurationState;
-  const clientName = report.client_name;
-  const fromDate = report.from_date || "";
-  const toDate = report.to_date || "";
-
-  const { data: placements = [] } = usePlacements();
-  const { data: awards = [] } = useAwards();
-  const { data: clients = [] } = useClients();
-  const { data: samples = [] } = useSamples();
-  const { data: briefings = [] } = useBriefings();
-
-  const client = useMemo(() => clients.find((c) => c.name === clientName), [clients, clientName]);
-
-  const clientPlacements = useMemo(() => {
-    return placements
-      .filter((p) => p.client_name === clientName)
-      .filter((p) => {
-        if (!p.date) return false;
-        if (fromDate && p.date < fromDate) return false;
-        if (toDate && p.date > toDate) return false;
-        return true;
-      })
-      .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-  }, [placements, clientName, fromDate, toDate]);
-
-  const clientAwards = useMemo(() => awards.filter((a) => a.client_name === clientName), [awards, clientName]);
-  const filteredAwards = useMemo(() => {
-    return clientAwards.filter((a) => {
-      const d = a.submitted_date || a.due_date || "";
-      if (!d) return !fromDate && !toDate;
-      if (fromDate && d < fromDate) return false;
-      if (toDate && d > toDate) return false;
-      return true;
-    });
-  }, [clientAwards, fromDate, toDate]);
-  const wonAwards = filteredAwards.filter((a) => a.status === "Won");
-
+  const snapshot = curation.snapshot as ReportSnapshot | undefined;
   const hiddenSet = new Set(curation.hiddenSections || []);
 
-  const periodLabel = useMemo(() => {
-    return fromDate || toDate ? `${fromDate} — ${toDate}` : "All-Time";
-  }, [fromDate, toDate]);
-
-  const typeBreakdown = useMemo(() => {
-    const counts = new Map<string, number>();
-    clientPlacements.forEach((p) => counts.set(p.type || "Other", (counts.get(p.type || "Other") || 0) + 1));
-    return Array.from(counts.entries())
-      .map(([type, count]) => ({ type, count, pct: Math.round((count / clientPlacements.length) * 100) }))
-      .sort((a, b) => b.count - a.count);
-  }, [clientPlacements]);
-
-  const topOutlets = useMemo(() => {
-    const counts = new Map<string, { count: number; reach: number }>();
-    clientPlacements.forEach((p) => {
-      const outlet = p.outlet || "Unknown";
-      const existing = counts.get(outlet) || { count: 0, reach: 0 };
-      counts.set(outlet, { count: existing.count + 1, reach: existing.reach + p.readership_viewership });
-    });
-    return Array.from(counts.entries())
-      .map(([outlet, { count, reach }]) => ({ outlet, count, reach }))
-      .sort((a, b) => b.reach - a.reach)
-      .slice(0, 8);
-  }, [clientPlacements]);
-
-  const monthlyReach = useMemo(() => {
-    const months: { label: string; reach: number; count: number }[] = [];
-    const now = new Date();
-    const endDate = toDate ? new Date(toDate) : now;
-    const startDate = fromDate ? new Date(fromDate) : new Date(now.getFullYear(), now.getMonth() - 11, 1);
-    const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-    while (cursor <= endDate) {
-      const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`;
-      const label = cursor.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
-      const mp = clientPlacements.filter((p) => p.date?.startsWith(key));
-      months.push({ label, reach: mp.reduce((s, p) => s + p.readership_viewership, 0), count: mp.length });
-      cursor.setMonth(cursor.getMonth() + 1);
-    }
-    return months;
-  }, [clientPlacements, fromDate, toDate]);
-
-  const CONVERSION_WINDOW = 90 * 86_400_000;
-  const clientSampleConversions = useMemo(() => {
-    return samples
-      .filter((s) => s.client?.trim().toLowerCase() === clientName.trim().toLowerCase())
-      .map((s) => {
-        const reporter = s.reporter_name?.trim().toLowerCase() || "";
-        const itemDate = s.date_shipped || s.date_requested;
-        if (!itemDate || !reporter) return { type: "sample" as const, id: s.id, client: s.client, reporter: s.reporter_name, outlet: s.outlet, date: itemDate || "", converted: false, daysToCoverage: undefined };
-        const t = new Date(itemDate).getTime();
-        const match = clientPlacements.find((p) => p.date && p.reporter_name?.trim().toLowerCase() === reporter && new Date(p.date).getTime() >= t && new Date(p.date).getTime() <= t + CONVERSION_WINDOW);
-        return { type: "sample" as const, id: s.id, client: s.client, reporter: s.reporter_name, outlet: s.outlet || match?.outlet || "", date: itemDate, converted: !!match, placement: match, daysToCoverage: match ? Math.round((new Date(match.date).getTime() - t) / 86_400_000) : undefined };
-      });
-  }, [samples, clientName, clientPlacements]);
-
-  const clientBriefingConversions = useMemo(() => {
-    return briefings
-      .filter((b) => b.client?.trim().toLowerCase() === clientName.trim().toLowerCase())
-      .map((b) => {
-        const reporter = b.reporter_name?.trim().toLowerCase() || "";
-        const itemDate = b.date_met;
-        if (!itemDate || !reporter) return { type: "briefing" as const, id: b.id, client: b.client, reporter: b.reporter_name, outlet: b.outlet, date: itemDate || "", converted: false, daysToCoverage: undefined };
-        const t = new Date(itemDate).getTime();
-        const match = clientPlacements.find((p) => p.date && p.reporter_name?.trim().toLowerCase() === reporter && new Date(p.date).getTime() >= t && new Date(p.date).getTime() <= t + CONVERSION_WINDOW);
-        return { type: "briefing" as const, id: b.id, client: b.client, reporter: b.reporter_name, outlet: b.outlet || match?.outlet || "", date: itemDate, converted: !!match, placement: match, daysToCoverage: match ? Math.round((new Date(match.date).getTime() - t) / 86_400_000) : undefined };
-      });
-  }, [briefings, clientName, clientPlacements]);
-
-  const sampleConversionRate = clientSampleConversions.length > 0
-    ? Math.round((clientSampleConversions.filter((c) => c.converted).length / clientSampleConversions.length) * 100)
-    : 0;
-  const briefingConversionRate = clientBriefingConversions.length > 0
-    ? Math.round((clientBriefingConversions.filter((c) => c.converted).length / clientBriefingConversions.length) * 100)
-    : 0;
+  // If no snapshot exists (legacy reports), show a message
+  if (!snapshot) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-foreground">Report Needs Re-publishing</h1>
+          <p className="mt-2 text-sm text-muted-foreground max-w-md">
+            This report was created before data snapshotting was enabled. Please ask the report owner to re-save and publish it.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const aiSummary = curation.textOverrides?.["ai-summary-text"] || curation.aiSummary || "";
+  const placements = snapshot.placements as any[];
+  const fromDate = report.from_date || "";
+  const toDate = report.to_date || "";
 
   function SectionDivider() {
     return <div className="mb-12 h-px w-full gradient-brand opacity-20" />;
@@ -247,25 +149,23 @@ function PublicReportContent({ report }: { report: NonNullable<ReturnType<typeof
 
   return (
     <div className="min-h-screen bg-background">
-      <ReportHero clientName={clientName} teamName={client?.team_name || ""} periodLabel={periodLabel} />
+      <ReportHero clientName={snapshot.clientName} teamName={snapshot.teamName} periodLabel={snapshot.periodLabel} />
 
       <div className="mx-auto max-w-5xl px-6 py-12 space-y-12">
         {!hiddenSet.has("exec-summary") && (
-          <>
-            <ReportExecSummary placements={clientPlacements} awardWins={wonAwards.length} periodLabel={periodLabel} />
-          </>
+          <ReportExecSummary placements={placements} awardWins={snapshot.awardWins} periodLabel={snapshot.periodLabel} />
         )}
 
         {!hiddenSet.has("kpis") && (
           <>
             <SectionDivider />
             <ReportKpis
-              totalPlacements={clientPlacements.length}
-              totalReach={clientPlacements.reduce((s, p) => s + p.readership_viewership, 0)}
-              totalAdValue={clientPlacements.reduce((s, p) => s + p.ad_value, 0)}
-              awardWins={wonAwards.length}
-              ytdPlacements={clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).length}
-              ytdReach={clientPlacements.filter((p) => p.date?.startsWith(String(new Date().getFullYear()))).reduce((s, p) => s + p.readership_viewership, 0)}
+              totalPlacements={snapshot.totalPlacements}
+              totalReach={snapshot.totalReach}
+              totalAdValue={snapshot.totalAdValue}
+              awardWins={snapshot.awardWins}
+              ytdPlacements={snapshot.ytdPlacements}
+              ytdReach={snapshot.ytdReach}
             />
           </>
         )}
@@ -281,10 +181,10 @@ function PublicReportContent({ report }: { report: NonNullable<ReturnType<typeof
           <>
             <SectionDivider />
             <ReportInsights
-              placements={clientPlacements}
-              awardWins={wonAwards.length}
-              sampleConversionRate={sampleConversionRate}
-              briefingConversionRate={briefingConversionRate}
+              placements={placements}
+              awardWins={snapshot.awardWins}
+              sampleConversionRate={snapshot.sampleConversionRate}
+              briefingConversionRate={snapshot.briefingConversionRate}
             />
           </>
         )}
@@ -292,49 +192,56 @@ function PublicReportContent({ report }: { report: NonNullable<ReturnType<typeof
         {!hiddenSet.has("timeline") && (
           <>
             <SectionDivider />
-            <ReportTimeline placements={clientPlacements} />
+            <ReportTimeline placements={placements} />
           </>
         )}
 
         {!hiddenSet.has("highlights") && (
           <>
             <SectionDivider />
-            <ReportHighlights placements={clientPlacements} />
+            <ReportHighlights placements={placements} />
           </>
         )}
 
         {!hiddenSet.has("coverage-breakdown") && (
           <>
             <SectionDivider />
-            <ReportCoverageBreakdown typeBreakdown={typeBreakdown} topOutlets={topOutlets} monthlyReach={monthlyReach} />
+            <ReportCoverageBreakdown
+              typeBreakdown={snapshot.typeBreakdown}
+              topOutlets={snapshot.topOutlets}
+              monthlyReach={snapshot.monthlyReach}
+            />
           </>
         )}
 
         {!hiddenSet.has("outreach") && (
           <>
             <SectionDivider />
-            <ReportOutreachSummary sampleConversions={clientSampleConversions} briefingConversions={clientBriefingConversions} />
+            <ReportOutreachSummary
+              sampleConversions={snapshot.sampleConversions as any}
+              briefingConversions={snapshot.briefingConversions as any}
+            />
           </>
         )}
 
         {!hiddenSet.has("top-reporters") && (
           <>
             <SectionDivider />
-            <ReportTopReporters conversions={[...clientSampleConversions, ...clientBriefingConversions]} />
+            <ReportTopReporters conversions={[...snapshot.sampleConversions, ...snapshot.briefingConversions] as any} />
           </>
         )}
 
         {!hiddenSet.has("outlet-momentum") && (
           <>
             <SectionDivider />
-            <ReportOutletMomentum placements={clientPlacements} fromDate={fromDate} toDate={toDate} />
+            <ReportOutletMomentum placements={placements} fromDate={fromDate} toDate={toDate} />
           </>
         )}
 
         {!hiddenSet.has("awards") && (
           <>
             <SectionDivider />
-            <ReportAwards wonAwards={wonAwards} allAwards={filteredAwards} />
+            <ReportAwards wonAwards={snapshot.wonAwards as any} allAwards={snapshot.allFilteredAwards as any} />
           </>
         )}
 
