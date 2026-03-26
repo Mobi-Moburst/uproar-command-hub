@@ -25,7 +25,7 @@ import { useAICoverageSummary } from "@/hooks/useAICoverageSummary";
 import type { MediaPlacement, AwardSubmission, Sample, Briefing } from "@/data/types";
 
 function SectionDivider() {
-  return <div className="mt-12 h-px w-full gradient-brand opacity-20 print:opacity-40" />;
+  return <div className="mb-12 h-px w-full gradient-brand opacity-20 print:opacity-40" />;
 }
 
 export default function ClientReportPage() {
