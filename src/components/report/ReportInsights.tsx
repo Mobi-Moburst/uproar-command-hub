@@ -144,3 +144,45 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
     </section>
   );
 }
+
+function EditableInsight({
+  id,
+  defaultText,
+  borderClass,
+  isEditing,
+  getTextOverride,
+  setTextOverride,
+}: {
+  id: string;
+  defaultText: string;
+  borderClass: string;
+  isEditing: boolean;
+  getTextOverride: (id: string) => string | undefined;
+  setTextOverride: (id: string, value: string) => void;
+}) {
+  const ref = useRef<HTMLLIElement>(null);
+  const displayText = getTextOverride(id) ?? defaultText;
+
+  const handleBlur = useCallback(() => {
+    if (ref.current) {
+      const text = ref.current.innerText.trim();
+      if (text !== defaultText) {
+        setTextOverride(id, text);
+      }
+    }
+  }, [id, defaultText, setTextOverride]);
+
+  return (
+    <li
+      ref={ref}
+      contentEditable={isEditing}
+      suppressContentEditableWarning
+      onBlur={handleBlur}
+      className={`text-sm text-foreground/85 leading-relaxed pl-4 border-l-2 ${borderClass} ${
+        isEditing ? "outline-none ring-1 ring-primary/20 rounded px-3 py-1 -mx-1 focus:ring-primary/50 transition-shadow cursor-text" : ""
+      }`}
+    >
+      {displayText}
+    </li>
+  );
+}
