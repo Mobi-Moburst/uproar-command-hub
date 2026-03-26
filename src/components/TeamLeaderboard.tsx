@@ -18,7 +18,7 @@ function InfoBadge({ tip }: { tip: string }) {
   );
 }
 
-
+interface TeamRanking {
   team: string;
   placements: number;
   reach: number;
