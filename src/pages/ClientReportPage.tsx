@@ -3,14 +3,19 @@ import { useSearchParams } from "react-router-dom";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
 import { useClients } from "@/hooks/useClients";
+import { useSamples } from "@/hooks/useSamples";
+import { useBriefings } from "@/hooks/useBriefings";
 import { ReportHero } from "@/components/report/ReportHero";
 import { ReportKpis } from "@/components/report/ReportKpis";
 import { ReportHighlights } from "@/components/report/ReportHighlights";
 import { ReportCoverageBreakdown } from "@/components/report/ReportCoverageBreakdown";
 import { ReportAwards } from "@/components/report/ReportAwards";
+import { ReportOutreachSummary } from "@/components/report/ReportOutreachSummary";
+import { ReportTopReporters } from "@/components/report/ReportTopReporters";
+import { ReportOutletMomentum } from "@/components/report/ReportOutletMomentum";
 import { ReportFooter } from "@/components/report/ReportFooter";
 import { ReportDateRange } from "@/components/report/ReportDateRange";
-import type { MediaPlacement, AwardSubmission } from "@/data/types";
+import type { MediaPlacement, AwardSubmission, Sample, Briefing } from "@/data/types";
 
 export default function ClientReportPage() {
   const [params, setParams] = useSearchParams();
