@@ -18,7 +18,19 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
 
   const handleBlur = useCallback(() => {
     if (contentRef.current) {
-      const text = contentRef.current.innerText.trim();
+      // Convert HTML back to markdown-style text to preserve formatting
+      let html = contentRef.current.innerHTML;
+      // Convert <strong> back to **bold**
+      html = html.replace(/<strong[^>]*>(.*?)<\/strong>/gi, "**$1**");
+      // Convert </p><p...> back to double newlines
+      html = html.replace(/<\/p>\s*<p[^>]*>/gi, "\n\n");
+      // Convert <br> to single newlines
+      html = html.replace(/<br\s*\/?>/gi, "\n");
+      // Strip remaining HTML tags
+      html = html.replace(/<[^>]+>/g, "");
+      // Decode HTML entities
+      html = html.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ");
+      const text = html.trim();
       if (text !== summary) {
         setTextOverride("ai-summary-text", text);
       }
