@@ -85,7 +85,10 @@ export function ReportInsights({ placements, awardWins, sampleConversionRate, br
   const strengths = insights.filter((i) => i.type === "strength");
   const opportunities = insights.filter((i) => i.type === "opportunity");
 
-  if (strengths.length === 0 && opportunities.length === 0) return null;
+  const allStrengths = [...strengths, ...customStrengths.map((t) => ({ type: "strength" as const, text: t }))];
+  const allOpportunities = [...opportunities, ...customOpportunities.map((t) => ({ type: "opportunity" as const, text: t }))];
+
+  if (allStrengths.length === 0 && allOpportunities.length === 0 && !isEditing) return null;
 
   return (
     <section>
