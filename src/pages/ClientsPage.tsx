@@ -13,6 +13,7 @@ import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
 import { useSamples } from "@/hooks/useSamples";
 import { useBriefings } from "@/hooks/useBriefings";
+import { useCoverageIntelligence } from "@/hooks/useCoverageIntelligence";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Info } from "lucide-react";
 import type { Client } from "@/data/types";
@@ -24,7 +25,7 @@ export default function ClientsPage() {
   const { data: awards = [] } = useAwards();
   const { data: samples = [] } = useSamples();
   const { data: briefings = [] } = useBriefings();
-
+  const { conversions } = useCoverageIntelligence();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
@@ -220,20 +221,22 @@ export default function ClientsPage() {
                     <div className="rounded-md border border-border p-4">
                       <p className="text-xs text-muted-foreground">Samples</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{clientSamples.length}</p>
-                      {clientSamples.length > 0 && (
-                        <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">
-                          {Math.round((clientSamples.filter(s => s.status.toLowerCase().includes("coverage live")).length / clientSamples.length) * 100)}% conversion
-                        </p>
-                      )}
+                      {clientSamples.length > 0 && (() => {
+                        const clientConv = conversions.filter(c => c.type === "sample" && c.client === selectedClient.name);
+                        const converted = clientConv.filter(c => c.converted).length;
+                        const rate = clientConv.length > 0 ? Math.round((converted / clientConv.length) * 100) : 0;
+                        return <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">{rate}% conversion ({converted}/{clientConv.length})</p>;
+                      })()}
                     </div>
                     <div className="rounded-md border border-border p-4">
                       <p className="text-xs text-muted-foreground">Briefings</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{clientBriefings.length}</p>
-                      {clientBriefings.length > 0 && (
-                        <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">
-                          {Math.round((clientBriefings.filter(b => b.status.toLowerCase().includes("coverage live")).length / clientBriefings.length) * 100)}% conversion
-                        </p>
-                      )}
+                      {clientBriefings.length > 0 && (() => {
+                        const clientConv = conversions.filter(c => c.type === "briefing" && c.client === selectedClient.name);
+                        const converted = clientConv.filter(c => c.converted).length;
+                        const rate = clientConv.length > 0 ? Math.round((converted / clientConv.length) * 100) : 0;
+                        return <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">{rate}% conversion ({converted}/{clientConv.length})</p>;
+                      })()}
                     </div>
                   </div>
 
