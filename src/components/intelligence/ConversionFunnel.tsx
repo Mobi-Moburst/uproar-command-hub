@@ -1,9 +1,18 @@
 import { useState, useMemo } from "react";
-import { FilterBar, FilterSelect, SearchInput } from "@/components/FilterBar";
-import { TypeBadge } from "@/components/TypeBadge";
+import { FilterBar, FilterSelect } from "@/components/FilterBar";
 import { formatDateShort } from "@/lib/format";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import type { ConversionRecord } from "@/hooks/useCoverageIntelligence";
+
+const tooltipStyle = {
+  backgroundColor: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
+  borderRadius: 10,
+  fontSize: 12,
+  fontFamily: "Geist Mono, monospace",
+  padding: "10px 14px",
+  boxShadow: "0 4px 16px -4px rgba(0,0,0,0.12)",
+};
 
 interface Props {
   conversions: ConversionRecord[];
@@ -55,48 +64,54 @@ export function ConversionFunnel({ conversions }: Props) {
       </FilterBar>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Samples Sent</p>
+        <div className="relative overflow-hidden rounded-xl border border-border bg-card p-4">
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-muted-foreground/20" />
+          <p className="text-xs font-medium text-muted-foreground">Samples Sent</p>
           <p className="mt-1 font-tight text-2xl font-bold text-foreground">{sampleTotal}</p>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Samples → Coverage</p>
-          <p className="mt-1 font-tight text-2xl font-bold text-emerald">{sampleConverted}</p>
+        <div className="relative overflow-hidden rounded-xl border border-border bg-card p-4">
+          <div className="absolute inset-x-0 top-0 h-[2px] gradient-brand" />
+          <p className="text-xs font-medium text-muted-foreground">Samples → Coverage</p>
+          <p className="mt-1 font-tight text-2xl font-bold text-primary">{sampleConverted}</p>
           <p className="text-[10px] font-mono text-muted-foreground">
             {sampleTotal > 0 ? `${Math.round((sampleConverted / sampleTotal) * 100)}%` : "–"}
           </p>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Briefings Conducted</p>
+        <div className="relative overflow-hidden rounded-xl border border-border bg-card p-4">
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-muted-foreground/20" />
+          <p className="text-xs font-medium text-muted-foreground">Briefings Conducted</p>
           <p className="mt-1 font-tight text-2xl font-bold text-foreground">{briefingTotal}</p>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Briefings → Coverage</p>
-          <p className="mt-1 font-tight text-2xl font-bold text-emerald">{briefingConverted}</p>
+        <div className="relative overflow-hidden rounded-xl border border-border bg-card p-4">
+          <div className="absolute inset-x-0 top-0 h-[2px] gradient-brand" />
+          <p className="text-xs font-medium text-muted-foreground">Briefings → Coverage</p>
+          <p className="mt-1 font-tight text-2xl font-bold text-primary">{briefingConverted}</p>
           <p className="text-[10px] font-mono text-muted-foreground">
             {briefingTotal > 0 ? `${Math.round((briefingConverted / briefingTotal) * 100)}%` : "–"}
           </p>
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
         <h4 className="text-sm font-semibold text-foreground mb-4">Conversion Comparison</h4>
-        <ResponsiveContainer width="100%" height={220}>
+        <ResponsiveContainer width="100%" height={240}>
           <BarChart data={chartData} barGap={8}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="name" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
-            <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: 8,
-                fontSize: 12,
-              }}
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+            <XAxis
+              dataKey="name"
+              tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))", fontFamily: "Geist, sans-serif" }}
+              tickLine={false}
+              axisLine={false}
             />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="sent" name="Sent" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="covered" name="Covered" fill="hsl(var(--emerald))" radius={[4, 4, 0, 0]} />
+            <YAxis
+              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "Geist Mono, monospace" }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "hsl(var(--muted) / 0.4)" }} />
+            <Legend wrapperStyle={{ fontSize: 12, fontFamily: "Geist, sans-serif" }} iconType="circle" iconSize={8} />
+            <Bar dataKey="sent" name="Sent" fill="hsl(var(--muted-foreground))" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="covered" name="Covered" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -104,24 +119,26 @@ export function ConversionFunnel({ conversions }: Props) {
       {recentConversions.length > 0 && (
         <div>
           <h4 className="text-sm font-semibold text-foreground mb-3">Recent Conversions</h4>
-          <div className="overflow-x-auto rounded-lg border border-border">
+          <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Reporter</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Client</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Outlet</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Days to Coverage</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Date</th>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reporter</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Outlet</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Days to Coverage</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
                 </tr>
               </thead>
               <tbody className="font-mono">
                 {recentConversions.map((c) => (
-                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                        c.type === "sample" ? "bg-emerald-light text-emerald" : "bg-muted text-muted-foreground"
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        c.type === "sample"
+                          ? "bg-primary/10 text-primary"
+                          : "bg-accent/10 text-accent"
                       }`}>
                         {c.type === "sample" ? "Sample" : "Briefing"}
                       </span>
@@ -129,7 +146,7 @@ export function ConversionFunnel({ conversions }: Props) {
                     <td className="px-4 py-3 font-sans text-foreground">{c.reporter || "–"}</td>
                     <td className="px-4 py-3 font-sans text-foreground">{c.client}</td>
                     <td className="px-4 py-3 text-muted-foreground">{c.outlet || "–"}</td>
-                    <td className="px-4 py-3 text-right text-emerald font-bold">{c.daysToCoverage ?? "–"}</td>
+                    <td className="px-4 py-3 text-right text-primary font-bold">{c.daysToCoverage ?? "–"}</td>
                     <td className="px-4 py-3 text-right text-muted-foreground">{formatDateShort(c.date)}</td>
                   </tr>
                 ))}
