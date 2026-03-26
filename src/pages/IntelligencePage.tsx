@@ -52,6 +52,38 @@ export default function IntelligencePage() {
           )}
         </div>
 
+        {/* Coming Soon — HubSpot-powered metrics */}
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            Pitch Intelligence
+            <span className="inline-flex items-center rounded-full bg-status-drafting/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-status-drafting">
+              Coming Soon
+            </span>
+          </h2>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="relative rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+              <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Pitch → Response Rate</p>
+              <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-muted-foreground/40">—</p>
+              <p className="mt-1 text-sm font-mono text-muted-foreground/40">HubSpot integration</p>
+            </div>
+            <div className="relative rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+              <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Pitch → Coverage Rate</p>
+              <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-muted-foreground/40">—</p>
+              <p className="mt-1 text-sm font-mono text-muted-foreground/40">Full funnel tracking</p>
+            </div>
+            <div className="relative rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+              <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Avg. Open Rate</p>
+              <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-muted-foreground/40">—</p>
+              <p className="mt-1 text-sm font-mono text-muted-foreground/40">Email engagement</p>
+            </div>
+            <div className="relative rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+              <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Best Outreach Window</p>
+              <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-muted-foreground/40">—</p>
+              <p className="mt-1 text-sm font-mono text-muted-foreground/40">Optimal send timing</p>
+            </div>
+          </div>
+        </div>
+
         <Tabs defaultValue="funnel" className="space-y-6">
           <TabsList>
             <TabsTrigger value="funnel">Conversion Funnel</TabsTrigger>
