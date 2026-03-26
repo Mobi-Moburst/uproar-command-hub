@@ -1,5 +1,8 @@
 import { Sparkles, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useReportEdit } from "@/contexts/ReportEditContext";
+import { useRef, useCallback } from "react";
+import { cn } from "@/lib/utils";
 
 interface ReportAISummaryProps {
   summary: string;
@@ -8,12 +11,24 @@ interface ReportAISummaryProps {
 }
 
 export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAISummaryProps) {
+  const { isEditing, getTextOverride, setTextOverride } = useReportEdit();
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const overriddenSummary = getTextOverride("ai-summary-text") ?? summary;
+
+  const handleBlur = useCallback(() => {
+    if (contentRef.current) {
+      const text = contentRef.current.innerText.trim();
+      if (text !== summary) {
+        setTextOverride("ai-summary-text", text);
+      }
+    }
+  }, [summary, setTextOverride]);
+
   return (
     <section className="relative overflow-hidden rounded-2xl border border-border bg-card">
-      {/* Gradient accent bar */}
       <div className="absolute inset-x-0 top-0 h-1 gradient-brand" />
 
-      {/* Header */}
       <div className="flex items-center justify-between px-6 pt-6 pb-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
@@ -29,14 +44,14 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
           size="sm"
           onClick={onGenerate}
           disabled={isGenerating}
-          className="gap-2 rounded-lg border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all"
+          className="gap-2 rounded-lg border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all print:hidden"
         >
           {isGenerating ? (
             <>
               <RotateCcw className="h-3.5 w-3.5 animate-spin" />
               Generating…
             </>
-          ) : summary ? (
+          ) : overriddenSummary ? (
             <>
               <RotateCcw className="h-3.5 w-3.5" />
               Regenerate
@@ -50,8 +65,7 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
         </Button>
       </div>
 
-      {/* Empty state */}
-      {!summary && !isGenerating && (
+      {!overriddenSummary && !isGenerating && (
         <div className="mx-6 mb-6 rounded-xl border border-dashed border-border/60 bg-muted/30 p-10 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <Sparkles className="h-5 w-5 text-primary/60" />
@@ -63,11 +77,9 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
         </div>
       )}
 
-      {/* Content */}
-      {(summary || isGenerating) && (
+      {(overriddenSummary || isGenerating) && (
         <div className="px-6 pb-6">
-          {/* Loading state */}
-          {!summary && isGenerating && (
+          {!overriddenSummary && isGenerating && (
             <div className="flex flex-col items-center justify-center py-10 gap-4">
               <div className="relative">
                 <div className="h-10 w-10 rounded-full border-2 border-primary/20" />
@@ -80,22 +92,36 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
             </div>
           )}
 
-          {/* Summary text */}
-          {summary && (
+          {overriddenSummary && (
             <div className="space-y-4">
-              {summary.split("\n\n").map((paragraph, i) => (
-                <p
-                  key={i}
-                  className="text-[14px] leading-[1.8] text-foreground/85 font-sans"
+              {isEditing ? (
+                <div
+                  ref={contentRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={handleBlur}
+                  className="text-[14px] leading-[1.8] text-foreground/85 font-sans outline-none ring-1 ring-primary/20 rounded-lg p-3 -m-3 focus:ring-primary/50 transition-shadow cursor-text"
                   dangerouslySetInnerHTML={{
-                    __html: paragraph
+                    __html: overriddenSummary
                       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+                      .replace(/\n\n/g, "</p><p class='mt-4 text-[14px] leading-[1.8] text-foreground/85 font-sans'>")
                       .replace(/\n/g, "<br />"),
                   }}
                 />
-              ))}
+              ) : (
+                overriddenSummary.split("\n\n").map((paragraph, i) => (
+                  <p
+                    key={i}
+                    className="text-[14px] leading-[1.8] text-foreground/85 font-sans"
+                    dangerouslySetInnerHTML={{
+                      __html: paragraph
+                        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+                        .replace(/\n/g, "<br />"),
+                    }}
+                  />
+                ))
+              )}
 
-              {/* Still streaming indicator */}
               {isGenerating && (
                 <div className="flex items-center gap-2 pt-3 border-t border-border/40">
                   <div className="flex gap-1">
