@@ -317,11 +317,7 @@ export default function PulsePage() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : unclaimedSignals.length === 0 ? (
-              <EmptyState
-                icon={Radar}
-                title="No signals yet"
-                description="Configure client targeting and run a scan to generate today's signals."
-              />
+              <EmptyState message="No signals yet — configure client targeting and run a scan to generate today's signals." />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {unclaimedSignals.map((signal) => (
@@ -333,11 +329,7 @@ export default function PulsePage() {
 
           <TabsContent value="claimed" className="space-y-3">
             {claimedSignals.length === 0 ? (
-              <EmptyState
-                icon={UserCheck}
-                title="No claimed signals"
-                description="Claim a signal to mark it as yours."
-              />
+              <EmptyState message="No claimed signals — claim a signal to mark it as yours." />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {claimedSignals.map((signal) => (
