@@ -90,7 +90,7 @@ export function ReportOutreachSummary({ sampleConversions, briefingConversions }
     )},
   ];
 
-  const visibleTop = topCards.filter((c) => !dismissed.has(c.id));
+  const visibleTop = topCards.filter((c) => !dismissedCards.has(c.id));
 
   return (
     <section>
