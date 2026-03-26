@@ -57,7 +57,7 @@ function DeltaBadge({ current, previous, label }: DeltaBadgeProps) {
   }
   if (previous === 0) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-emerald-600">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-accent">
         <TrendingUp className="h-3 w-3" />New {label && <span className="ml-0.5 opacity-60">{label}</span>}
       </span>
     );
@@ -72,7 +72,7 @@ function DeltaBadge({ current, previous, label }: DeltaBadgeProps) {
   }
   if (pct > 0) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-emerald-600">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-accent">
         <TrendingUp className="h-3 w-3" />+{pct}% {label && <span className="ml-0.5 opacity-60">{label}</span>}
       </span>
     );
