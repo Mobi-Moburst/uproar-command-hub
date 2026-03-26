@@ -46,8 +46,8 @@ export interface ReportSnapshot {
   }>;
   sampleConversionRate: number;
   briefingConversionRate: number;
-  wonAwards: Array<{ id: string; title: string; publication: string; status: string; submitted_date?: string; due_date?: string; client_name: string }>;
-  allFilteredAwards: Array<{ id: string; title: string; publication: string; status: string; submitted_date?: string; due_date?: string; client_name: string }>;
+  wonAwards: Array<{ id: string; award_name: string; submission_title: string; status: string; submitted_date?: string | null; due_date?: string; client_name: string }>;
+  allFilteredAwards: Array<{ id: string; award_name: string; submission_title: string; status: string; submitted_date?: string | null; due_date?: string; client_name: string }>;
   placements: Array<{
     id: string;
     headline: string;
