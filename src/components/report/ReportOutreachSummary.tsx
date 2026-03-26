@@ -7,9 +7,14 @@ interface ReportOutreachSummaryProps {
 }
 
 export function ReportOutreachSummary({ sampleConversions, briefingConversions }: ReportOutreachSummaryProps) {
+  const CONVERSION_WINDOW = 90 * 86_400_000;
+  const now = Date.now();
+
   const samplesSent = sampleConversions.length;
   const samplesConverted = sampleConversions.filter((c) => c.converted).length;
+  const samplesPending = sampleConversions.filter((c) => !c.converted && c.date && (now - new Date(c.date).getTime()) < CONVERSION_WINDOW).length;
   const sampleRate = samplesSent > 0 ? Math.round((samplesConverted / samplesSent) * 100) : 0;
+  const samplePendingRate = samplesSent > 0 ? Math.round((samplesPending / samplesSent) * 100) : 0;
 
   const briefingsSent = briefingConversions.length;
   const briefingsConverted = briefingConversions.filter((c) => c.converted).length;
@@ -40,7 +45,9 @@ export function ReportOutreachSummary({ sampleConversions, briefingConversions }
         <div className="rounded-lg border border-border bg-card p-5">
           <p className="text-xs font-medium text-muted-foreground">Sample Conversion</p>
           <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-primary">{sampleRate}%</p>
-          <p className="mt-1 text-[11px] font-mono text-muted-foreground/70">Sample → Placement</p>
+          <p className="mt-1 text-[11px] font-mono text-muted-foreground/70">
+            {samplesConverted} converted · {samplePendingRate}% pending
+          </p>
         </div>
 
         {/* Briefing funnel */}
