@@ -11,6 +11,7 @@ import PlacementsPage from "./pages/PlacementsPage";
 import AwardsPage from "./pages/AwardsPage";
 import WeeklyWinsPage from "./pages/WeeklyWinsPage";
 import ReportersPage from "./pages/ReportersPage";
+import IntelligencePage from "./pages/IntelligencePage";
 import VerticalsPage from "./pages/VerticalsPage";
 import TeamsPage from "./pages/TeamsPage";
 import SamplesPage from "./pages/SamplesPage";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/awards" element={<ProtectedRoute><AwardsPage /></ProtectedRoute>} />
             <Route path="/weekly-wins" element={<ProtectedRoute><WeeklyWinsPage /></ProtectedRoute>} />
             <Route path="/reporters" element={<ProtectedRoute><ReportersPage /></ProtectedRoute>} />
+            <Route path="/intelligence" element={<ProtectedRoute><IntelligencePage /></ProtectedRoute>} />
             <Route path="/verticals" element={<ProtectedRoute><VerticalsPage /></ProtectedRoute>} />
             <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
             <Route path="/samples" element={<ProtectedRoute><SamplesPage /></ProtectedRoute>} />

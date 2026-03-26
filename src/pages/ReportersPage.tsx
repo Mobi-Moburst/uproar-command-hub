@@ -11,7 +11,7 @@ import { useReporterAnalytics, ReporterAggregate } from "@/hooks/useReporterAnal
 import { formatNumber, formatDateShort } from "@/lib/format";
 import { ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
-type SortKey = "name" | "relationshipScore" | "placementCount" | "primaryOutlets" | "uniqueClients" | "topVertical" | "totalReach" | "mostRecentDate";
+type SortKey = "name" | "relationshipScore" | "placementCount" | "primaryOutlets" | "uniqueClients" | "topVertical" | "totalReach" | "mostRecentDate" | "conversionRate";
 type SortDir = "asc" | "desc";
 
 export default function ReportersPage() {
@@ -45,6 +45,7 @@ export default function ReportersPage() {
         case "topVertical": cmp = a.topVertical.localeCompare(b.topVertical); break;
         case "totalReach": cmp = a.totalReach - b.totalReach; break;
         case "mostRecentDate": cmp = (a.mostRecentDate || "").localeCompare(b.mostRecentDate || ""); break;
+        case "conversionRate": cmp = a.conversionRate - b.conversionRate; break;
       }
       return sortDir === "asc" ? cmp : -cmp;
     });
@@ -133,6 +134,7 @@ export default function ReportersPage() {
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("topVertical")}>Top Vertical<SortIcon col="topVertical" /></th>
                   <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("totalReach")}>Reach<SortIcon col="totalReach" /></th>
                   <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("mostRecentDate")}>Last Placement<SortIcon col="mostRecentDate" /></th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("conversionRate")}>Conversion<SortIcon col="conversionRate" /></th>
                 </tr>
               </thead>
               <tbody className="font-mono">
@@ -184,10 +186,26 @@ function ReporterRow({
         <td className="px-4 py-3"><TypeBadge type={r.topVertical} /></td>
         <td className="px-4 py-3 text-right">{formatNumber(r.totalReach)}</td>
         <td className="px-4 py-3 text-right text-muted-foreground">{formatDateShort(r.mostRecentDate)}</td>
+        <td className="px-4 py-3 text-right">
+          {r.conversionRate > 0 ? (
+            <span className="font-bold text-emerald">{Math.round(r.conversionRate * 100)}%</span>
+          ) : (
+            <span className="text-muted-foreground">–</span>
+          )}
+          {r.topAffinityVerticals.length > 0 && (
+            <div className="mt-0.5 flex justify-end gap-1">
+              {r.topAffinityVerticals.map((v) => (
+                <span key={v} className="inline-flex items-center rounded-full bg-emerald-light px-1.5 py-0.5 text-[9px] font-medium text-emerald">
+                  {v}
+                </span>
+              ))}
+            </div>
+          )}
+        </td>
       </tr>
       {isExpanded && (
         <tr>
-          <td colSpan={9} className="bg-muted/30 px-6 py-4">
+          <td colSpan={10} className="bg-muted/30 px-6 py-4">
             <div className="mb-3 flex items-center gap-4">
               <p className="text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">Clients:</span> {r.uniqueClients.join(", ")}
