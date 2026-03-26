@@ -10,10 +10,10 @@ export function ReportHero({ clientName, teamName, periodLabel }: ReportHeroProp
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <header className="relative overflow-hidden border-b border-border bg-foreground px-6 py-16 text-primary-foreground">
+    <header className="relative overflow-hidden border-b border-border gradient-brand px-6 py-16 text-primary-foreground">
       {/* Subtle geometric accent */}
-      <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-primary/10" />
-      <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-primary/5" />
+      <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/10" />
+      <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-white/5" />
 
       <div className="relative mx-auto max-w-5xl">
         <p className="text-xs font-mono uppercase tracking-[0.2em] text-primary/80">

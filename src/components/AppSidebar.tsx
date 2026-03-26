@@ -1,8 +1,10 @@
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Sun, Moon } from "lucide-react";
 
 const navItems = [
   { title: "Overview", path: "/" },
@@ -22,6 +24,7 @@ const navItems = [
 export function AppSidebar() {
   const location = useLocation();
   const { user, profile, signOut } = useAuthContext();
+  const { theme, toggleTheme } = useTheme();
 
   const displayName = profile?.display_name || user?.email || "";
   const initials = displayName
@@ -61,7 +64,18 @@ export function AppSidebar() {
           })}
         </ul>
       </nav>
-      <div className="border-t border-border px-4 py-3">
+      <div className="border-t border-border px-4 py-3 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">Theme</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+          >
+            {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+          </Button>
+        </div>
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={profile?.avatar_url} />
