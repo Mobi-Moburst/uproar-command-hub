@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { usePlacements } from "@/hooks/usePlacements";
 import { useAwards } from "@/hooks/useAwards";
@@ -19,9 +19,11 @@ import { ReportOutletMomentum } from "@/components/report/ReportOutletMomentum";
 import { ReportFooter } from "@/components/report/ReportFooter";
 import { ReportDateRange } from "@/components/report/ReportDateRange";
 import { ReportAISummary } from "@/components/report/ReportAISummary";
-import { ReportEditProvider } from "@/contexts/ReportEditContext";
+import { ReportEditProvider, useReportEdit } from "@/contexts/ReportEditContext";
 import { EditableSection, ReportEditToolbar } from "@/components/report/ReportEditControls";
+import { ReportSaveControls } from "@/components/report/ReportSaveControls";
 import { useAICoverageSummary } from "@/hooks/useAICoverageSummary";
+import { useClientReports, type ClientReport } from "@/hooks/useClientReports";
 import type { MediaPlacement, AwardSubmission, Sample, Briefing } from "@/data/types";
 
 function SectionDivider() {
