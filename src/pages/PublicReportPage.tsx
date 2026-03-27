@@ -14,6 +14,8 @@ import { ReportTopReporters } from "@/components/report/ReportTopReporters";
 import { ReportOutletMomentum } from "@/components/report/ReportOutletMomentum";
 import { ReportFooter } from "@/components/report/ReportFooter";
 import { ReportAISummary } from "@/components/report/ReportAISummary";
+import { ReportPROverview } from "@/components/report/ReportPROverview";
+import { ReportWrapUp } from "@/components/report/ReportWrapUp";
 import { ReportEditProvider, useReportEdit } from "@/contexts/ReportEditContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -156,6 +158,10 @@ function PublicReportContent({ report }: { report: NonNullable<ReturnType<typeof
       <ReportHero clientName={snapshot.clientName} teamName={snapshot.teamName} periodLabel={snapshot.periodLabel} />
 
       <div className="mx-auto max-w-5xl px-6 py-12 space-y-12">
+        {!hiddenSet.has("pr-overview") && (
+          <ReportPROverview />
+        )}
+
         {!hiddenSet.has("exec-summary") && (
           <ReportExecSummary placements={placements} awardWins={snapshot.awardWins} periodLabel={snapshot.periodLabel} />
         )}
@@ -246,6 +252,13 @@ function PublicReportContent({ report }: { report: NonNullable<ReturnType<typeof
           <>
             <SectionDivider />
             <ReportAwards wonAwards={snapshot.wonAwards as any} allAwards={snapshot.allFilteredAwards as any} />
+          </>
+        )}
+
+        {!hiddenSet.has("wrap-up") && (
+          <>
+            <SectionDivider />
+            <ReportWrapUp />
           </>
         )}
 

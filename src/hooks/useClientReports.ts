@@ -83,6 +83,11 @@ export interface CurationState {
   }>;
   aiSummary?: string;
   snapshot?: ReportSnapshot;
+  prOverview?: string;
+  takeaways?: string[];
+  upcomingInitiatives?: string[];
+  kpiGoals?: Record<string, string>;
+  categoryNarratives?: Record<string, string>;
 }
 
 export interface ClientReport {
