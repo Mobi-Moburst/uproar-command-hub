@@ -12,6 +12,8 @@ import { ReportHighlights } from "@/components/report/ReportHighlights";
 import { ReportCoverageBreakdown } from "@/components/report/ReportCoverageBreakdown";
 import { ReportTimeline } from "@/components/report/ReportTimeline";
 import { ReportInsights } from "@/components/report/ReportInsights";
+import { ReportPROverview } from "@/components/report/ReportPROverview";
+import { ReportWrapUp } from "@/components/report/ReportWrapUp";
 import { ReportAwards } from "@/components/report/ReportAwards";
 import { ReportOutreachSummary } from "@/components/report/ReportOutreachSummary";
 import { ReportTopReporters } from "@/components/report/ReportTopReporters";
@@ -339,6 +341,10 @@ function ClientReportContent({
           </div>
         </div>
 
+        <EditableSection id="pr-overview">
+          <ReportPROverview />
+        </EditableSection>
+
         <EditableSection id="exec-summary">
           <ReportExecSummary
             placements={clientPlacements}
@@ -420,6 +426,11 @@ function ClientReportContent({
         <EditableSection id="awards">
           <SectionDivider />
           <ReportAwards wonAwards={wonAwards} allAwards={filteredAwards} />
+        </EditableSection>
+
+        <EditableSection id="wrap-up">
+          <SectionDivider />
+          <ReportWrapUp />
         </EditableSection>
 
         <ReportFooter />
