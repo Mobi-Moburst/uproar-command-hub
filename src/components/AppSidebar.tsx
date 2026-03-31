@@ -5,7 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, BarChart3, Users, Newspaper, Trophy, Package, FileText, Star, UserSearch, Brain, Layers, UsersRound, ClipboardList, Zap } from "lucide-react";
+import { Sun, Moon, BarChart3, Users, Newspaper, Trophy, Package, FileText, Star, UserSearch, Brain, UsersRound, ClipboardList, Zap } from "lucide-react";
 
 const navItems = [
   { title: "Overview", path: "/", icon: BarChart3 },
