@@ -40,7 +40,7 @@ export default function PlacementsPage() {
     return placements.filter((p) => {
       if (search) {
         const q = search.toLowerCase();
-        const match = [p.headline, p.outlet, p.client_name, p.reporter_name, p.secured_by, p.vertical, p.type, p.topic_product]
+        const match = [p.headline, p.outlet, p.client_name, p.reporter_name, p.secured_by, p.vertical, p.type]
           .some((field) => field?.toLowerCase().includes(q));
         if (!match) return false;
       }
