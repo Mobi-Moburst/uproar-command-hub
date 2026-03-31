@@ -78,11 +78,10 @@ export default function BriefingsPage() {
           <ErrorState message="Failed to load briefings" />
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <KpiCard label="Total Briefings" value={total} />
               <KpiCard label="Coverage Live" value={coverageLive} />
               <KpiCard label="Conversion Rate" value={`${conversionRate}%`} detail={`${coverageLive} of ${total}`} />
-              <KpiCard label="Top Type" value={byType} />
             </div>
 
             <FilterBar>
