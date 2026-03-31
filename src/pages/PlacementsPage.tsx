@@ -11,7 +11,7 @@ import { usePlacements } from "@/hooks/usePlacements";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { TypeTrendChart } from "@/components/TypeTrendChart";
+
 
 const PAGE_SIZE = 50;
 
