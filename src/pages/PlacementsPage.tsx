@@ -143,7 +143,7 @@ export default function PlacementsPage() {
                       </td>
                       <td className="px-4 py-3"><TypeBadge type={p.type} /></td>
                       <td className="px-4 py-3"><TypeBadge type={p.vertical} /></td>
-                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground font-sans">{p.topic_product || "–"}</td>
+                      
                       <td className="px-4 py-3 text-right">{formatNumber(p.readership_viewership)}</td>
                       <td className="px-4 py-3 text-right">{p.ad_value ? formatCurrency(p.ad_value) : "–"}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground font-sans">{p.secured_by}</td>
