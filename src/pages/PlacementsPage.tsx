@@ -11,7 +11,7 @@ import { usePlacements } from "@/hooks/usePlacements";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { TypeTrendChart } from "@/components/TypeTrendChart";
+
 
 const PAGE_SIZE = 50;
 
@@ -25,14 +25,14 @@ export default function PlacementsPage() {
   const [verticalFilter, setVerticalFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
   const [securedByFilter, setSecuredByFilter] = useState("Uproar");
-  const [topicFilter, setTopicFilter] = useState("");
+  
   const [page, setPage] = useState(0);
 
   const clientNames = [...new Set(placements.map((p) => p.client_name))].sort();
   const teamNames = [...new Set(placements.map((p) => p.team_name))].sort();
   const types = [...new Set(placements.map((p) => p.type))].sort();
   const verticals = [...new Set(placements.map((p) => p.vertical))].sort();
-  const topicProducts = [...new Set(placements.map((p) => p.topic_product).filter(Boolean))].sort();
+  
   const years = [...new Set(placements.map((p) => p.date?.slice(0, 4)).filter(Boolean))].sort().reverse();
   const securedByNames = [...new Set(placements.map((p) => p.secured_by).filter(Boolean))].sort();
 
@@ -40,7 +40,7 @@ export default function PlacementsPage() {
     return placements.filter((p) => {
       if (search) {
         const q = search.toLowerCase();
-        const match = [p.headline, p.outlet, p.client_name, p.reporter_name, p.secured_by, p.vertical, p.type, p.topic_product]
+        const match = [p.headline, p.outlet, p.client_name, p.reporter_name, p.secured_by, p.vertical, p.type]
           .some((field) => field?.toLowerCase().includes(q));
         if (!match) return false;
       }
@@ -50,10 +50,10 @@ export default function PlacementsPage() {
       if (verticalFilter && p.vertical !== verticalFilter) return false;
       if (yearFilter && !p.date?.startsWith(yearFilter)) return false;
       if (securedByFilter && p.secured_by !== securedByFilter) return false;
-      if (topicFilter && p.topic_product !== topicFilter) return false;
+      
       return true;
     });
-  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter, securedByFilter, topicFilter]);
+  }, [placements, search, clientFilter, teamFilter, typeFilter, verticalFilter, yearFilter, securedByFilter]);
 
   // Reset page when filters change
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -98,12 +98,11 @@ export default function PlacementsPage() {
           <FilterSelect label="All Verticals" value={verticalFilter} options={verticals} onChange={handleFilterChange(setVerticalFilter)} />
           <FilterSelect label="All Years" value={yearFilter} options={years} onChange={handleFilterChange(setYearFilter)} />
           <FilterSelect label="All Secured By" value={securedByFilter} options={securedByNames} onChange={handleFilterChange(setSecuredByFilter)} />
-          <FilterSelect label="All Topics" value={topicFilter} options={topicProducts} onChange={handleFilterChange(setTopicFilter)} />
+          
         </FilterBar>
 
-        {!isLoading && !isError && filtered.length > 0 && (
-          <TypeTrendChart placements={filtered} />
-        )}
+
+
 
         {isError ? (
           <ErrorState message="Failed to load placements." onRetry={() => refetch()} />
@@ -124,7 +123,7 @@ export default function PlacementsPage() {
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Headline</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Vertical</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Topic/Product</th>
+                    
                     <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reach</th>
                     <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ad Value</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Secured By</th>
@@ -144,7 +143,7 @@ export default function PlacementsPage() {
                       </td>
                       <td className="px-4 py-3"><TypeBadge type={p.type} /></td>
                       <td className="px-4 py-3"><TypeBadge type={p.vertical} /></td>
-                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground font-sans">{p.topic_product || "–"}</td>
+                      
                       <td className="px-4 py-3 text-right">{formatNumber(p.readership_viewership)}</td>
                       <td className="px-4 py-3 text-right">{p.ad_value ? formatCurrency(p.ad_value) : "–"}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground font-sans">{p.secured_by}</td>

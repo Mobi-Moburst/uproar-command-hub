@@ -59,17 +59,6 @@ export default function BriefingsPage() {
   const total = filtered.length;
   const coverageLive = filtered.filter((b) => b.status.toLowerCase().includes("coverage live")).length;
   const conversionRate = total > 0 ? ((coverageLive / total) * 100).toFixed(1) : "0";
-  const byType = useMemo(() => {
-    const map = new Map<string, number>();
-    filtered.forEach((b) => {
-      if (b.interview_type) map.set(b.interview_type, (map.get(b.interview_type) || 0) + 1);
-    });
-    // Return top type
-    let topType = "—";
-    let topCount = 0;
-    map.forEach((count, type) => { if (count > topCount) { topType = type; topCount = count; } });
-    return topType;
-  }, [filtered]);
 
   return (
     <DashboardLayout>
@@ -82,18 +71,17 @@ export default function BriefingsPage() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => <KpiCardSkeleton key={i} />)}
           </div>
         ) : error ? (
           <ErrorState message="Failed to load briefings" />
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <KpiCard label="Total Briefings" value={total} />
               <KpiCard label="Coverage Live" value={coverageLive} />
               <KpiCard label="Conversion Rate" value={`${conversionRate}%`} detail={`${coverageLive} of ${total}`} />
-              <KpiCard label="Top Type" value={byType} />
             </div>
 
             <FilterBar>
