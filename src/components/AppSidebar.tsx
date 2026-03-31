@@ -18,7 +18,7 @@ const navItems = [
   { title: "Reporter Analytics", path: "/reporters", icon: UserSearch },
   { title: "Intelligence", path: "/intelligence", icon: Brain },
   { title: "Pulse Center", path: "/pulse", icon: Zap },
-  { title: "Vertical Benchmarking", path: "/verticals", icon: Layers },
+  
   { title: "Teams", path: "/teams", icon: UsersRound },
   { title: "Reports", path: "/reports", icon: ClipboardList },
 ];
