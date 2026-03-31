@@ -59,17 +59,6 @@ export default function BriefingsPage() {
   const total = filtered.length;
   const coverageLive = filtered.filter((b) => b.status.toLowerCase().includes("coverage live")).length;
   const conversionRate = total > 0 ? ((coverageLive / total) * 100).toFixed(1) : "0";
-  const byType = useMemo(() => {
-    const map = new Map<string, number>();
-    filtered.forEach((b) => {
-      if (b.interview_type) map.set(b.interview_type, (map.get(b.interview_type) || 0) + 1);
-    });
-    // Return top type
-    let topType = "—";
-    let topCount = 0;
-    map.forEach((count, type) => { if (count > topCount) { topType = type; topCount = count; } });
-    return topType;
-  }, [filtered]);
 
   return (
     <DashboardLayout>
