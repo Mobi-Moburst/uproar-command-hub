@@ -13,7 +13,7 @@ import AwardsPage from "./pages/AwardsPage";
 import WeeklyWinsPage from "./pages/WeeklyWinsPage";
 import ReportersPage from "./pages/ReportersPage";
 import IntelligencePage from "./pages/IntelligencePage";
-import VerticalsPage from "./pages/VerticalsPage";
+
 import TeamsPage from "./pages/TeamsPage";
 import SamplesPage from "./pages/SamplesPage";
 import BriefingsPage from "./pages/BriefingsPage";
