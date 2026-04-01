@@ -49,12 +49,26 @@ async function getArchivedPlacements(): Promise<MediaPlacement[]> {
   }));
 }
 
-/** Fetch live (2026+) placements from Airtable */
+function first(val: unknown): string {
+  if (Array.isArray(val)) return String(val[0] ?? "");
+  if (val == null) return "";
+  return String(val);
+}
+
+/** Fetch live (2026+) placements from Airtable, resolving outlet IDs */
 async function getLivePlacements(): Promise<MediaPlacement[]> {
-  const records = await fetchTable("placements", TABLE_IDS.placements, {
-    filterByFormula: "IS_AFTER({Date}, '2025-12-31')",
-  });
-  return records.map(mapPlacement);
+  const [records, outletRecords] = await Promise.all([
+    fetchTable("placements", TABLE_IDS.placements, {
+      filterByFormula: "IS_AFTER({Date}, '2025-12-31')",
+    }),
+    fetchTable("placements", TABLE_IDS.outlets),
+  ]);
+
+  const outletLookup = new Map<string, string>(
+    outletRecords.map((r) => [r.id, first(r.fields["Name"])])
+  );
+
+  return records.map((r) => mapPlacement(r, outletLookup));
 }
 
 /** Fetch all media placements — archived from DB + live from Airtable */

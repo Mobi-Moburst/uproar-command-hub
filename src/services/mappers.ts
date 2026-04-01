@@ -20,15 +20,22 @@ function firstNum(val: unknown): number {
 
 // ── Media Placements ───────────────────────────────────────────────────────────
 
+/** Resolve a linked-record ID to its name via a lookup map */
+function resolveOutlet(val: unknown, lookup?: Map<string, string>): string {
+  const raw = first(val);
+  if (lookup && raw.startsWith("rec")) return lookup.get(raw) ?? raw;
+  return raw;
+}
+
 /** Maps raw Airtable Clips record → MediaPlacement */
-export function mapPlacement(record: AirtableRecord): MediaPlacement {
+export function mapPlacement(record: AirtableRecord, outletLookup?: Map<string, string>): MediaPlacement {
   const f = record.fields as Record<string, any>;
   return {
     id: record.id,
     date: first(f["Date"] ?? f["date"]),
     client_name: first(f["Client"] ?? f["client"]),
     team_name: first(f["Team"] ?? f["team"]),
-    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"]),
+    outlet: resolveOutlet(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"], outletLookup),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     headline: first(f["Headline"] ?? f["headline"]),
     link: first(f["Link"] ?? f["link"]),
@@ -106,7 +113,7 @@ export function mapAward(
 // ── Samples ────────────────────────────────────────────────────────────────────
 
 /** Maps raw Airtable Samples record → Sample (excludes PII) */
-export function mapSample(record: AirtableRecord): Sample {
+export function mapSample(record: AirtableRecord, outletLookup?: Map<string, string>): Sample {
   const f = record.fields as Record<string, any>;
   return {
     id: record.id,
@@ -114,7 +121,7 @@ export function mapSample(record: AirtableRecord): Sample {
     team: first(f["Team"] ?? f["team"]),
     client: first(f["Client"] ?? f["client"]),
     products: first(f["Products"] ?? f["products"]),
-    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"]),
+    outlet: resolveOutlet(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"], outletLookup),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     date_shipped: first(f["Date Shipped"] ?? f["date_shipped"]),
     delivery_date: first(f["Delivery Date"] ?? f["delivery_date"]),
@@ -128,14 +135,14 @@ export function mapSample(record: AirtableRecord): Sample {
 // ── Briefings ──────────────────────────────────────────────────────────────────
 
 /** Maps raw Airtable Briefings record → Briefing */
-export function mapBriefing(record: AirtableRecord): Briefing {
+export function mapBriefing(record: AirtableRecord, outletLookup?: Map<string, string>): Briefing {
   const f = record.fields as Record<string, any>;
   return {
     id: record.id,
     date_met: first(f["Date Met"] ?? f["date_met"]),
     team: first(f["Team"] ?? f["team"]),
     client: first(f["Client"] ?? f["client"]),
-    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"]),
+    outlet: resolveOutlet(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"], outletLookup),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     spokesperson: first(f["Company Spokesperson"] ?? f["spokesperson"]),
     uproar_contact: first(f["Uproar Point of Contact"] ?? f["uproar_contact"]),

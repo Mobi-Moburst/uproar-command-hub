@@ -12,6 +12,7 @@ export const TABLE_IDS = {
   awardsClients: "tblmucN4TFZ8EmxB4",
   samples: "tblw2XmLUw693b0Oy",
   briefings: "tblCw6tkrAGZ1eoc3",
+  outlets: "tbl65cHPi8TIHTfpT",
 };
 
 /** Always configured — the edge function holds the secrets */
