@@ -114,7 +114,7 @@ export function mapSample(record: AirtableRecord): Sample {
     team: first(f["Team"] ?? f["team"]),
     client: first(f["Client"] ?? f["client"]),
     products: first(f["Products"] ?? f["products"]),
-    outlet: first(f["Outlet"] ?? f["outlet"]),
+    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"]),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     date_shipped: first(f["Date Shipped"] ?? f["date_shipped"]),
     delivery_date: first(f["Delivery Date"] ?? f["delivery_date"]),
