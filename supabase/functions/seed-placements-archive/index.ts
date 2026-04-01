@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     } while (outletOffset);
 
     const outletLookup = new Map<string, string>(
-      outletRecords.map((r) => [r.id, first(r.fields["Name"] as unknown)])
+      outletRecords.map((r) => [r.id, first((r.fields["Outlets"] ?? r.fields["Name"]) as unknown)])
     );
     console.log(`Built outlet lookup with ${outletLookup.size} entries`);
 
