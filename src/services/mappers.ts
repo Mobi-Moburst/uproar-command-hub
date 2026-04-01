@@ -135,7 +135,7 @@ export function mapBriefing(record: AirtableRecord): Briefing {
     date_met: first(f["Date Met"] ?? f["date_met"]),
     team: first(f["Team"] ?? f["team"]),
     client: first(f["Client"] ?? f["client"]),
-    outlet: first(f["Outlet"] ?? f["outlet"]),
+    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"]),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     spokesperson: first(f["Company Spokesperson"] ?? f["spokesperson"]),
     uproar_contact: first(f["Uproar Point of Contact"] ?? f["uproar_contact"]),
