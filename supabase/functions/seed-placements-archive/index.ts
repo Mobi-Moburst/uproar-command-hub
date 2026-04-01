@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
     console.log(`Fetched ${allRecords.length} total records from Airtable`);
 
     // Map and filter to ≤2025
-    const mapped = allRecords.map(mapPlacement);
+    const mapped = allRecords.map((r) => mapPlacement(r, outletLookup));
     const historical = mapped.filter((p) => {
       if (!p.date) return false;
       return p.date <= "2025-12-31";
