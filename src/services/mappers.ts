@@ -113,7 +113,7 @@ export function mapAward(
 // ── Samples ────────────────────────────────────────────────────────────────────
 
 /** Maps raw Airtable Samples record → Sample (excludes PII) */
-export function mapSample(record: AirtableRecord): Sample {
+export function mapSample(record: AirtableRecord, outletLookup?: Map<string, string>): Sample {
   const f = record.fields as Record<string, any>;
   return {
     id: record.id,
@@ -121,7 +121,7 @@ export function mapSample(record: AirtableRecord): Sample {
     team: first(f["Team"] ?? f["team"]),
     client: first(f["Client"] ?? f["client"]),
     products: first(f["Products"] ?? f["products"]),
-    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"]),
+    outlet: resolveOutlet(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"], outletLookup),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     date_shipped: first(f["Date Shipped"] ?? f["date_shipped"]),
     delivery_date: first(f["Delivery Date"] ?? f["delivery_date"]),
