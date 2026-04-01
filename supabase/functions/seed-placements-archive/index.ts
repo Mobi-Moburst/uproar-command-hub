@@ -35,7 +35,7 @@ function mapPlacement(record: AirtableRecord) {
     date: first(f["Date"]),
     client_name: first(f["Client Name"] ?? f["Client"]),
     team_name: first(f["Team Name"] ?? f["Team"]),
-    outlet: first(f["Outlet"]),
+    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"]),
     reporter_name: first(f["Reporter Name"] ?? f["Reporter"]),
     headline: first(f["Headline"]),
     link: first(f["Link"]),
