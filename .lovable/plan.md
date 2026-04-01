@@ -1,30 +1,44 @@
 
 
-## Plan: Switch Outlet field from "Outlet (Unlinked)" to "Outlet (Linked)"
+## Plan: Resolve Outlet Linked Record IDs to Names
 
-### What changed
-Airtable renamed the old "Outlet" column to "Outlet (Unlinked)" and a new "Outlet (Linked)" column was created across all three tables (Placements, Samples, Briefings). We need to update every mapper to read from the new field name.
+### Problem
+"Outlet (Linked)" is a linked record field returning record IDs (e.g. `recXXX`) instead of outlet names.
 
-### Impact points (4 files)
+### Solution
+Use the same pattern as Awards clients: fetch the Outlets table, build an ID→name lookup map, and resolve names in mappers.
 
-**1. `src/services/mappers.ts`** — 3 mappers to update
-- `mapPlacement` (line 31): Change `f["Outlet"]` → `f["Outlet (Linked)"]` (keep `f["outlet"]` as DB fallback)
-- `mapSample` (line 117): Same change
-- `mapBriefing` (line 138): Same change
+### Changes
 
-**2. `supabase/functions/seed-placements-archive/index.ts`** (line 38)
-- Change `f["Outlet"]` → `f["Outlet (Linked)"]`
+**1. `src/services/airtable.ts`**
+- Add `outletsTable: "tbl65cHPi8TIHTfpT"` to `TABLE_IDS`
 
-**3. `supabase/functions/airtable-proxy/index.ts`** — no changes needed (passes raw fields through)
+**2. `src/services/mappers.ts`**
+- Update `mapPlacement`, `mapSample`, `mapBriefing` to accept an optional `outletLookup?: Map<string, string>` parameter
+- Resolve the linked record ID to the outlet name using the lookup map, falling back to the raw value
 
-**4. `src/services/placementsService.ts`** — no changes needed (reads from DB column `outlet`, not Airtable field names)
+**3. `src/services/placementsService.ts`**
+- Fetch the Outlets table alongside live placements
+- Build `Map<recordId, outletName>` from the fetched records
+- Pass the lookup to `mapPlacement()`
 
-### Why this is safe
-- The DB column is still called `outlet` — no database migration needed
-- The app's TypeScript interfaces still use `outlet` — no UI changes needed
-- Only the Airtable field name mapping changes in the 4 locations above
-- The `f["outlet"]` lowercase fallback in mappers handles the archived DB rows
+**4. `src/services/samplesService.ts`**
+- Same: fetch Outlets table, build lookup, pass to `mapSample()`
 
-### Summary
-This is a 2-file edit (mappers.ts + seed function) touching 4 lines total. No UI, database, or type changes required.
+**5. `src/services/briefingsService.ts`**
+- Same: fetch Outlets table, build lookup, pass to `mapBriefing()`
+
+**6. `supabase/functions/seed-placements-archive/index.ts`**
+- Fetch Outlets table from Airtable directly in the edge function
+- Build lookup and resolve outlet names before upserting to DB
+
+### Files modified
+- `src/services/airtable.ts` — add table ID
+- `src/services/mappers.ts` — add outlet lookup param to 3 mappers
+- `src/services/placementsService.ts` — fetch outlets, pass lookup
+- `src/services/samplesService.ts` — fetch outlets, pass lookup
+- `src/services/briefingsService.ts` — fetch outlets, pass lookup
+- `supabase/functions/seed-placements-archive/index.ts` — fetch outlets, resolve names
+
+No database changes needed.
 
