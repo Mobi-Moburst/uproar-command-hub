@@ -135,14 +135,14 @@ export function mapSample(record: AirtableRecord, outletLookup?: Map<string, str
 // ── Briefings ──────────────────────────────────────────────────────────────────
 
 /** Maps raw Airtable Briefings record → Briefing */
-export function mapBriefing(record: AirtableRecord): Briefing {
+export function mapBriefing(record: AirtableRecord, outletLookup?: Map<string, string>): Briefing {
   const f = record.fields as Record<string, any>;
   return {
     id: record.id,
     date_met: first(f["Date Met"] ?? f["date_met"]),
     team: first(f["Team"] ?? f["team"]),
     client: first(f["Client"] ?? f["client"]),
-    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"]),
+    outlet: resolveOutlet(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"], outletLookup),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     spokesperson: first(f["Company Spokesperson"] ?? f["spokesperson"]),
     uproar_contact: first(f["Uproar Point of Contact"] ?? f["uproar_contact"]),

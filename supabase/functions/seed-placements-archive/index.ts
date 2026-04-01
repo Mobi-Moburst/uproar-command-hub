@@ -67,6 +67,29 @@ Deno.serve(async (req) => {
 
     const baseId = rawBaseId.split("/")[0];
     const tableId = "tblsFhq3a6NPalO5N";
+    const outletsTableId = "tbl65cHPi8TIHTfpT";
+
+    // Fetch Outlets table for ID→name lookup
+    const outletRecords: AirtableRecord[] = [];
+    let outletOffset: string | undefined;
+    do {
+      const params = new URLSearchParams({ pageSize: "100" });
+      if (outletOffset) params.set("offset", outletOffset);
+      const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(outletsTableId)}?${params}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${apiKey}` } });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`Airtable outlets error ${res.status}: ${body}`);
+      }
+      const data: AirtableListResponse = await res.json();
+      outletRecords.push(...data.records);
+      outletOffset = data.offset;
+    } while (outletOffset);
+
+    const outletLookup = new Map<string, string>(
+      outletRecords.map((r) => [r.id, first(r.fields["Name"] as unknown)])
+    );
+    console.log(`Built outlet lookup with ${outletLookup.size} entries`);
 
     // Fetch ALL records from Airtable with pagination
     const allRecords: AirtableRecord[] = [];
