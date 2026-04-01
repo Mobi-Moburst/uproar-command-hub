@@ -20,15 +20,22 @@ function firstNum(val: unknown): number {
 
 // ── Media Placements ───────────────────────────────────────────────────────────
 
+/** Resolve a linked-record ID to its name via a lookup map */
+function resolveOutlet(val: unknown, lookup?: Map<string, string>): string {
+  const raw = first(val);
+  if (lookup && raw.startsWith("rec")) return lookup.get(raw) ?? raw;
+  return raw;
+}
+
 /** Maps raw Airtable Clips record → MediaPlacement */
-export function mapPlacement(record: AirtableRecord): MediaPlacement {
+export function mapPlacement(record: AirtableRecord, outletLookup?: Map<string, string>): MediaPlacement {
   const f = record.fields as Record<string, any>;
   return {
     id: record.id,
     date: first(f["Date"] ?? f["date"]),
     client_name: first(f["Client"] ?? f["client"]),
     team_name: first(f["Team"] ?? f["team"]),
-    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"]),
+    outlet: resolveOutlet(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"], outletLookup),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     headline: first(f["Headline"] ?? f["headline"]),
     link: first(f["Link"] ?? f["link"]),
