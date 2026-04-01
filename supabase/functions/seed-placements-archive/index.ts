@@ -28,14 +28,16 @@ function firstNum(val: unknown): number {
   return Number(val) || 0;
 }
 
-function mapPlacement(record: AirtableRecord) {
+function mapPlacement(record: AirtableRecord, outletLookup: Map<string, string>) {
   const f = record.fields;
+  const rawOutlet = first(f["Outlet (Linked)"] ?? f["Outlet"]);
+  const outlet = rawOutlet.startsWith("rec") ? (outletLookup.get(rawOutlet) ?? rawOutlet) : rawOutlet;
   return {
     id: record.id,
     date: first(f["Date"]),
     client_name: first(f["Client Name"] ?? f["Client"]),
     team_name: first(f["Team Name"] ?? f["Team"]),
-    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"]),
+    outlet,
     reporter_name: first(f["Reporter Name"] ?? f["Reporter"]),
     headline: first(f["Headline"]),
     link: first(f["Link"]),
