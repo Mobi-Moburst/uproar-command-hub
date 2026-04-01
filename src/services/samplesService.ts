@@ -15,7 +15,7 @@ export async function getSamples(): Promise<Sample[]> {
   ]);
 
   const outletLookup = new Map<string, string>(
-    outletRecords.map((r) => [r.id, first(r.fields["Name"])])
+    outletRecords.map((r) => [r.id, first(r.fields["Outlets"] ?? r.fields["Name"])])
   );
 
   return records.map((r) => mapSample(r, outletLookup));
