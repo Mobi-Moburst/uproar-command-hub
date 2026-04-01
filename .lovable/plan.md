@@ -1,35 +1,30 @@
 
 
-## Quick Cleanup Plan
+## Plan: Switch Outlet field from "Outlet (Unlinked)" to "Outlet (Linked)"
 
-### Changes
+### What changed
+Airtable renamed the old "Outlet" column to "Outlet (Unlinked)" and a new "Outlet (Linked)" column was created across all three tables (Placements, Samples, Briefings). We need to update every mapper to read from the new field name.
 
-**1. Remove Vertical Benchmarking section entirely**
-- Delete `src/pages/VerticalsPage.tsx`
-- Delete `src/hooks/useVerticalBenchmarks.ts`
-- Remove the `/verticals` route from `src/App.tsx`
-- Remove "Vertical Benchmarking" nav item from `src/components/AppSidebar.tsx` and `src/components/MobileNav.tsx`
-- Remove the `Layers` icon import from AppSidebar
+### Impact points (4 files)
 
-**2. Remove Topics filter from Placements page**
-- `src/pages/PlacementsPage.tsx`: Remove `topicFilter` state, `topicProducts` derivation, the Topics `FilterSelect`, the filter condition in `useMemo`, and the "Topic/Product" table column (header + cell)
+**1. `src/services/mappers.ts`** — 3 mappers to update
+- `mapPlacement` (line 31): Change `f["Outlet"]` → `f["Outlet (Linked)"]` (keep `f["outlet"]` as DB fallback)
+- `mapSample` (line 117): Same change
+- `mapBriefing` (line 138): Same change
 
-**3. Remove Types trend chart from Placements page**
-- `src/pages/PlacementsPage.tsx`: Remove the `TypeTrendChart` import and the block rendering it
+**2. `supabase/functions/seed-placements-archive/index.ts`** (line 38)
+- Change `f["Outlet"]` → `f["Outlet (Linked)"]`
 
-**4. Remove "Top Type" KPI from Briefings page**
-- `src/pages/BriefingsPage.tsx`: Remove the `byType` useMemo and the 4th KPI card. Change grid from `lg:grid-cols-4` to `lg:grid-cols-3`
+**3. `supabase/functions/airtable-proxy/index.ts`** — no changes needed (passes raw fields through)
 
----
+**4. `src/services/placementsService.ts`** — no changes needed (reads from DB column `outlet`, not Airtable field names)
 
-### Files deleted
-- `src/pages/VerticalsPage.tsx`
-- `src/hooks/useVerticalBenchmarks.ts`
+### Why this is safe
+- The DB column is still called `outlet` — no database migration needed
+- The app's TypeScript interfaces still use `outlet` — no UI changes needed
+- Only the Airtable field name mapping changes in the 4 locations above
+- The `f["outlet"]` lowercase fallback in mappers handles the archived DB rows
 
-### Files modified
-- `src/App.tsx` — remove Verticals route + import
-- `src/components/AppSidebar.tsx` — remove Verticals nav item + Layers icon
-- `src/components/MobileNav.tsx` — remove Verticals nav item
-- `src/pages/PlacementsPage.tsx` — remove Topics filter, Topic/Product column, TypeTrendChart
-- `src/pages/BriefingsPage.tsx` — remove Top Type KPI card
+### Summary
+This is a 2-file edit (mappers.ts + seed function) touching 4 lines total. No UI, database, or type changes required.
 
