@@ -28,7 +28,7 @@ export function mapPlacement(record: AirtableRecord): MediaPlacement {
     date: first(f["Date"] ?? f["date"]),
     client_name: first(f["Client"] ?? f["client"]),
     team_name: first(f["Team"] ?? f["team"]),
-    outlet: first(f["Outlet"] ?? f["outlet"]),
+    outlet: first(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"]),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     headline: first(f["Headline"] ?? f["headline"]),
     link: first(f["Link"] ?? f["link"]),
