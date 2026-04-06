@@ -14,8 +14,14 @@ function first(val: unknown): string {
 }
 
 function firstNum(val: unknown): number {
-  if (Array.isArray(val)) return Number(val[0] ?? 0);
-  return Number(val ?? 0);
+  if (val == null) return 0;
+  if (Array.isArray(val)) {
+    const n = Number(val[0] ?? 0);
+    return Number.isFinite(n) ? n : 0;
+  }
+  if (typeof val === "object") return 0;
+  const n = Number(val);
+  return Number.isFinite(n) ? n : 0;
 }
 
 // ── Media Placements ───────────────────────────────────────────────────────────
