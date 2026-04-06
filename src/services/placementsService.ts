@@ -28,6 +28,10 @@ async function getArchivedPlacements(): Promise<MediaPlacement[]> {
   }
 
   console.log(`Fetched ${allRows.length} archived placements`);
+  const sampleReach = allRows.slice(0, 5).map((r: Record<string, unknown>) => ({ id: r.id, rv: r.readership_viewership, type: typeof r.readership_viewership }));
+  console.log("Archive reach sample:", JSON.stringify(sampleReach));
+  const archiveReachSum = allRows.reduce((s, r: Record<string, unknown>) => s + (Number(r.readership_viewership) || 0), 0);
+  console.log("Archive reach total:", archiveReachSum);
 
   return allRows.map((row: Record<string, unknown>) => ({
     id: String(row.id),
