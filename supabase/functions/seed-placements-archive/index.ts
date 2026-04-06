@@ -30,8 +30,14 @@ function firstNum(val: unknown): number {
 
 function mapPlacement(record: AirtableRecord, outletLookup: Map<string, string>) {
   const f = record.fields;
+  // Resolve outlet: linked record → lookup → Import Outlet fallback
   const rawOutlet = first(f["Outlet (Linked)"] ?? f["Outlet"]);
-  const outlet = rawOutlet.startsWith("rec") ? (outletLookup.get(rawOutlet) ?? rawOutlet) : rawOutlet;
+  let outlet = rawOutlet;
+  if (rawOutlet.startsWith("rec")) {
+    const resolved = outletLookup.get(rawOutlet);
+    outlet = resolved ?? first(f["Import Outlet"]) ?? rawOutlet;
+  }
+  if (!outlet) outlet = first(f["Import Outlet"]) || "";
   return {
     id: record.id,
     date: first(f["\uFEFFDate"] ?? f["Date"] ?? f["date"]),
@@ -45,7 +51,7 @@ function mapPlacement(record: AirtableRecord, outletLookup: Map<string, string>)
     vertical: first(f["Vertical"]),
     readership_viewership: firstNum(f["Readership/Viewership"] ?? f["Readership Viewership"]),
     ad_value: firstNum(f["Ad Value"]),
-    secured_by: first(f["Secured By"]),
+    secured_by: first(f["Secured by?"] ?? f["Secured By"]),
     topic_product: first(f["Topic/Product"] ?? f["Topic Product"]),
     notes: first(f["Notes"]),
     weekly_wins_trigger: Boolean(f["Weekly Wins Trigger"] ?? f["Weekly Wins"]),
