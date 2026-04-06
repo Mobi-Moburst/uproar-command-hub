@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -19,12 +19,11 @@ const navItems = [
   { title: "Reporter Analytics", path: "/reporters" },
   { title: "Intelligence", path: "/intelligence" },
   { title: "Pulse Center", path: "/pulse" },
-  
   { title: "Teams", path: "/teams" },
   { title: "Reports", path: "/reports" },
 ];
 
-export function MobileNav() {
+export const MobileNav = forwardRef<HTMLDivElement, Record<string, never>>(function MobileNav(_props, ref) {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const { user, profile, signOut } = useAuthContext();
@@ -33,20 +32,20 @@ export function MobileNav() {
   const displayName = profile?.display_name || user?.email || "";
 
   return (
-    <div className="lg:hidden">
-      <header className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border bg-card/80 backdrop-blur-md px-4">
+    <div ref={ref} className="lg:hidden">
+      <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <img src={uproarLogo} alt="Uproar by Moburst" className="h-6 object-contain" />
         </div>
         <button
           onClick={() => setOpen(!open)}
-          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </header>
       {open && (
-        <div className="fixed inset-0 top-14 z-30 bg-background/95 backdrop-blur-sm p-4 overflow-y-auto">
+        <div className="fixed inset-0 top-14 z-30 overflow-y-auto bg-background/95 p-4 backdrop-blur-sm">
           <nav>
             <ul className="space-y-0.5">
               {navItems.map((item) => {
@@ -57,9 +56,7 @@ export function MobileNav() {
                       to={item.path}
                       end
                       className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                       activeClassName=""
                       onClick={() => setOpen(false)}
@@ -71,9 +68,9 @@ export function MobileNav() {
               })}
             </ul>
           </nav>
-          <div className="mt-6 border-t border-border pt-4 space-y-3">
+          <div className="mt-6 space-y-3 border-t border-border pt-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Theme</span>
+              <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Theme</span>
               <Button variant="ghost" size="sm" onClick={toggleTheme} className="h-7 w-7 p-0">
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
@@ -86,12 +83,7 @@ export function MobileNav() {
                 </AvatarFallback>
               </Avatar>
               <p className="flex-1 truncate text-sm text-foreground">{displayName}</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={signOut}
-                className="text-xs text-muted-foreground"
-              >
+              <Button variant="ghost" size="sm" onClick={signOut} className="text-xs text-muted-foreground">
                 Sign out
               </Button>
             </div>
@@ -100,4 +92,4 @@ export function MobileNav() {
       )}
     </div>
   );
-}
+});

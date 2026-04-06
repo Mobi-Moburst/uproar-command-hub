@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { NavLink } from "@/components/NavLink";
 import uproarLogo from "@/assets/uproar-white-logo.svg";
 import { useLocation } from "react-router-dom";
@@ -18,27 +19,26 @@ const navItems = [
   { title: "Reporter Analytics", path: "/reporters", icon: UserSearch },
   { title: "Intelligence", path: "/intelligence", icon: Brain },
   { title: "Pulse Center", path: "/pulse", icon: Zap },
-  
   { title: "Teams", path: "/teams", icon: UsersRound },
   { title: "Reports", path: "/reports", icon: ClipboardList },
 ];
 
-export function AppSidebar() {
+export const AppSidebar = forwardRef<HTMLElement, Record<string, never>>(function AppSidebar(_props, ref) {
   const location = useLocation();
   const { user, profile, signOut } = useAuthContext();
   const { theme, toggleTheme } = useTheme();
 
   const displayName = profile?.display_name || user?.email || "";
-  const initials = displayName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "U";
+  const initials =
+    displayName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "U";
 
   return (
-    <aside className="fixed left-0 top-0 z-30 hidden h-screen w-60 flex-col bg-sidebar border-r border-sidebar-border lg:flex">
-      {/* Brand header with gradient accent */}
+    <aside ref={ref} className="fixed left-0 top-0 z-30 hidden h-screen w-60 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
       <div className="relative flex h-16 items-center px-5">
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-sidebar-primary/40 to-transparent" />
         <div className="flex items-center gap-2.5">
@@ -65,9 +65,7 @@ export function AppSidebar() {
                 >
                   <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-sidebar-primary" : "text-sidebar-muted group-hover:text-sidebar-foreground"}`} />
                   {item.title}
-                  {isActive && (
-                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
-                  )}
+                  {isActive && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />}
                 </NavLink>
               </li>
             );
@@ -75,14 +73,14 @@ export function AppSidebar() {
         </ul>
       </nav>
 
-      <div className="border-t border-sidebar-border px-4 py-3 space-y-3">
+      <div className="space-y-3 border-t border-sidebar-border px-4 py-3">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-mono text-sidebar-muted uppercase tracking-wider">Theme</span>
+          <span className="text-[10px] font-mono uppercase tracking-wider text-sidebar-muted">Theme</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleTheme}
-            className="h-7 w-7 p-0 text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+            className="h-7 w-7 p-0 text-sidebar-muted hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
           >
             {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
           </Button>
@@ -90,20 +88,16 @@ export function AppSidebar() {
         <div className="flex items-center gap-2.5">
           <Avatar className="h-7 w-7">
             <AvatarImage src={profile?.avatar_url} />
-            <AvatarFallback className="bg-sidebar-accent text-[10px] text-sidebar-accent-foreground">
-              {initials}
-            </AvatarFallback>
+            <AvatarFallback className="bg-sidebar-accent text-[10px] text-sidebar-accent-foreground">{initials}</AvatarFallback>
           </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="truncate text-xs font-medium text-sidebar-foreground">
-              {displayName}
-            </p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium text-sidebar-foreground">{displayName}</p>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={signOut}
-            className="h-6 px-2 text-[11px] text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+            className="h-6 px-2 text-[11px] text-sidebar-muted hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
           >
             Sign out
           </Button>
@@ -111,4 +105,4 @@ export function AppSidebar() {
       </div>
     </aside>
   );
-}
+});
