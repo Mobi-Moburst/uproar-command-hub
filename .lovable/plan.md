@@ -1,44 +1,16 @@
 
 
-## Plan: Resolve Outlet Linked Record IDs to Names
+## Plan: Update Clips Table ID
 
-### Problem
-"Outlet (Linked)" is a linked record field returning record IDs (e.g. `recXXX`) instead of outlet names.
-
-### Solution
-Use the same pattern as Awards clients: fetch the Outlets table, build an ID→name lookup map, and resolve names in mappers.
+The old table ID `tblsFhq3a6NPalO5N` is still in both locations. Updating to `tblw34mWTvuaIUz16` will fix the 403 Airtable error and restore all live data across the app.
 
 ### Changes
 
-**1. `src/services/airtable.ts`**
-- Add `outletsTable: "tbl65cHPi8TIHTfpT"` to `TABLE_IDS`
+**1. `src/services/airtable.ts`** (line 10)
+- Change `placements: "tblsFhq3a6NPalO5N"` → `placements: "tblw34mWTvuaIUz16"`
 
-**2. `src/services/mappers.ts`**
-- Update `mapPlacement`, `mapSample`, `mapBriefing` to accept an optional `outletLookup?: Map<string, string>` parameter
-- Resolve the linked record ID to the outlet name using the lookup map, falling back to the raw value
+**2. `supabase/functions/seed-placements-archive/index.ts`** (line 71)
+- Change `const tableId = "tblsFhq3a6NPalO5N"` → `const tableId = "tblw34mWTvuaIUz16"`
 
-**3. `src/services/placementsService.ts`**
-- Fetch the Outlets table alongside live placements
-- Build `Map<recordId, outletName>` from the fetched records
-- Pass the lookup to `mapPlacement()`
-
-**4. `src/services/samplesService.ts`**
-- Same: fetch Outlets table, build lookup, pass to `mapSample()`
-
-**5. `src/services/briefingsService.ts`**
-- Same: fetch Outlets table, build lookup, pass to `mapBriefing()`
-
-**6. `supabase/functions/seed-placements-archive/index.ts`**
-- Fetch Outlets table from Airtable directly in the edge function
-- Build lookup and resolve outlet names before upserting to DB
-
-### Files modified
-- `src/services/airtable.ts` — add table ID
-- `src/services/mappers.ts` — add outlet lookup param to 3 mappers
-- `src/services/placementsService.ts` — fetch outlets, pass lookup
-- `src/services/samplesService.ts` — fetch outlets, pass lookup
-- `src/services/briefingsService.ts` — fetch outlets, pass lookup
-- `supabase/functions/seed-placements-archive/index.ts` — fetch outlets, resolve names
-
-No database changes needed.
+Two lines changed, two files. This restores all live placement data across the entire app (placements, reports, intelligence, reporters, clients, teams, weekly wins).
 
