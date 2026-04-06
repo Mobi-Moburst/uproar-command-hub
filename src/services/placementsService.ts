@@ -59,7 +59,7 @@ function first(val: unknown): string {
 async function getLivePlacements(): Promise<MediaPlacement[]> {
   const [records, outletRecords] = await Promise.all([
     fetchTable("placements", TABLE_IDS.placements, {
-      filterByFormula: 'IS_AFTER({Date}, "2025-12-31")',
+      filterByFormula: 'IS_AFTER({﻿Date}, "2025-12-31")',
     }),
     fetchTable("placements", TABLE_IDS.outlets),
   ]);
