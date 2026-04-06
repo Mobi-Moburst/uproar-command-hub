@@ -231,16 +231,14 @@ export default function ClientsPage() {
                       <ClientLogoUpload clientName={selectedClient.name} size="md" />
                       <div>
                         <h2 className="text-xl font-semibold text-foreground">{selectedClient.name}</h2>
-                        <div className="mt-1 flex items-center gap-2">
+                        <div className="mt-1 flex items-center gap-3 flex-wrap">
                           <StatusBadge status={selectedClient.status} />
                           <Switch
                             checked={selectedClient.status === "Active"}
                             onCheckedChange={(checked) => handleStatusToggle(selectedClient.name, checked)}
                           />
-                          <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
-                        </div>
-                        <div className="mt-2 flex items-center gap-1.5">
-                          <span className="text-xs text-muted-foreground mr-1">Health</span>
+                          <span className="h-4 w-px bg-border" />
+                          <span className="text-xs text-muted-foreground">Health</span>
                           {(["green", "yellow", "red"] as const).map((color) => (
                             <button
                               key={color}
@@ -248,7 +246,7 @@ export default function ClientsPage() {
                               className={`h-5 w-5 rounded-full border-2 transition-all ${
                                 selectedClient.health === color || (!selectedClient.health && color === "green")
                                   ? `${HEALTH_COLORS[color]} ${HEALTH_RING_COLORS[color]} ring-2 ring-offset-2 ring-offset-background`
-                                  : `border-muted-foreground/30 hover:${HEALTH_COLORS[color]}/50`
+                                  : `border-muted-foreground/30`
                               }`}
                               style={
                                 selectedClient.health !== color && (selectedClient.health || "green") !== color
@@ -257,6 +255,8 @@ export default function ClientsPage() {
                               }
                             />
                           ))}
+                          <span className="h-4 w-px bg-border" />
+                          <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
                         </div>
                       </div>
                     </div>
