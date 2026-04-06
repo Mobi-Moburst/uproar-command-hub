@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     }
 
     const baseId = rawBaseId.split("/")[0];
-    const tableId = "tblsFhq3a6NPalO5N";
+    const tableId = "tblw34mWTvuaIUz16";
     const outletsTableId = "tbl65cHPi8TIHTfpT";
 
     // Fetch Outlets table for ID→name lookup

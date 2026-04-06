@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 /** Table IDs for each base */
 export const TABLE_IDS = {
-  placements: "tblsFhq3a6NPalO5N",
+  placements: "tblw34mWTvuaIUz16",
   awards: "tblyqY5sA6j41GqYY",
   awardsClients: "tblmucN4TFZ8EmxB4",
   samples: "tblw2XmLUw693b0Oy",
