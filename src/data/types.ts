@@ -79,6 +79,22 @@ export interface Sample {
   notes: string;
 }
 
+export interface ClientSOW {
+  id: string;
+  client_name: string;
+  file_name: string;
+  storage_path: string;
+  is_current: boolean;
+  uploaded_at: string;
+  summary?: string;
+  start_date?: string;
+  end_date?: string;
+  renewal_date?: string;
+  retainer_amount?: string;
+  deliverables?: string[];
+  ai_processed: boolean;
+}
+
 export interface Briefing {
   id: string;
   date_met: string;
