@@ -1,16 +1,32 @@
 
 
-## Plan: Update Clips Table ID
+## Plan: Re-seed Placements Archive from New Clips Table
 
-The old table ID `tblsFhq3a6NPalO5N` is still in both locations. Updating to `tblw34mWTvuaIUz16` will fix the 403 Airtable error and restore all live data across the app.
+### Problem
+The `placements_archive` DB table was seeded from the old (now deleted) Clips table. The new table has ~22,730 records but the app only shows ~21,774 — the archive is missing ~1,000 historical records.
 
-### Changes
+### Solution
 
-**1. `src/services/airtable.ts`** (line 10)
-- Change `placements: "tblsFhq3a6NPalO5N"` → `placements: "tblw34mWTvuaIUz16"`
+**1. Truncate + re-seed the archive**
+- Run the existing `seed-placements-archive` edge function, which already points to the new table (`tblw34mWTvuaIUz16`) and fetches the Outlets lookup table
+- But first, truncate `placements_archive` via a migration so we start clean (old record IDs from the deleted table won't conflict)
 
-**2. `supabase/functions/seed-placements-archive/index.ts`** (line 71)
-- Change `const tableId = "tblsFhq3a6NPalO5N"` → `const tableId = "tblw34mWTvuaIUz16"`
+**2. Fix the 422 filter error**
+- The runtime error shows `filterByFormula` with lowercase `date` is still being rejected
+- Update `src/services/placementsService.ts` to use the correct BOM-prefixed field name: `IS_AFTER({﻿Date}, "2025-12-31")` — or better, use the capital-D `{Date}` since Airtable field names in formulas are case-insensitive but must match
 
-Two lines changed, two files. This restores all live placement data across the entire app (placements, reports, intelligence, reporters, clients, teams, weekly wins).
+### Steps
+1. **Database migration**: `TRUNCATE public.placements_archive;` to clear stale data
+2. **Fix filter formula** in `placementsService.ts`: change `{date}` → `{Date}` (capital D, no BOM needed in formulas)
+3. **Invoke `seed-placements-archive`** to re-populate all ≤2025 records from the new table
+4. Verify total count matches expectations (~22,730 total = archive + live 2026 records)
+
+### Files modified
+- `src/services/placementsService.ts` — fix filterByFormula field name
+- Database migration — truncate archive table
+
+### What stays the same
+- `seed-placements-archive` edge function already uses the correct table ID and outlet lookup
+- No UI or type changes needed
+- Live 2026+ data continues fetching from Airtable directly
 
