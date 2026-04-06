@@ -64,7 +64,6 @@ export default function PlacementsPage() {
 
   const totalReach = filtered.reduce((s, p) => s + (Number.isFinite(p.readership_viewership) ? p.readership_viewership : 0), 0);
   const totalAdValue = filtered.reduce((s, p) => s + (Number.isFinite(p.ad_value) ? p.ad_value : 0), 0);
-  console.log("KPI debug:", { count: filtered.length, totalReach, totalAdValue, sampleRV: filtered.slice(0, 3).map(p => ({ id: p.id, rv: p.readership_viewership, type: typeof p.readership_viewership })) });
   const hasActiveFilters = Boolean(
     search || clientFilter || teamFilter || typeFilter || verticalFilter || yearFilter || securedByFilter
   );
