@@ -1,13 +1,21 @@
+import { forwardRef, type HTMLAttributes } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface TableSkeletonProps {
+interface TableSkeletonProps extends HTMLAttributes<HTMLDivElement> {
   columns?: number;
   rows?: number;
 }
 
-export function TableSkeleton({ columns = 6, rows = 8 }: TableSkeletonProps) {
+export const TableSkeleton = forwardRef<HTMLDivElement, TableSkeletonProps>(function TableSkeleton(
+  { columns = 6, rows = 8, className, ...props },
+  ref,
+) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
+    <div
+      ref={ref}
+      className={["overflow-x-auto rounded-lg border border-border", className].filter(Boolean).join(" ")}
+      {...props}
+    >
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-muted">
@@ -32,4 +40,4 @@ export function TableSkeleton({ columns = 6, rows = 8 }: TableSkeletonProps) {
       </table>
     </div>
   );
-}
+});
