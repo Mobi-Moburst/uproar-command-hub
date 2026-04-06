@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { FilterBar, FilterSelect, SearchInput } from "@/components/FilterBar";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -7,6 +7,7 @@ import { TableSkeleton } from "@/components/TableSkeleton";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { useClients } from "@/hooks/useClients";
@@ -15,14 +16,14 @@ import { useAwards } from "@/hooks/useAwards";
 import { useSamples } from "@/hooks/useSamples";
 import { useBriefings } from "@/hooks/useBriefings";
 import { useCoverageIntelligence } from "@/hooks/useCoverageIntelligence";
+import { useClientSows } from "@/hooks/useClientSows";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
-import { Info } from "lucide-react";
+import { Info, Upload, Download, Trash2, FileText, Star, Loader2 } from "lucide-react";
 import { ClientLogoUpload } from "@/components/ClientLogoUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Client } from "@/data/types";
-import type { AwardSubmission } from "@/data/types";
+import type { Client, AwardSubmission } from "@/data/types";
 
 const HEALTH_COLORS = {
   green: "bg-emerald-500",
