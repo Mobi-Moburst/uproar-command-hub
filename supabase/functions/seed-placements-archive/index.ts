@@ -24,8 +24,12 @@ function first(val: unknown): string {
 }
 
 function firstNum(val: unknown): number {
-  if (Array.isArray(val)) return Number(val[0]) || 0;
-  return Number(val) || 0;
+  if (val == null) return 0;
+  const raw = Array.isArray(val) ? val[0] : val;
+  if (raw == null || typeof raw === "object") return 0;
+  const normalized = String(raw).replace(/[^0-9.-]/g, "");
+  const parsed = Number(normalized || 0);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function mapPlacement(record: AirtableRecord, outletLookup: Map<string, string>) {

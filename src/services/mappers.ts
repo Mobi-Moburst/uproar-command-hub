@@ -16,11 +16,16 @@ function first(val: unknown): string {
 function firstNum(val: unknown): number {
   if (val == null) return 0;
   if (Array.isArray(val)) {
-    const n = Number(val[0] ?? 0);
+    const raw = val[0];
+    if (raw == null) return 0;
+    if (typeof raw === "object") return 0;
+    const normalized = String(raw).replace(/[^0-9.-]/g, "");
+    const n = Number(normalized || 0);
     return Number.isFinite(n) ? n : 0;
   }
   if (typeof val === "object") return 0;
-  const n = Number(val);
+  const normalized = String(val).replace(/[^0-9.-]/g, "");
+  const n = Number(normalized || 0);
   return Number.isFinite(n) ? n : 0;
 }
 
