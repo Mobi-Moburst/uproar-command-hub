@@ -231,7 +231,8 @@ export default function ClientsPage() {
                       <ClientLogoUpload clientName={selectedClient.name} size="md" />
                       <div>
                         <h2 className="text-xl font-semibold text-foreground">{selectedClient.name}</h2>
-                        <div className="mt-1 flex items-center gap-3 flex-wrap">
+                        <p className="mt-0.5 text-sm font-mono text-muted-foreground">{selectedClient.team_name}</p>
+                        <div className="mt-2 flex items-center gap-3 flex-wrap">
                           <StatusBadge status={selectedClient.status} />
                           <Switch
                             checked={selectedClient.status === "Active"}
@@ -255,8 +256,6 @@ export default function ClientsPage() {
                               }
                             />
                           ))}
-                          <span className="h-4 w-px bg-border" />
-                          <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
                         </div>
                       </div>
                     </div>
