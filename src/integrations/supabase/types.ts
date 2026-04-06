@@ -19,27 +19,33 @@ export type Database = {
           client_name: string
           competitors: string[]
           created_at: string
+          health: string
           id: string
           industries: string[]
           keywords: string[]
+          status_override: string | null
           updated_at: string
         }
         Insert: {
           client_name: string
           competitors?: string[]
           created_at?: string
+          health?: string
           id?: string
           industries?: string[]
           keywords?: string[]
+          status_override?: string | null
           updated_at?: string
         }
         Update: {
           client_name?: string
           competitors?: string[]
           created_at?: string
+          health?: string
           id?: string
           industries?: string[]
           keywords?: string[]
+          status_override?: string | null
           updated_at?: string
         }
         Relationships: []

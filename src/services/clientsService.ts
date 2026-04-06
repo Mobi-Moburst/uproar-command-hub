@@ -4,6 +4,7 @@
 
 import { getPlacements } from "./placementsService";
 import { getAwards } from "./awardsService";
+import { supabase } from "@/integrations/supabase/client";
 import type { Client } from "@/data/types";
 
 export async function getClients(): Promise<Client[]> {
@@ -69,6 +70,25 @@ export async function getClients(): Promise<Client[]> {
         last_placement_date: "",
       });
     }
+  }
+
+  // Merge enrichment data (health + status overrides)
+  try {
+    const { data: enrichments } = await supabase
+      .from("client_enrichment")
+      .select("client_name, health, status_override");
+
+    if (enrichments) {
+      for (const e of enrichments) {
+        const client = clientMap.get(e.client_name);
+        if (client) {
+          if (e.health) client.health = e.health as Client["health"];
+          if (e.status_override) client.status = e.status_override as Client["status"];
+        }
+      }
+    }
+  } catch {
+    // enrichment is optional, don't block client loading
   }
 
   return Array.from(clientMap.values()).sort((a, b) => a.name.localeCompare(b.name));

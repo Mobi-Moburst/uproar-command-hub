@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { FilterBar, FilterSelect, SearchInput } from "@/components/FilterBar";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -6,6 +6,7 @@ import { TypeBadge } from "@/components/TypeBadge";
 import { TableSkeleton } from "@/components/TableSkeleton";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
+import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { useClients } from "@/hooks/useClients";
@@ -17,8 +18,23 @@ import { useCoverageIntelligence } from "@/hooks/useCoverageIntelligence";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Info } from "lucide-react";
 import { ClientLogoUpload } from "@/components/ClientLogoUpload";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type { Client } from "@/data/types";
 import type { AwardSubmission } from "@/data/types";
+
+const HEALTH_COLORS = {
+  green: "bg-emerald-500",
+  yellow: "bg-yellow-400",
+  red: "bg-red-500",
+} as const;
+
+const HEALTH_RING_COLORS = {
+  green: "ring-emerald-500",
+  yellow: "ring-yellow-400",
+  red: "ring-red-500",
+} as const;
 
 export default function ClientsPage() {
   const { data: clients = [], isLoading, isError, refetch } = useClients();
@@ -27,11 +43,35 @@ export default function ClientsPage() {
   const { data: samples = [] } = useSamples();
   const { data: briefings = [] } = useBriefings();
   const { conversions } = useCoverageIntelligence();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
   const [verticalFilter, setVerticalFilter] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+  const upsertEnrichment = useCallback(async (clientName: string, updates: Record<string, unknown>) => {
+    const { error } = await supabase
+      .from("client_enrichment")
+      .upsert({ client_name: clientName, ...updates }, { onConflict: "client_name" });
+    if (error) {
+      toast.error("Failed to save");
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+    }
+  }, [queryClient]);
+
+  const handleHealthChange = useCallback((clientName: string, health: "red" | "yellow" | "green") => {
+    upsertEnrichment(clientName, { health });
+    // Optimistically update selectedClient
+    setSelectedClient(prev => prev ? { ...prev, health } : null);
+  }, [upsertEnrichment]);
+
+  const handleStatusToggle = useCallback((clientName: string, isActive: boolean) => {
+    const status_override = isActive ? "Active" : "Inactive";
+    upsertEnrichment(clientName, { status_override });
+    setSelectedClient(prev => prev ? { ...prev, status: status_override as Client["status"] } : null);
+  }, [upsertEnrichment]);
 
   const statuses = [...new Set(clients.map((c) => c.status))];
   const teamNames = [...new Set(clients.map((c) => c.team_name))];
@@ -162,7 +202,12 @@ export default function ClientsPage() {
                         selectedClient?.id === c.id ? "bg-emerald-light" : "hover:bg-muted/50"
                       }`}
                     >
-                      <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{c.name}</td>
+                      <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">
+                        <span className="inline-flex items-center gap-2">
+                          <span className={`inline-block h-2.5 w-2.5 rounded-full ${HEALTH_COLORS[c.health || "green"]}`} />
+                          {c.name}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground">{c.team_name}</td>
                       <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                       
@@ -188,7 +233,30 @@ export default function ClientsPage() {
                         <h2 className="text-xl font-semibold text-foreground">{selectedClient.name}</h2>
                         <div className="mt-1 flex items-center gap-2">
                           <StatusBadge status={selectedClient.status} />
+                          <Switch
+                            checked={selectedClient.status === "Active"}
+                            onCheckedChange={(checked) => handleStatusToggle(selectedClient.name, checked)}
+                          />
                           <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
+                        </div>
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground mr-1">Health</span>
+                          {(["green", "yellow", "red"] as const).map((color) => (
+                            <button
+                              key={color}
+                              onClick={() => handleHealthChange(selectedClient.name, color)}
+                              className={`h-5 w-5 rounded-full border-2 transition-all ${
+                                selectedClient.health === color || (!selectedClient.health && color === "green")
+                                  ? `${HEALTH_COLORS[color]} ${HEALTH_RING_COLORS[color]} ring-2 ring-offset-2 ring-offset-background`
+                                  : `border-muted-foreground/30 hover:${HEALTH_COLORS[color]}/50`
+                              }`}
+                              style={
+                                selectedClient.health !== color && (selectedClient.health || "green") !== color
+                                  ? { backgroundColor: color === "green" ? "rgb(16 185 129 / 0.2)" : color === "yellow" ? "rgb(250 204 21 / 0.2)" : "rgb(239 68 68 / 0.2)" }
+                                  : undefined
+                              }
+                            />
+                          ))}
                         </div>
                       </div>
                     </div>
