@@ -202,7 +202,12 @@ export default function ClientsPage() {
                         selectedClient?.id === c.id ? "bg-emerald-light" : "hover:bg-muted/50"
                       }`}
                     >
-                      <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{c.name}</td>
+                      <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">
+                        <span className="inline-flex items-center gap-2">
+                          <span className={`inline-block h-2.5 w-2.5 rounded-full ${HEALTH_COLORS[c.health || "green"]}`} />
+                          {c.name}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground">{c.team_name}</td>
                       <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                       
@@ -228,7 +233,30 @@ export default function ClientsPage() {
                         <h2 className="text-xl font-semibold text-foreground">{selectedClient.name}</h2>
                         <div className="mt-1 flex items-center gap-2">
                           <StatusBadge status={selectedClient.status} />
+                          <Switch
+                            checked={selectedClient.status === "Active"}
+                            onCheckedChange={(checked) => handleStatusToggle(selectedClient.name, checked)}
+                          />
                           <span className="text-sm font-mono text-muted-foreground">{selectedClient.team_name}</span>
+                        </div>
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground mr-1">Health</span>
+                          {(["green", "yellow", "red"] as const).map((color) => (
+                            <button
+                              key={color}
+                              onClick={() => handleHealthChange(selectedClient.name, color)}
+                              className={`h-5 w-5 rounded-full border-2 transition-all ${
+                                selectedClient.health === color || (!selectedClient.health && color === "green")
+                                  ? `${HEALTH_COLORS[color]} ${HEALTH_RING_COLORS[color]} ring-2 ring-offset-2 ring-offset-background`
+                                  : `border-muted-foreground/30 hover:${HEALTH_COLORS[color]}/50`
+                              }`}
+                              style={
+                                selectedClient.health !== color && (selectedClient.health || "green") !== color
+                                  ? { backgroundColor: color === "green" ? "rgb(16 185 129 / 0.2)" : color === "yellow" ? "rgb(250 204 21 / 0.2)" : "rgb(239 68 68 / 0.2)" }
+                                  : undefined
+                              }
+                            />
+                          ))}
                         </div>
                       </div>
                     </div>
