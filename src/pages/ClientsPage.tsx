@@ -466,6 +466,126 @@ export default function ClientsPage() {
                       <p className="text-sm font-mono text-muted-foreground">No briefings recorded.</p>
                     )}
                   </div>
+
+                  {/* SOW Section */}
+                  <div className="mt-8 pb-8">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                        <FileText className="h-4 w-4" />
+                        Statements of Work
+                      </h3>
+                      <div>
+                        <input
+                          ref={sowInputRef}
+                          type="file"
+                          accept=".pdf"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) uploadSow(file);
+                            e.target.value = "";
+                          }}
+                        />
+                        <button
+                          onClick={() => sowInputRef.current?.click()}
+                          disabled={uploading}
+                          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+                        >
+                          {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                          Upload SOW
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Current SOW summary */}
+                    {(() => {
+                      const currentSow = sows.find(s => s.is_current && s.ai_processed);
+                      if (!currentSow) return null;
+                      return (
+                        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Star className="h-3.5 w-3.5 text-primary" />
+                            <span className="text-xs font-semibold text-primary">Current SOW Summary</span>
+                          </div>
+                          {currentSow.summary && (
+                            <p className="text-xs text-foreground leading-relaxed">{currentSow.summary}</p>
+                          )}
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            {currentSow.start_date && (
+                              <div>
+                                <p className="text-muted-foreground">Start Date</p>
+                                <p className="font-medium text-foreground">{formatDateShort(currentSow.start_date)}</p>
+                              </div>
+                            )}
+                            {currentSow.end_date && (
+                              <div>
+                                <p className="text-muted-foreground">End Date</p>
+                                <p className="font-medium text-foreground">{formatDateShort(currentSow.end_date)}</p>
+                              </div>
+                            )}
+                            {currentSow.retainer_amount && (
+                              <div>
+                                <p className="text-muted-foreground">Retainer</p>
+                                <p className="font-medium text-foreground">{currentSow.retainer_amount}</p>
+                              </div>
+                            )}
+                            {currentSow.renewal_date && (
+                              <div>
+                                <p className="text-muted-foreground">Renewal Date</p>
+                                <p className="font-medium text-foreground">{formatDateShort(currentSow.renewal_date)}</p>
+                              </div>
+                            )}
+                          </div>
+                          {currentSow.deliverables && currentSow.deliverables.length > 0 && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Deliverables</p>
+                              <ul className="list-disc list-inside text-xs text-foreground space-y-0.5">
+                                {currentSow.deliverables.map((d, i) => (
+                                  <li key={i}>{d}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* SOW list */}
+                    {sows.length > 0 ? (
+                      <div className="space-y-2">
+                        {sows.map((sow) => (
+                          <div key={sow.id} className="flex items-center justify-between rounded-md border border-border p-3">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-foreground truncate">{sow.file_name}</p>
+                                <p className="text-[10px] font-mono text-muted-foreground">
+                                  {formatDateShort(sow.uploaded_at)}
+                                  {!sow.ai_processed && " · Processing..."}
+                                </p>
+                              </div>
+                              {sow.is_current && <Badge variant="secondary" className="text-[10px] shrink-0">Current</Badge>}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {!sow.is_current && (
+                                <button onClick={() => setAsCurrent(sow.id)} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground" title="Set as current">
+                                  <Star className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                              <button onClick={() => downloadSow(sow)} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground" title="Download">
+                                <Download className="h-3.5 w-3.5" />
+                              </button>
+                              <button onClick={() => deleteSow(sow)} className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Delete">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-mono text-muted-foreground">No SOWs uploaded yet.</p>
+                    )}
+                  </div>
                 </div>
               </TooltipProvider>
             )}
