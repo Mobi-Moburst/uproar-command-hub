@@ -95,6 +95,60 @@ export type Database = {
         }
         Relationships: []
       }
+      client_sows: {
+        Row: {
+          ai_processed: boolean
+          client_name: string
+          deliverables: Json | null
+          end_date: string | null
+          file_name: string
+          id: string
+          is_current: boolean
+          raw_text: string | null
+          renewal_date: string | null
+          retainer_amount: string | null
+          start_date: string | null
+          storage_path: string
+          summary: string | null
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          ai_processed?: boolean
+          client_name: string
+          deliverables?: Json | null
+          end_date?: string | null
+          file_name: string
+          id?: string
+          is_current?: boolean
+          raw_text?: string | null
+          renewal_date?: string | null
+          retainer_amount?: string | null
+          start_date?: string | null
+          storage_path: string
+          summary?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          ai_processed?: boolean
+          client_name?: string
+          deliverables?: Json | null
+          end_date?: string | null
+          file_name?: string
+          id?: string
+          is_current?: boolean
+          raw_text?: string | null
+          renewal_date?: string | null
+          retainer_amount?: string | null
+          start_date?: string | null
+          storage_path?: string
+          summary?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       placements_archive: {
         Row: {
           ad_value: number
