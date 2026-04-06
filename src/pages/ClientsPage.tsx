@@ -45,6 +45,8 @@ export default function ClientsPage() {
   const { data: briefings = [] } = useBriefings();
   const { conversions } = useCoverageIntelligence();
   const queryClient = useQueryClient();
+  const { sows, uploading, uploadSow, setAsCurrent, deleteSow, downloadSow } = useClientSows(selectedClient?.name ?? null);
+  const sowInputRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
