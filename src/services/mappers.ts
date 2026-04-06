@@ -32,7 +32,7 @@ export function mapPlacement(record: AirtableRecord, outletLookup?: Map<string, 
   const f = record.fields as Record<string, any>;
   return {
     id: record.id,
-    date: first(f["Date"] ?? f["date"]),
+    date: first(f["\uFEFFDate"] ?? f["Date"] ?? f["date"]),
     client_name: first(f["Client"] ?? f["client"]),
     team_name: first(f["Team"] ?? f["team"]),
     outlet: resolveOutlet(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"], outletLookup),
