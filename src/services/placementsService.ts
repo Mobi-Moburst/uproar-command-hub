@@ -58,9 +58,7 @@ function first(val: unknown): string {
 /** Fetch live (2026+) placements from Airtable, resolving outlet IDs */
 async function getLivePlacements(): Promise<MediaPlacement[]> {
   const [records, outletRecords] = await Promise.all([
-    fetchTable("placements", TABLE_IDS.placements, {
-      filterByFormula: "IS_AFTER({Date}, '2025-12-31')",
-    }),
+    fetchTable("placements", TABLE_IDS.placements),
     fetchTable("placements", TABLE_IDS.outlets),
   ]);
 
@@ -68,7 +66,9 @@ async function getLivePlacements(): Promise<MediaPlacement[]> {
     outletRecords.map((r) => [r.id, first(r.fields["Outlets"] ?? r.fields["Name"])])
   );
 
-  return records.map((r) => mapPlacement(r, outletLookup));
+  // Filter client-side to only 2026+ records (archive handles ≤2025)
+  const mapped = records.map((r) => mapPlacement(r, outletLookup));
+  return mapped.filter((p) => p.date > "2025-12-31");
 }
 
 /** Fetch all media placements — archived from DB + live from Airtable */
