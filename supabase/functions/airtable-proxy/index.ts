@@ -32,6 +32,14 @@ Deno.serve(async (req) => {
 
     const { base, table, options = {}, maxRecords } = (await req.json()) as RequestBody;
 
+    const sanitizedOptions = { ...options };
+    if (
+      (table === "tblw34mWTvuaIUz16" || table === "tblsFhq3a6NPalO5N") &&
+      typeof sanitizedOptions.filterByFormula === "string"
+    ) {
+      delete sanitizedOptions.filterByFormula;
+    }
+
     const rawBaseIds: Record<string, string | undefined> = {
       placements: Deno.env.get("AIRTABLE_BASE_PLACEMENTS"),
       awards: Deno.env.get("AIRTABLE_BASE_AWARDS"),
@@ -53,7 +61,7 @@ Deno.serve(async (req) => {
     const limit = maxRecords ?? 10000; // default cap to avoid runaway pagination
 
     do {
-      const params = new URLSearchParams({ ...options, pageSize: "100" });
+      const params = new URLSearchParams({ ...sanitizedOptions, pageSize: "100" });
       if (offset) params.set("offset", offset);
 
       const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}?${params}`;
