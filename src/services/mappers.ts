@@ -20,11 +20,19 @@ function firstNum(val: unknown): number {
 
 // ── Media Placements ───────────────────────────────────────────────────────────
 
-/** Resolve a linked-record ID to its name via a lookup map */
-function resolveOutlet(val: unknown, lookup?: Map<string, string>): string {
-  const raw = first(val);
-  if (lookup && raw.startsWith("rec")) return lookup.get(raw) ?? raw;
-  return raw;
+/** Resolve a linked-record ID to its name via a lookup map, with Import Outlet fallback */
+function resolveOutlet(linkedVal: unknown, importOutlet: unknown, lookup?: Map<string, string>): string {
+  const raw = first(linkedVal);
+  if (lookup && raw.startsWith("rec")) {
+    const resolved = lookup.get(raw);
+    if (resolved) return resolved;
+  }
+  // If linked record didn't resolve, fall back to Import Outlet (plain text)
+  if (raw.startsWith("rec") || !raw) {
+    const fallback = first(importOutlet);
+    if (fallback) return fallback;
+  }
+  return raw || "–";
 }
 
 /** Maps raw Airtable Clips record → MediaPlacement */
@@ -33,9 +41,9 @@ export function mapPlacement(record: AirtableRecord, outletLookup?: Map<string, 
   return {
     id: record.id,
     date: first(f["\uFEFFDate"] ?? f["Date"] ?? f["date"]),
-    client_name: first(f["Client"] ?? f["client"]),
-    team_name: first(f["Team"] ?? f["team"]),
-    outlet: resolveOutlet(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"], outletLookup),
+    client_name: first(f["Client Name"] ?? f["Client"] ?? f["client_name"] ?? f["client"]),
+    team_name: first(f["Team Name"] ?? f["Team"] ?? f["team_name"] ?? f["team"]),
+    outlet: resolveOutlet(f["Outlet (Linked)"] ?? f["Outlet"] ?? f["outlet"], f["Import Outlet"], outletLookup),
     reporter_name: first(f["Reporter Name"] ?? f["reporter_name"]),
     headline: first(f["Headline"] ?? f["headline"]),
     link: first(f["Link"] ?? f["link"]),
