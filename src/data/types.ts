@@ -11,6 +11,7 @@ export interface Client {
   total_award_submissions: number;
   total_award_wins: number;
   last_placement_date: string;
+  health?: "red" | "yellow" | "green";
 }
 
 export interface MediaPlacement {
