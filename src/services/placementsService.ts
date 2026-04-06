@@ -58,7 +58,9 @@ function first(val: unknown): string {
 /** Fetch live (2026+) placements from Airtable, resolving outlet IDs */
 async function getLivePlacements(): Promise<MediaPlacement[]> {
   const [records, outletRecords] = await Promise.all([
-    fetchTable("placements", TABLE_IDS.placements),
+    fetchTable("placements", TABLE_IDS.placements, {
+      filterByFormula: 'IS_AFTER({Date}, "2025-12-31")',
+    }),
     fetchTable("placements", TABLE_IDS.outlets),
   ]);
 
