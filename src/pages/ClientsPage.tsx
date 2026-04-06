@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { FilterBar, FilterSelect, SearchInput } from "@/components/FilterBar";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -6,6 +6,7 @@ import { TypeBadge } from "@/components/TypeBadge";
 import { TableSkeleton } from "@/components/TableSkeleton";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
+import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { useClients } from "@/hooks/useClients";
@@ -17,8 +18,23 @@ import { useCoverageIntelligence } from "@/hooks/useCoverageIntelligence";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Info } from "lucide-react";
 import { ClientLogoUpload } from "@/components/ClientLogoUpload";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type { Client } from "@/data/types";
 import type { AwardSubmission } from "@/data/types";
+
+const HEALTH_COLORS = {
+  green: "bg-emerald-500",
+  yellow: "bg-yellow-400",
+  red: "bg-red-500",
+} as const;
+
+const HEALTH_RING_COLORS = {
+  green: "ring-emerald-500",
+  yellow: "ring-yellow-400",
+  red: "ring-red-500",
+} as const;
 
 export default function ClientsPage() {
   const { data: clients = [], isLoading, isError, refetch } = useClients();
@@ -27,11 +43,35 @@ export default function ClientsPage() {
   const { data: samples = [] } = useSamples();
   const { data: briefings = [] } = useBriefings();
   const { conversions } = useCoverageIntelligence();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
   const [verticalFilter, setVerticalFilter] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+  const upsertEnrichment = useCallback(async (clientName: string, updates: Record<string, unknown>) => {
+    const { error } = await supabase
+      .from("client_enrichment")
+      .upsert({ client_name: clientName, ...updates }, { onConflict: "client_name" });
+    if (error) {
+      toast.error("Failed to save");
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+    }
+  }, [queryClient]);
+
+  const handleHealthChange = useCallback((clientName: string, health: "red" | "yellow" | "green") => {
+    upsertEnrichment(clientName, { health });
+    // Optimistically update selectedClient
+    setSelectedClient(prev => prev ? { ...prev, health } : null);
+  }, [upsertEnrichment]);
+
+  const handleStatusToggle = useCallback((clientName: string, isActive: boolean) => {
+    const status_override = isActive ? "Active" : "Inactive";
+    upsertEnrichment(clientName, { status_override });
+    setSelectedClient(prev => prev ? { ...prev, status: status_override as Client["status"] } : null);
+  }, [upsertEnrichment]);
 
   const statuses = [...new Set(clients.map((c) => c.status))];
   const teamNames = [...new Set(clients.map((c) => c.team_name))];
