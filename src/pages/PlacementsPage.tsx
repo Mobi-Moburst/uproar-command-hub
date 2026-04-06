@@ -24,7 +24,7 @@ export default function PlacementsPage() {
   const [typeFilter, setTypeFilter] = useState("");
   const [verticalFilter, setVerticalFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
-  const [securedByFilter, setSecuredByFilter] = useState("Uproar");
+  const [securedByFilter, setSecuredByFilter] = useState("");
   
   const [page, setPage] = useState(0);
 
@@ -64,6 +64,9 @@ export default function PlacementsPage() {
 
   const totalReach = filtered.reduce((s, p) => s + p.readership_viewership, 0);
   const totalAdValue = filtered.reduce((s, p) => s + p.ad_value, 0);
+  const hasActiveFilters = Boolean(
+    search || clientFilter || teamFilter || typeFilter || verticalFilter || yearFilter || securedByFilter
+  );
 
   const handleFilterChange = (setter: (v: string) => void) => (v: string) => {
     setter(v);
@@ -83,7 +86,11 @@ export default function PlacementsPage() {
             Array.from({ length: 3 }).map((_, i) => <KpiCardSkeleton key={i} />)
           ) : (
             <>
-              <KpiCard label="Total Placements" value={filtered.length.toLocaleString()} detail={yearFilter || "All time"} />
+              <KpiCard
+                label="Total Placements"
+                value={filtered.length.toLocaleString()}
+                detail={hasActiveFilters ? "Filtered results" : "All time"}
+              />
               <KpiCard label="Total Reach" value={formatNumber(totalReach)} detail="Reported total reach" />
               <KpiCard label="Total Ad Value" value={formatCurrency(totalAdValue)} detail="Reported total ad value" />
             </>
