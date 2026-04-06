@@ -33,12 +33,6 @@ Deno.serve(async (req) => {
     const { base, table, options = {}, maxRecords } = (await req.json()) as RequestBody;
 
     const sanitizedOptions = { ...options };
-    if (
-      (table === "tblw34mWTvuaIUz16" || table === "tblsFhq3a6NPalO5N") &&
-      typeof sanitizedOptions.filterByFormula === "string"
-    ) {
-      delete sanitizedOptions.filterByFormula;
-    }
 
     const rawBaseIds: Record<string, string | undefined> = {
       placements: Deno.env.get("AIRTABLE_BASE_PLACEMENTS"),
