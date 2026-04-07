@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { KpiCard } from "@/components/KpiCard";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { KpiCardSkeleton } from "@/components/KpiCardSkeleton";
 import { FilterBar, FilterSelect, SearchInput } from "@/components/FilterBar";
 import { TypeBadge } from "@/components/TypeBadge";
@@ -40,7 +41,7 @@ export default function PlacementsPage() {
     return placements.filter((p) => {
       if (search) {
         const q = search.toLowerCase();
-        const match = [p.headline, p.outlet, p.client_name, p.reporter_name, p.secured_by, p.vertical, p.type]
+        const match = [p.headline, p.outlet, p.client_name, p.reporter_name, p.secured_by, p.vertical, p.type, p.notes]
           .some((field) => field?.toLowerCase().includes(q));
         if (!match) return false;
       }
@@ -134,6 +135,7 @@ export default function PlacementsPage() {
                     <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reach</th>
                     <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ad Value</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Secured By</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notes</th>
                   </tr>
                 </thead>
                 <tbody className="font-mono">
@@ -154,6 +156,18 @@ export default function PlacementsPage() {
                       <td className="px-4 py-3 text-right">{formatNumber(p.readership_viewership)}</td>
                       <td className="px-4 py-3 text-right">{p.ad_value ? formatCurrency(p.ad_value) : "–"}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground font-sans">{p.secured_by}</td>
+                      <td className="max-w-[200px] px-4 py-3 text-muted-foreground">
+                        {p.notes ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="block truncate cursor-default">{p.notes}</span>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-xs whitespace-pre-wrap">
+                              {p.notes}
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : "–"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
