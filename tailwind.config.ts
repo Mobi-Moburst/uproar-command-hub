@@ -26,6 +26,11 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         surface: "hsl(var(--surface))",
+        intercept: {
+          DEFAULT: "#b9e045",
+          accent: "#b9e045",
+          success: "#10b981",
+        },
         brand: {
           blue: "hsl(var(--brand-blue))",
           lime: "hsl(var(--brand-lime))",

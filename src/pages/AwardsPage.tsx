@@ -71,7 +71,7 @@ export default function AwardsPage() {
             <FilterSelect label="All Teams" value={teamFilter} options={teamNames} onChange={setTeamFilter} />
             <FilterSelect label="All Statuses" value={statusFilter} options={statuses} onChange={setStatusFilter} />
           </FilterBar>
-          <div className="flex gap-1 rounded-md border border-border p-0.5">
+          <div className="flex gap-1 rounded-md border border-[rgba(255,255,255,0.05)] p-0.5">
             <button
               onClick={() => setViewMode("table")}
               className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === "table" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
@@ -95,10 +95,10 @@ export default function AwardsPage() {
           filtered.length === 0 ? (
             <EmptyState message="No awards match your filters." columns={9} />
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div className="overflow-x-auto rounded-lg border border-[rgba(255,255,255,0.05)]">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted">
+                  <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.04)]">
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Client</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Award</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Edition</th>
@@ -112,7 +112,7 @@ export default function AwardsPage() {
                 </thead>
                 <tbody className="font-mono">
                   {filtered.map((a) => (
-                    <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                    <tr key={a.id} className="border-b border-[rgba(255,255,255,0.05)] last:border-0 hover:bg-[rgba(18,20,24,0.7)]">
                       <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{a.client_name}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-foreground">{a.award_name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{a.award_edition}</td>
@@ -138,7 +138,7 @@ export default function AwardsPage() {
                 </div>
                 <div className="space-y-2">
                   {group.items.map((a) => (
-                    <div key={a.id} className="rounded-lg border border-border bg-card p-4">
+                    <div key={a.id} className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-4">
                       <p className="text-sm font-medium text-foreground">{a.client_name}</p>
                       <p className="mt-1 text-xs text-muted-foreground">{a.submission_title}</p>
                       <p className="mt-2 text-xs font-mono text-muted-foreground">{a.award_name}</p>
@@ -148,7 +148,7 @@ export default function AwardsPage() {
                     </div>
                   ))}
                   {group.items.length === 0 && (
-                    <p className="rounded-lg border border-border px-4 py-6 text-xs font-mono text-muted-foreground">No submissions with this status.</p>
+                    <p className="rounded-lg border border-[rgba(255,255,255,0.05)] px-4 py-6 text-xs font-mono text-muted-foreground">No submissions with this status.</p>
                   )}
                 </div>
               </div>

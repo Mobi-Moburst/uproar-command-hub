@@ -270,7 +270,7 @@ function EditableInsight({
       {isEditing && onRemove && (
         <button
           onClick={onRemove}
-          className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-muted text-muted-foreground hover:bg-muted-foreground hover:text-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+          className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-[rgba(255,255,255,0.04)] text-muted-foreground hover:bg-[rgba(255,255,255,0.06)]-foreground hover:text-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
         >
           <X className="h-3 w-3" />
         </button>

@@ -5,9 +5,9 @@ interface EmptyStateProps {
 
 export function EmptyState({ message, columns = 1 }: EmptyStateProps) {
   return (
-    <div className="rounded-lg border border-border bg-card">
+    <div className="glass">
       {columns > 1 && (
-        <div className="border-b border-border bg-muted px-6 py-3">
+        <div className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.04)] px-6 py-3">
           <div className="h-4 w-32 rounded bg-border" />
         </div>
       )}

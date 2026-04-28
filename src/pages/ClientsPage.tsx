@@ -180,10 +180,10 @@ export default function ClientsPage() {
           <EmptyState message="No clients match your filters." columns={10} />
         ) : (
           <div className="relative">
-            <div className={`overflow-x-auto rounded-lg border border-border transition-all ${selectedClient ? "lg:mr-[50%]" : ""}`}>
+            <div className={`overflow-x-auto rounded-lg border border-[rgba(255,255,255,0.05)] transition-all ${selectedClient ? "lg:mr-[50%]" : ""}`}>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted">
+                  <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.04)]">
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Client</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Team</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
@@ -201,8 +201,8 @@ export default function ClientsPage() {
                     <tr
                       key={c.id}
                       onClick={() => setSelectedClient(selectedClient?.id === c.id ? null : c)}
-                      className={`cursor-pointer border-b border-border last:border-0 transition-colors ${
-                        selectedClient?.id === c.id ? "bg-emerald-light" : "hover:bg-muted/50"
+                      className={`cursor-pointer border-b border-[rgba(255,255,255,0.05)] last:border-0 transition-colors ${
+                        selectedClient?.id === c.id ? "bg-emerald-light" : "hover:bg-[rgba(18,20,24,0.7)]"
                       }`}
                     >
                       <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">
@@ -228,7 +228,7 @@ export default function ClientsPage() {
 
             {selectedClient && (
               <TooltipProvider>
-                <div className="fixed right-0 top-0 z-40 h-screen w-full overflow-y-auto border-l border-border bg-background p-6 shadow-xl animate-slide-in-right lg:w-1/2">
+                <div className="fixed right-0 top-0 z-40 h-screen w-full overflow-y-auto border-l border-[rgba(255,255,255,0.05)] bg-background p-6 shadow-xl animate-slide-in-right lg:w-1/2">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <ClientLogoUpload clientName={selectedClient.name} size="md" />
@@ -250,7 +250,7 @@ export default function ClientsPage() {
                               className={`h-5 w-5 rounded-full border-2 transition-all ${
                                 selectedClient.health === color || (!selectedClient.health && color === "green")
                                   ? `${HEALTH_COLORS[color]} ${HEALTH_RING_COLORS[color]} ring-2 ring-offset-2 ring-offset-background`
-                                  : `border-muted-foreground/30`
+                                  : `border-[rgba(255,255,255,0.05)]-foreground/30`
                               }`}
                               style={
                                 selectedClient.health !== color && (selectedClient.health || "green") !== color
@@ -262,21 +262,21 @@ export default function ClientsPage() {
                         </div>
                       </div>
                     </div>
-                    <button onClick={() => setSelectedClient(null)} className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+                    <button onClick={() => setSelectedClient(null)} className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-[rgba(255,255,255,0.06)] hover:text-foreground">
                       Close
                     </button>
                   </div>
 
                   <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
-                    <div className="rounded-md border border-border p-4">
+                    <div className="rounded-md border border-[rgba(255,255,255,0.05)] p-4">
                       <p className="text-xs text-muted-foreground">Placements</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_placements}</p>
                     </div>
-                    <div className="rounded-md border border-border p-4">
+                    <div className="rounded-md border border-[rgba(255,255,255,0.05)] p-4">
                       <p className="text-xs text-muted-foreground">Reach</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{formatNumber(selectedClient.total_reach)}</p>
                     </div>
-                    <div className="rounded-md border border-border p-4">
+                    <div className="rounded-md border border-[rgba(255,255,255,0.05)] p-4">
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         Ad Value
                         <Tooltip>
@@ -290,11 +290,11 @@ export default function ClientsPage() {
                       </p>
                       <p className="mt-1 font-tight text-2xl font-bold">{formatCurrency(selectedClient.total_ad_value)}</p>
                     </div>
-                    <div className="rounded-md border border-border p-4">
+                    <div className="rounded-md border border-[rgba(255,255,255,0.05)] p-4">
                       <p className="text-xs text-muted-foreground">Award Wins</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{selectedClient.total_award_wins}</p>
                     </div>
-                    <div className="rounded-md border border-border p-4">
+                    <div className="rounded-md border border-[rgba(255,255,255,0.05)] p-4">
                       <p className="text-xs text-muted-foreground">Samples</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{clientSamples.length}</p>
                       {clientSamples.length > 0 && (() => {
@@ -304,7 +304,7 @@ export default function ClientsPage() {
                         return <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">{rate}% conversion ({converted}/{clientConv.length})</p>;
                       })()}
                     </div>
-                    <div className="rounded-md border border-border p-4">
+                    <div className="rounded-md border border-[rgba(255,255,255,0.05)] p-4">
                       <p className="text-xs text-muted-foreground">Briefings</p>
                       <p className="mt-1 font-tight text-2xl font-bold">{clientBriefings.length}</p>
                       {clientBriefings.length > 0 && (() => {
@@ -328,7 +328,7 @@ export default function ClientsPage() {
                       Recent Placements
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-mono text-muted-foreground cursor-help">
+                          <span className="inline-flex items-center rounded-full bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-[10px] font-mono text-muted-foreground cursor-help">
                             All-Time
                             <Info className="ml-1 h-2.5 w-2.5" />
                           </span>
@@ -341,7 +341,7 @@ export default function ClientsPage() {
                     {clientPlacements.length > 0 ? (
                       <div className="space-y-2">
                         {clientPlacements.map((p) => (
-                          <div key={p.id} className="rounded-md border border-border p-3">
+                          <div key={p.id} className="rounded-md border border-[rgba(255,255,255,0.05)] p-3">
                             <div className="flex items-start justify-between">
                               <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald hover:underline">
                                 {p.headline}
@@ -383,7 +383,7 @@ export default function ClientsPage() {
                                     <AccordionContent>
                                       <div className="space-y-2 pt-1">
                                         {statusAwards.map((a) => (
-                                          <div key={a.id} className="flex items-center justify-between rounded-md border border-border p-3">
+                                          <div key={a.id} className="flex items-center justify-between rounded-md border border-[rgba(255,255,255,0.05)] p-3">
                                             <div>
                                               <p className="text-sm font-medium text-foreground">{a.submission_title}</p>
                                               <p className="text-xs font-mono text-muted-foreground">{a.award_name} — {a.award_edition}</p>
@@ -410,7 +410,7 @@ export default function ClientsPage() {
                     {clientSamples.length > 0 ? (
                       <div className="space-y-2">
                         {clientSamples.slice(0, 5).map((s) => (
-                          <div key={s.id} className="rounded-md border border-border p-3">
+                          <div key={s.id} className="rounded-md border border-[rgba(255,255,255,0.05)] p-3">
                             <div className="flex items-start justify-between">
                               <div>
                                 <p className="text-sm font-medium text-foreground">{s.products || "No product listed"}</p>
@@ -441,7 +441,7 @@ export default function ClientsPage() {
                     {clientBriefings.length > 0 ? (
                       <div className="space-y-2">
                         {clientBriefings.slice(0, 5).map((b) => (
-                          <div key={b.id} className="rounded-md border border-border p-3">
+                          <div key={b.id} className="rounded-md border border-[rgba(255,255,255,0.05)] p-3">
                             <div className="flex items-start justify-between">
                               <div>
                                 <p className="text-sm font-medium text-foreground">{b.topic || b.outlet || "Briefing"}</p>
@@ -489,7 +489,7 @@ export default function ClientsPage() {
                         <button
                           onClick={() => sowInputRef.current?.click()}
                           disabled={uploading}
-                          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-[rgba(255,255,255,0.05)] px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-[rgba(255,255,255,0.06)] hover:text-foreground disabled:opacity-50"
                         >
                           {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
                           Upload SOW
@@ -554,7 +554,7 @@ export default function ClientsPage() {
                     {sows.length > 0 ? (
                       <div className="space-y-2">
                         {sows.map((sow) => (
-                          <div key={sow.id} className="flex items-center justify-between rounded-md border border-border p-3">
+                          <div key={sow.id} className="flex items-center justify-between rounded-md border border-[rgba(255,255,255,0.05)] p-3">
                             <div className="flex items-center gap-2 min-w-0">
                               <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                               <div className="min-w-0">
@@ -568,11 +568,11 @@ export default function ClientsPage() {
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
                               {!sow.is_current && (
-                                <button onClick={() => setAsCurrent(sow.id)} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground" title="Set as current">
+                                <button onClick={() => setAsCurrent(sow.id)} className="rounded p-1.5 text-muted-foreground hover:bg-[rgba(255,255,255,0.06)] hover:text-foreground" title="Set as current">
                                   <Star className="h-3.5 w-3.5" />
                                 </button>
                               )}
-                              <button onClick={() => downloadSow(sow)} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground" title="Download">
+                              <button onClick={() => downloadSow(sow)} className="rounded p-1.5 text-muted-foreground hover:bg-[rgba(255,255,255,0.06)] hover:text-foreground" title="Download">
                                 <Download className="h-3.5 w-3.5" />
                               </button>
                               <button onClick={() => deleteSow(sow)} className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Delete">

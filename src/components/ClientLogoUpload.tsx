@@ -34,7 +34,7 @@ export function ClientLogoUpload({ clientName, size = "md" }: ClientLogoUploadPr
       <button
         onClick={() => inputRef.current?.click()}
         disabled={isUploading}
-        className={`${sizeMap[size]} rounded-xl border-2 border-dashed border-border bg-muted/30 flex items-center justify-center overflow-hidden transition-all hover:border-primary/40 hover:bg-primary/5 cursor-pointer`}
+        className={`${sizeMap[size]} rounded-xl border-2 border-dashed border-[rgba(255,255,255,0.05)] bg-[rgba(18,20,24,0.5)] flex items-center justify-center overflow-hidden transition-all hover:border-primary/40 hover:bg-primary/5 cursor-pointer`}
       >
         {isUploading ? (
           <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />

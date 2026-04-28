@@ -59,7 +59,7 @@ export function ReportKpis({
                 placeholder="Set goal (e.g. 10+)"
                 value={kpiGoals["kpi-ytd-placements"] || ""}
                 onChange={(e) => setKpiGoal("kpi-ytd-placements", e.target.value)}
-                className="mt-2 w-full rounded border border-border bg-background px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 print:hidden"
+                className="mt-2 w-full rounded border border-[rgba(255,255,255,0.05)] bg-background px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 print:hidden"
               />
             )}
           </div>
@@ -77,7 +77,7 @@ export function ReportKpis({
                 placeholder="Set goal (e.g. 1M+)"
                 value={kpiGoals["kpi-ytd-reach"] || ""}
                 onChange={(e) => setKpiGoal("kpi-ytd-reach", e.target.value)}
-                className="mt-2 w-full rounded border border-border bg-background px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 print:hidden"
+                className="mt-2 w-full rounded border border-[rgba(255,255,255,0.05)] bg-background px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 print:hidden"
               />
             )}
           </div>
@@ -105,7 +105,7 @@ function KpiBlock({
   setKpiGoal: (id: string, value: string) => void;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <div className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p className="mt-2 font-tight text-3xl font-bold tracking-tight text-foreground">{value}</p>
       <p className="mt-1 text-[11px] font-mono text-muted-foreground/70">{sub}</p>
@@ -118,7 +118,7 @@ function KpiBlock({
           placeholder="Set goal…"
           value={goal || ""}
           onChange={(e) => setKpiGoal(goalId, e.target.value)}
-          className="mt-2 w-full rounded border border-border bg-background px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 print:hidden"
+          className="mt-2 w-full rounded border border-[rgba(255,255,255,0.05)] bg-background px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 print:hidden"
         />
       )}
     </div>

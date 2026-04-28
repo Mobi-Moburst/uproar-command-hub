@@ -90,7 +90,7 @@ export function ReportSaveControls({
           <span className={`text-[10px] font-mono uppercase tracking-wide px-2 py-1 rounded-full ${
             existingReport.status === "published"
               ? "bg-primary/10 text-primary"
-              : "bg-muted text-muted-foreground"
+              : "bg-[rgba(255,255,255,0.04)] text-muted-foreground"
           }`}>
             {existingReport.status}
           </span>

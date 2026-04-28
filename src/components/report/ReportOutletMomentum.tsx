@@ -56,7 +56,7 @@ export function ReportOutletMomentum({ placements, toDate, fromDate }: ReportOut
 
       <div className="grid gap-4 sm:grid-cols-2">
         {/* Emerging */}
-        <div className="rounded-lg border border-border bg-card p-5">
+        <div className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5">
           <p className="text-xs font-mono uppercase tracking-wide text-primary mb-3">↑ Emerging</p>
           {emerging.length > 0 ? (
             <div className="space-y-2.5">
@@ -76,7 +76,7 @@ export function ReportOutletMomentum({ placements, toDate, fromDate }: ReportOut
         </div>
 
         {/* Established */}
-        <div className="rounded-lg border border-border bg-card p-5">
+        <div className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5">
           <p className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">● Established</p>
           {established.length > 0 ? (
             <div className="space-y-2.5">

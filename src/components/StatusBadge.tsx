@@ -3,20 +3,20 @@ import { cn } from "@/lib/utils";
 type StatusVariant = "active" | "inactive" | "onboarding" | "drafting" | "submitted" | "finalist" | "won" | "lost" | "coverage live" | "pending" | "fell through" | "interview occurred, pending coverage" | "sample delivered, pending coverage" | "default";
 
 const variantClasses: Record<StatusVariant, string> = {
-  active: "bg-emerald-light text-emerald",
-  inactive: "bg-muted text-muted-foreground",
-  onboarding: "bg-muted text-foreground",
-  drafting: "bg-[hsl(38,92%,93%)] text-status-drafting",
-  submitted: "bg-[hsl(217,91%,93%)] text-status-submitted",
-  finalist: "bg-[hsl(262,83%,93%)] text-status-finalist",
-  won: "bg-emerald-light text-emerald",
-  lost: "bg-[hsl(0,84%,95%)] text-status-lost",
-  "coverage live": "bg-emerald-light text-emerald",
-  "pending": "bg-[hsl(38,92%,93%)] text-status-drafting",
-  "fell through": "bg-[hsl(0,84%,95%)] text-status-lost",
-  "interview occurred, pending coverage": "bg-[hsl(217,91%,93%)] text-status-submitted",
-  "sample delivered, pending coverage": "bg-[hsl(217,91%,93%)] text-status-submitted",
-  default: "bg-muted text-muted-foreground",
+  active: "bg-[rgba(16,185,129,0.10)] text-[#10b981]",
+  inactive: "bg-[rgba(255,255,255,0.06)] text-[#9ca3af]",
+  onboarding: "bg-[rgba(255,255,255,0.06)] text-white",
+  drafting: "bg-[rgba(250,204,21,0.10)] text-[#facc15]",
+  submitted: "bg-[rgba(56,189,248,0.10)] text-[#38bdf8]",
+  finalist: "bg-[rgba(192,132,252,0.10)] text-[#c084fc]",
+  won: "bg-[rgba(185,224,69,0.12)] text-[#b9e045]",
+  lost: "bg-[rgba(239,68,68,0.10)] text-red-400",
+  "coverage live": "bg-[rgba(16,185,129,0.10)] text-[#10b981]",
+  "pending": "bg-[rgba(250,204,21,0.10)] text-[#facc15]",
+  "fell through": "bg-[rgba(239,68,68,0.10)] text-red-400",
+  "interview occurred, pending coverage": "bg-[rgba(56,189,248,0.10)] text-[#38bdf8]",
+  "sample delivered, pending coverage": "bg-[rgba(56,189,248,0.10)] text-[#38bdf8]",
+  default: "bg-[rgba(255,255,255,0.06)] text-[#9ca3af]",
 };
 
 interface StatusBadgeProps {

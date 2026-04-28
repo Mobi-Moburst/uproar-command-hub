@@ -38,7 +38,7 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
   }, [summary, setTextOverride]);
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-border bg-card">
+    <section className="relative overflow-hidden glass">
       <div className="absolute inset-x-0 top-0 h-1 gradient-brand" />
 
       <div className="flex items-center justify-between px-6 pt-6 pb-4">
@@ -55,7 +55,7 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
           size="sm"
           onClick={onGenerate}
           disabled={isGenerating}
-          className="gap-2 rounded-lg border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all print:hidden"
+          className="gap-2 rounded-lg border-[rgba(255,255,255,0.05)]/60 hover:border-primary/40 hover:bg-primary/5 transition-all print:hidden"
         >
           {isGenerating ? (
             <>
@@ -77,7 +77,7 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
       </div>
 
       {!overriddenSummary && !isGenerating && (
-        <div className="mx-6 mb-6 rounded-xl border border-dashed border-border/60 bg-muted/30 p-10 text-center">
+        <div className="mx-6 mb-6 rounded-xl border border-dashed border-[rgba(255,255,255,0.05)]/60 bg-[rgba(18,20,24,0.5)] p-10 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <Sparkles className="h-5 w-5 text-primary/60" />
           </div>
@@ -134,7 +134,7 @@ export function ReportAISummary({ summary, isGenerating, onGenerate }: ReportAIS
               )}
 
               {isGenerating && (
-                <div className="flex items-center gap-2 pt-3 border-t border-border/40">
+                <div className="flex items-center gap-2 pt-3 border-t border-[rgba(255,255,255,0.05)]/40">
                   <div className="flex gap-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                     <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse [animation-delay:150ms]" />

@@ -121,10 +121,10 @@ export default function ReportersPage() {
         ) : filtered.length === 0 ? (
           <EmptyState message="No reporters match your filters." columns={7} />
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-border">
+          <div className="overflow-x-auto rounded-lg border border-[rgba(255,255,255,0.05)]">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted">
+                <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.04)]">
                   <th className="w-8 px-2 py-3" />
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("name")}>Reporter<SortIcon col="name" /></th>
                   <th className="px-4 py-3 text-right font-medium text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("relationshipScore")}>Score<SortIcon col="relationshipScore" /></th>
@@ -171,7 +171,7 @@ function ReporterRow({
     <>
       <tr
         onClick={onToggle}
-        className="cursor-pointer border-b border-border last:border-0 hover:bg-muted/50"
+        className="cursor-pointer border-b border-[rgba(255,255,255,0.05)] last:border-0 hover:bg-[rgba(18,20,24,0.7)]"
       >
         <td className="px-2 py-3 text-muted-foreground">
           {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -205,7 +205,7 @@ function ReporterRow({
       </tr>
       {isExpanded && (
         <tr>
-          <td colSpan={10} className="bg-muted/30 px-6 py-4">
+          <td colSpan={10} className="bg-[rgba(18,20,24,0.5)] px-6 py-4">
             <div className="mb-3 flex items-center gap-4">
               <p className="text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">Clients:</span> {r.uniqueClients.join(", ")}
@@ -213,7 +213,7 @@ function ReporterRow({
             </div>
             <div className="space-y-1.5">
               {r.placements.slice(0, 10).map((p) => (
-                <div key={p.id} className="flex items-center justify-between gap-4 rounded-md border border-border bg-background p-3">
+                <div key={p.id} className="flex items-center justify-between gap-4 rounded-md border border-[rgba(255,255,255,0.05)] bg-background p-3">
                   <div className="min-w-0 flex-1">
                     <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald hover:underline font-sans truncate block">
                       {p.headline}

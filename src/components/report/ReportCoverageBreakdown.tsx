@@ -36,7 +36,7 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Coverage Type Mix */}
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="rounded-xl border border-[rgba(255,255,255,0.05)] glass p-6 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-5">Coverage by Type</h3>
           <div className="space-y-3.5">
             {typeBreakdown.map(({ type, count, pct }) => (
@@ -45,7 +45,7 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
                   <span className="font-medium text-foreground">{type}</span>
                   <span className="font-mono text-xs text-muted-foreground">{count} ({pct}%)</span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <div className="h-2 w-full rounded-full bg-[rgba(255,255,255,0.04)] overflow-hidden">
                   <div
                     className="h-full rounded-full gradient-brand transition-all"
                     style={{ width: `${pct}%` }}
@@ -57,7 +57,7 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
         </div>
 
         {/* Top Outlets */}
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="rounded-xl border border-[rgba(255,255,255,0.05)] glass p-6 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-5">Top Outlets by Reach</h3>
           <div className="space-y-3">
             {topOutlets.map(({ outlet, count, reach }, i) => (
@@ -76,7 +76,7 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
 
       {/* Monthly Reach Trend */}
       {monthlyReach.filter((m) => m.reach > 0 || m.count > 0).length > 0 && (
-        <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="mt-6 rounded-xl border border-[rgba(255,255,255,0.05)] glass p-6 shadow-sm">
           <h3 className="text-sm font-semibold text-foreground mb-5">Monthly Reach — Selected Period</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={monthlyReach.filter((m) => m.reach > 0 || m.count > 0)} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
@@ -87,11 +87,11 @@ export function ReportCoverageBreakdown({ typeBreakdown, topOutlets, monthlyReac
                   name === "reach" ? formatNumber(value) : value,
                   name === "reach" ? "Reach" : "Placements",
                 ]}
-                contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(var(--border))" }}
+                contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.08)" }}
               />
               <Bar dataKey="reach" name="reach" radius={[4, 4, 0, 0]}>
                 {monthlyReach.filter((m) => m.reach > 0 || m.count > 0).map((_, i) => (
-                  <Cell key={i} fill="hsl(var(--primary))" />
+                  <Cell key={i} fill="#b9e045" />
                 ))}
               </Bar>
             </BarChart>

@@ -24,7 +24,7 @@ export function EditableSection({
         <button
           onClick={() => hideSection(id)}
           className={cn(
-            "absolute -right-3 -top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-all opacity-0 group-hover:opacity-100 hover:scale-110 hover:text-foreground",
+            "absolute -right-3 -top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-[rgba(255,255,255,0.05)] glass text-muted-foreground transition-all opacity-0 group-hover:opacity-100 hover:scale-110 hover:text-foreground",
             isHidden && "opacity-50"
           )}
           title="Remove from report"
@@ -94,7 +94,7 @@ export function ReportEditToolbar() {
           "rounded-lg px-4 py-2 text-sm font-medium transition-all",
           isEditing
             ? "bg-primary text-white shadow-md"
-            : "border border-border bg-card text-foreground hover:bg-muted"
+            : "border border-[rgba(255,255,255,0.05)] glass text-foreground hover:bg-[rgba(255,255,255,0.06)]"
         )}
       >
         {isEditing ? "Done Editing" : "Edit Report"}
@@ -103,7 +103,7 @@ export function ReportEditToolbar() {
       {isEditing && hiddenSections.size > 0 && (
         <button
           onClick={resetHidden}
-          className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 rounded-lg border border-[rgba(255,255,255,0.05)] glass px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <RotateCcw className="h-3 w-3" />
           Restore {hiddenSections.size} hidden

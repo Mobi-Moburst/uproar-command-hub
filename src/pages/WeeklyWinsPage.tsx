@@ -80,7 +80,7 @@ export default function WeeklyWinsPage() {
               className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
                 copyReady
                   ? "border-emerald bg-emerald text-primary-foreground"
-                  : "border-border text-foreground hover:bg-muted"
+                  : "border-[rgba(255,255,255,0.05)] text-foreground hover:bg-[rgba(255,255,255,0.06)]"
               }`}
             >
               {copyReady ? "Exit Copy-Ready View" : "Copy-Ready View"}
@@ -92,14 +92,14 @@ export default function WeeklyWinsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={goPrev}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
+            className="rounded-md border border-[rgba(255,255,255,0.05)] px-3 py-1.5 text-sm font-medium text-foreground hover:bg-[rgba(255,255,255,0.06)]"
           >
             ← Prev
           </button>
           <span className="text-sm font-medium text-foreground">{weekLabel}</span>
           <button
             onClick={goNext}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
+            className="rounded-md border border-[rgba(255,255,255,0.05)] px-3 py-1.5 text-sm font-medium text-foreground hover:bg-[rgba(255,255,255,0.06)]"
           >
             Next →
           </button>
@@ -107,7 +107,7 @@ export default function WeeklyWinsPage() {
             <select
               value={selectedWeekStart.toISOString()}
               onChange={(e) => setSelectedWeekStart(new Date(e.target.value))}
-              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground"
+              className="rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-1.5 text-sm text-foreground"
             >
               {availableWeeks.map((ws) => (
                 <option key={ws.toISOString()} value={ws.toISOString()}>
@@ -123,10 +123,10 @@ export default function WeeklyWinsPage() {
         ) : isLoading ? (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-lg border border-border bg-card p-5 space-y-3">
-                <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-                <div className="h-4 w-full animate-pulse rounded bg-muted" />
-                <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+              <div key={i} className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5 space-y-3">
+                <div className="h-4 w-24 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
+                <div className="h-4 w-full animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
+                <div className="h-3 w-32 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
               </div>
             ))}
           </div>
@@ -137,12 +137,12 @@ export default function WeeklyWinsPage() {
             <div className="flex justify-end">
               <button
                 onClick={handleCopy}
-                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                className="rounded-md border border-[rgba(255,255,255,0.05)] px-4 py-2 text-sm font-medium text-foreground hover:bg-[rgba(255,255,255,0.06)]"
               >
                 {copied ? "Copied" : "Copy to Clipboard"}
               </button>
             </div>
-            <div className="rounded-lg border border-border bg-card p-8">
+            <div className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-8">
               <h2 className="text-lg font-semibold text-foreground mb-6">Weekly Wins — Week of {format(selectedWeekStart, "MMMM d, yyyy")}</h2>
               {Object.entries(grouped).map(([client, wins]) => (
                 <div key={client} className="mb-6 last:mb-0">
@@ -165,7 +165,7 @@ export default function WeeklyWinsPage() {
                 <h2 className="text-base font-semibold text-foreground mb-3">{client}</h2>
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {wins.map((w) => (
-                    <div key={w.id} className="rounded-lg border border-border bg-card p-5 overflow-hidden">
+                    <div key={w.id} className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5 overflow-hidden">
                       <div className="flex items-start justify-between gap-2">
                         <a href={w.link} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-emerald hover:underline leading-snug min-w-0 break-words">
                           {w.headline}

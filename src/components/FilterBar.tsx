@@ -22,7 +22,7 @@ export function FilterSelect({ label, value, options, onChange }: FilterSelectPr
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-md border border-border bg-background px-3 py-2 text-sm font-sans text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+      className="input-glass rounded-xl px-3 py-2 text-sm font-sans text-white focus:outline-none focus:ring-1 focus:ring-[rgba(185,224,69,0.3)]"
       aria-label={label}
     >
       <option value="">{label}</option>
@@ -46,7 +46,7 @@ export function SearchInput({ value, onChange, placeholder = "Search..." }: Sear
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm font-sans text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+      className="input-glass w-full max-w-sm rounded-xl px-3 py-2 text-sm font-sans text-white placeholder:text-[rgba(255,255,255,0.4)] focus:outline-none focus:ring-1 focus:ring-[rgba(185,224,69,0.3)]"
     />
   );
 }

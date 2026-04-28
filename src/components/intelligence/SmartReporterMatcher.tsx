@@ -187,7 +187,7 @@ export function SmartReporterMatcher() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div className="rounded-xl border border-[rgba(255,255,255,0.05)] glass p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <Target className="h-4 w-4 text-primary" />
           <h4 className="text-sm font-semibold text-foreground">Find the Right Reporter</h4>
@@ -219,8 +219,8 @@ export function SmartReporterMatcher() {
           {recommendations.map((r, i) => (
             <div
               key={r.reporter}
-              className={`rounded-xl border bg-card p-5 transition-shadow hover:shadow-md ${
-                i === 0 ? "border-primary/30 shadow-sm" : "border-border"
+              className={`rounded-xl border glass p-5 transition-shadow hover-lift ${
+                i === 0 ? "border-primary/30 shadow-sm" : "border-[rgba(255,255,255,0.05)]"
               }`}
             >
               <div className="flex items-start justify-between gap-4">
@@ -230,7 +230,7 @@ export function SmartReporterMatcher() {
                       ? "gradient-brand text-white"
                       : i < 3
                         ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-[rgba(255,255,255,0.04)] text-muted-foreground"
                   }`}>
                     {i + 1}
                   </div>
@@ -252,18 +252,18 @@ export function SmartReporterMatcher() {
 
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {selectedClient && (
-                  <div className="rounded-lg bg-muted/50 p-2.5">
+                  <div className="rounded-lg bg-[rgba(18,20,24,0.5)] p-2.5">
                     <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Client Hits</p>
                     <p className="mt-0.5 text-lg font-bold text-foreground">{r.clientPlacements}</p>
                   </div>
                 )}
                 {selectedVertical && (
-                  <div className="rounded-lg bg-muted/50 p-2.5">
+                  <div className="rounded-lg bg-[rgba(18,20,24,0.5)] p-2.5">
                     <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Vertical Hits</p>
                     <p className="mt-0.5 text-lg font-bold text-foreground">{r.verticalPlacements}</p>
                   </div>
                 )}
-                <div className="rounded-lg bg-muted/50 p-2.5">
+                <div className="rounded-lg bg-[rgba(18,20,24,0.5)] p-2.5">
                   <div className="flex items-center gap-1">
                     <TrendingUp className="h-3 w-3 text-accent" />
                     <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Conv. Rate</p>
@@ -272,7 +272,7 @@ export function SmartReporterMatcher() {
                     {r.conversionRate > 0 ? `${Math.round(r.conversionRate * 100)}%` : "–"}
                   </p>
                 </div>
-                <div className="rounded-lg bg-muted/50 p-2.5">
+                <div className="rounded-lg bg-[rgba(18,20,24,0.5)] p-2.5">
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3 text-muted-foreground" />
                     <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Avg. Days</p>

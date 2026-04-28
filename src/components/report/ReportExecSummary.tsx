@@ -57,7 +57,7 @@ export function ReportExecSummary({ placements, awardWins, periodLabel }: Report
   })();
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card">
+    <section className="relative overflow-hidden glass-accent">
       {/* Accent */}
       <div className="absolute inset-x-0 top-0 h-1 gradient-brand" />
 
@@ -77,7 +77,7 @@ export function ReportExecSummary({ placements, awardWins, periodLabel }: Report
       </div>
 
       {/* Stat grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 border-t border-border/60">
+      <div className="grid grid-cols-2 sm:grid-cols-4 border-t border-[rgba(255,255,255,0.05)]/60">
         <StatCell
           icon={<Newspaper className="h-4 w-4 text-primary" />}
           value={formatNumber(placements.length)}
@@ -106,7 +106,7 @@ export function ReportExecSummary({ placements, awardWins, periodLabel }: Report
 
 function StatCell({ icon, value, label, isText }: { icon: React.ReactNode; value: string; label: string; isText?: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-5 border-r border-border/40 last:border-r-0 text-center">
+    <div className="flex flex-col items-center justify-center px-4 py-5 border-r border-[rgba(255,255,255,0.05)]/40 last:border-r-0 text-center">
       <div className="mb-2">{icon}</div>
       <p className={`font-tight font-bold tracking-tight text-foreground ${isText ? "text-sm" : "text-2xl"}`}>
         {value}

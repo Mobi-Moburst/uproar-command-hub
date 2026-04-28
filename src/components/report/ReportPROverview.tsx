@@ -18,10 +18,10 @@ export function ReportPROverview() {
             value={prOverview || ""}
             onChange={(e) => setPrOverview(e.target.value)}
             placeholder="Describe the PR strategy, key tactics, and approach for this period…"
-            className="w-full min-h-[120px] rounded-lg border border-border bg-card p-5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 resize-y"
+            className="w-full min-h-[120px] rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 resize-y"
           />
         ) : (
-          <div className="rounded-lg border border-border bg-card p-5">
+          <div className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5">
             <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
               {prOverview}
             </p>

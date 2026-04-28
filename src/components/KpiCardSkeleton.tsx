@@ -10,14 +10,14 @@ export const KpiCardSkeleton = forwardRef<HTMLDivElement, KpiCardSkeletonProps>(
     <div
       ref={ref}
       className={[
-        "relative overflow-hidden rounded-xl border border-border bg-card p-5",
+        "glass relative overflow-hidden p-5",
         className,
       ].filter(Boolean).join(" ")}
       {...props}
     >
-      <div className="absolute inset-x-0 top-0 h-[2px] bg-muted" />
-      <div className="h-4 w-20 animate-pulse rounded bg-muted" />
-      <div className="mt-3 h-7 w-16 animate-pulse rounded bg-muted" />
+      <div className="absolute inset-x-0 top-0 h-[2px] bg-[rgba(255,255,255,0.04)]" />
+      <div className="h-4 w-20 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
+      <div className="mt-3 h-7 w-16 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
     </div>
   );
 });

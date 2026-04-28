@@ -48,7 +48,7 @@ export function ReportTimeline({ placements }: ReportTimelineProps) {
         Coverage Timeline
       </h2>
 
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="rounded-xl border border-[rgba(255,255,255,0.05)] glass p-6">
         {/* Timeline bar */}
         <div className="relative h-20">
           {/* Base line */}
@@ -94,7 +94,7 @@ export function ReportTimeline({ placements }: ReportTimelineProps) {
                 />
                 {/* Tooltip */}
                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block z-10">
-                  <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg text-[11px] whitespace-nowrap">
+                  <div className="rounded-lg border border-[rgba(255,255,255,0.05)] glass px-3 py-2 shadow-lg text-[11px] whitespace-nowrap">
                     <p className="font-semibold text-foreground">{weekPlacements.length} placement{weekPlacements.length > 1 ? "s" : ""}</p>
                     <p className="text-muted-foreground">Week of {formatDateShort(weekKey)}</p>
                   </div>

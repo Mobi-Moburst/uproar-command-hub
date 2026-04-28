@@ -36,10 +36,10 @@ export function ReportAwards({ wonAwards, allAwards }: ReportAwardsProps) {
       )}
 
       {/* Full submissions table */}
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="rounded-lg border border-[rgba(255,255,255,0.05)] overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted">
+            <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.04)]">
               <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Submission</th>
               <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Award</th>
               <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Edition</th>
@@ -48,7 +48,7 @@ export function ReportAwards({ wonAwards, allAwards }: ReportAwardsProps) {
           </thead>
           <tbody className="font-mono text-xs">
             {allAwards.map((a) => (
-              <tr key={a.id} className="border-b border-border last:border-0">
+              <tr key={a.id} className="border-b border-[rgba(255,255,255,0.05)] last:border-0">
                 <td className="px-4 py-2.5 font-sans text-sm font-medium text-foreground">{a.submission_title}</td>
                 <td className="px-4 py-2.5 text-muted-foreground">{a.award_name}</td>
                 <td className="px-4 py-2.5 text-muted-foreground">{a.award_edition}</td>

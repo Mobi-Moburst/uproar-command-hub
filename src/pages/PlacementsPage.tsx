@@ -120,10 +120,10 @@ export default function PlacementsPage() {
           <EmptyState message="No placements match your filters." columns={10} />
         ) : (
           <>
-            <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
+            <div className="overflow-x-auto rounded-xl border border-[rgba(255,255,255,0.05)] shadow-sm">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted/50">
+                  <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(18,20,24,0.5)]">
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Outlet</th>
@@ -140,7 +140,7 @@ export default function PlacementsPage() {
                 </thead>
                 <tbody className="font-mono">
                   {pageRows.map((p) => (
-                    <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr key={p.id} className="border-b border-[rgba(255,255,255,0.05)] last:border-0 hover:bg-[rgba(255,255,255,0.03)] transition-colors">
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
                       <td className="whitespace-nowrap px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-foreground">{p.outlet || "–"}</td>

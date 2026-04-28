@@ -147,14 +147,14 @@ export default function BriefingsPage() {
                       <button
                         onClick={() => setPage((p) => Math.max(0, p - 1))}
                         disabled={page === 0}
-                        className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-40"
+                        className="rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-40"
                       >
                         Previous
                       </button>
                       <button
                         onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                         disabled={page >= totalPages - 1}
-                        className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-40"
+                        className="rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-1.5 text-xs font-medium text-foreground disabled:opacity-40"
                       >
                         Next
                       </button>
