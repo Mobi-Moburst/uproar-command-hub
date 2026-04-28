@@ -13,12 +13,12 @@ export const TableSkeleton = forwardRef<HTMLDivElement, TableSkeletonProps>(func
   return (
     <div
       ref={ref}
-      className={["overflow-x-auto rounded-lg border border-border", className].filter(Boolean).join(" ")}
+      className={["glass overflow-x-auto", className].filter(Boolean).join(" ")}
       {...props}
     >
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border bg-muted">
+          <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.04)]">
             {Array.from({ length: columns }).map((_, i) => (
               <th key={i} className="px-4 py-3 text-left">
                 <Skeleton className="h-4 w-20" />
@@ -28,7 +28,7 @@ export const TableSkeleton = forwardRef<HTMLDivElement, TableSkeletonProps>(func
         </thead>
         <tbody>
           {Array.from({ length: rows }).map((_, r) => (
-            <tr key={r} className="border-b border-border last:border-0">
+            <tr key={r} className="border-b border-[rgba(255,255,255,0.05)] last:border-0">
               {Array.from({ length: columns }).map((_, c) => (
                 <td key={c} className="px-4 py-3">
                   <Skeleton className={`h-4 ${c === 0 ? "w-32" : "w-16"}`} />

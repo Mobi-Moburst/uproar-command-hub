@@ -53,11 +53,11 @@ export function ReporterAffinityMatrix({ affinities }: Props) {
         <SearchInput value={search} onChange={setSearch} placeholder="Search reporters..." />
       </FilterBar>
 
-      <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-[rgba(255,255,255,0.05)] shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="sticky left-0 z-10 bg-muted/50 backdrop-blur-sm px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground min-w-[160px]">
+            <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(18,20,24,0.5)]">
+              <th className="sticky left-0 z-10 bg-[rgba(18,20,24,0.5)] backdrop-blur-sm px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground min-w-[160px]">
                 Reporter
               </th>
               {allVerticals.map((v) => (
@@ -71,8 +71,8 @@ export function ReporterAffinityMatrix({ affinities }: Props) {
           </thead>
           <tbody className="font-mono">
             {filtered.map((r) => (
-              <tr key={r.reporter} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                <td className="sticky left-0 z-10 bg-card backdrop-blur-sm whitespace-nowrap px-4 py-2.5 font-sans font-medium text-foreground">
+              <tr key={r.reporter} className="border-b border-[rgba(255,255,255,0.05)] last:border-0 hover:bg-[rgba(255,255,255,0.06)]/20 transition-colors">
+                <td className="sticky left-0 z-10 glass backdrop-blur-sm whitespace-nowrap px-4 py-2.5 font-sans font-medium text-foreground">
                   {r.reporter}
                 </td>
                 {allVerticals.map((v) => {

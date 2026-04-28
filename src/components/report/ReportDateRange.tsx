@@ -41,7 +41,7 @@ export function ReportDateRange({ fromDate, toDate, earliest, latest, onChange }
   };
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5">
+    <section className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5">
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Report Period

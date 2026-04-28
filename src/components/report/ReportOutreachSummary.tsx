@@ -30,7 +30,7 @@ function DismissibleCard({
       {isEditing && (
         <button
           onClick={() => onDismiss(id)}
-          className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-muted text-muted-foreground hover:bg-muted-foreground hover:text-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+          className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-[rgba(255,255,255,0.04)] text-muted-foreground hover:bg-[rgba(255,255,255,0.06)]-foreground hover:text-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
         >
           <X className="h-3 w-3" />
         </button>
@@ -101,7 +101,7 @@ export function ReportOutreachSummary({ sampleConversions, briefingConversions }
       {visibleTop.length > 0 && (
         <div className={`grid gap-4 ${visibleTop.length === 1 ? "grid-cols-1" : visibleTop.length === 2 ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3"}`}>
           {topCards.map((card) => (
-            <DismissibleCard key={card.id} id={card.id} dismissedCards={dismissedCards} onDismiss={dismiss} isEditing={isEditing} className="rounded-lg border border-border bg-card p-5">
+            <DismissibleCard key={card.id} id={card.id} dismissedCards={dismissedCards} onDismiss={dismiss} isEditing={isEditing} className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5">
               {card.content}
             </DismissibleCard>
           ))}

@@ -87,7 +87,7 @@ export default function OverviewPage() {
         </div>
 
         {/* KPI Stripe */}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="stagger-children grid grid-cols-2 gap-5 lg:grid-cols-3 xl:grid-cols-6">
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => <KpiCardSkeleton key={i} />)
           ) : (
@@ -105,7 +105,7 @@ export default function OverviewPage() {
         {/* Coverage Intelligence KPIs */}
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-4">Coverage Intelligence</h2>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="stagger-children grid grid-cols-2 gap-5 lg:grid-cols-3 xl:grid-cols-6">
             {loadingIntel ? (
               Array.from({ length: 3 }).map((_, i) => <KpiCardSkeleton key={i} />)
             ) : (
@@ -116,17 +116,17 @@ export default function OverviewPage() {
               </>
             )}
             {/* Coming Soon — HubSpot-powered */}
-            <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+            <div className="glass-inner border-dashed p-6 opacity-60">
               <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Pitch → Response Rate</p>
               <p className="mt-2 font-tight text-2xl font-bold tracking-tight text-muted-foreground/40">—</p>
               <p className="mt-1 text-xs font-mono text-status-drafting">Coming soon</p>
             </div>
-            <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+            <div className="glass-inner border-dashed p-6 opacity-60">
               <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Pitch → Coverage Rate</p>
               <p className="mt-2 font-tight text-2xl font-bold tracking-tight text-muted-foreground/40">—</p>
               <p className="mt-1 text-xs font-mono text-status-drafting">Coming soon</p>
             </div>
-            <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 opacity-60">
+            <div className="glass-inner border-dashed p-6 opacity-60">
               <p className="min-h-[2.5rem] text-sm font-medium leading-snug text-muted-foreground">Avg. Open Rate</p>
               <p className="mt-2 font-tight text-2xl font-bold tracking-tight text-muted-foreground/40">—</p>
               <p className="mt-1 text-xs font-mono text-status-drafting">Coming soon</p>
@@ -144,10 +144,10 @@ export default function OverviewPage() {
           ) : topPlacements.length === 0 ? (
             <EmptyState message="No placements recorded yet." columns={6} />
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
+            <div className="glass overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted/50">
+                  <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(18,20,24,0.5)]">
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Outlet</th>
@@ -158,7 +158,7 @@ export default function OverviewPage() {
                 </thead>
                 <tbody className="font-mono">
                   {topPlacements.map((p) => (
-                    <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr key={p.id} className="border-b border-[rgba(255,255,255,0.05)] last:border-0 hover:bg-[rgba(255,255,255,0.03)] transition-colors">
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateShort(p.date)}</td>
                       <td className="px-4 py-3 font-sans font-medium text-foreground">{p.client_name}</td>
                       <td className="px-4 py-3 text-foreground">{p.outlet}</td>
@@ -183,10 +183,10 @@ export default function OverviewPage() {
           {loadingPlacements ? (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="rounded-lg border border-border bg-card p-5 space-y-3">
-                  <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-                  <div className="h-4 w-full animate-pulse rounded bg-muted" />
-                  <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+                <div key={i} className="glass p-5 space-y-3">
+                  <div className="h-4 w-24 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
+                  <div className="h-4 w-full animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
+                  <div className="h-3 w-32 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
                 </div>
               ))}
             </div>
@@ -195,7 +195,7 @@ export default function OverviewPage() {
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {weeklyWins.map((win) => (
-                <div key={win.id} className="rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div key={win.id} className="glass p-5 hover-lift">
                   <div className="flex items-start justify-between">
                     <p className="text-sm font-medium text-foreground">{win.client_name}</p>
                     <TypeBadge type={win.type} />
@@ -221,9 +221,9 @@ export default function OverviewPage() {
             ) : loadingClients ? (
               <div className="space-y-2">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center justify-between rounded-md border border-border px-4 py-3">
-                    <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-                    <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+                  <div key={i} className="glass-inner flex items-center justify-between px-4 py-3">
+                    <div className="h-4 w-32 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
+                    <div className="h-3 w-16 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
                   </div>
                 ))}
               </div>
@@ -233,7 +233,7 @@ export default function OverviewPage() {
                   <h3 className="text-sm font-medium text-muted-foreground mb-3">Most Recent Activity</h3>
                   <div className="space-y-2">
                     {recentActiveClients.map((c) => (
-                      <div key={c.id} className="flex items-center justify-between rounded-md border border-border px-4 py-3">
+                      <div key={c.id} className="glass-inner flex items-center justify-between px-4 py-3">
                         <span className="text-sm font-medium text-foreground">{c.name}</span>
                         <span className="text-xs font-mono text-muted-foreground">{formatDateShort(c.last_placement_date)}</span>
                       </div>
@@ -244,7 +244,7 @@ export default function OverviewPage() {
                   <h3 className="text-sm font-medium text-muted-foreground mb-3">Highest Reach</h3>
                   <div className="space-y-2">
                     {topReachClients.map((c) => (
-                      <div key={c.id} className="flex items-center justify-between rounded-md border border-border px-4 py-3">
+                      <div key={c.id} className="glass-inner flex items-center justify-between px-4 py-3">
                         <span className="text-sm font-medium text-foreground">{c.name}</span>
                         <span className="text-xs font-mono text-muted-foreground">{formatNumber(c.total_reach)}</span>
                       </div>
@@ -260,11 +260,11 @@ export default function OverviewPage() {
             {loadingPlacements || loadingAwards ? (
               <div className="space-y-3">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="rounded-lg border border-border bg-card p-5 space-y-3">
-                    <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                  <div key={i} className="glass p-5 space-y-3">
+                    <div className="h-4 w-24 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
                     <div className="grid grid-cols-3 gap-4">
                       {Array.from({ length: 3 }).map((_, j) => (
-                        <div key={j} className="h-8 animate-pulse rounded bg-muted" />
+                        <div key={j} className="h-8 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
                       ))}
                     </div>
                   </div>
@@ -275,7 +275,7 @@ export default function OverviewPage() {
             ) : (
               <div className="space-y-3">
                 {monthlyTeams.map((t) => (
-                  <div key={t.id} className="rounded-lg border border-border bg-card p-5">
+                  <div key={t.id} className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5">
                     <p className="text-sm font-semibold text-foreground">{t.team_name}</p>
                     <div className="mt-3 grid grid-cols-3 gap-4 text-center">
                       <div>

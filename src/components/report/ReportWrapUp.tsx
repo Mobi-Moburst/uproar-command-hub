@@ -40,7 +40,7 @@ export function ReportWrapUp() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Key Takeaways */}
-          <div className="rounded-lg border border-border bg-card p-5">
+          <div className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5">
             <h3 className="text-sm font-semibold text-foreground mb-3">Key Takeaways</h3>
             {takeaways.length === 0 && !isEditing && (
               <p className="text-sm text-muted-foreground italic">No takeaways added.</p>
@@ -52,7 +52,7 @@ export function ReportWrapUp() {
                   {isEditing ? (
                     <>
                       <input
-                        className="flex-1 bg-transparent text-sm text-foreground border-b border-transparent focus:border-border focus:outline-none"
+                        className="flex-1 bg-transparent text-sm text-foreground border-b border-transparent focus:border-[rgba(255,255,255,0.05)] focus:outline-none"
                         value={item}
                         onChange={(e) =>
                           setTakeaways((prev) => prev.map((t, idx) => (idx === i ? e.target.value : t)))
@@ -79,7 +79,7 @@ export function ReportWrapUp() {
                   value={newTakeaway}
                   onChange={(e) => setNewTakeaway(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addTakeaway()}
-                  className="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40"
+                  className="flex-1 rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40"
                 />
                 <button
                   onClick={addTakeaway}
@@ -93,7 +93,7 @@ export function ReportWrapUp() {
           </div>
 
           {/* Upcoming Initiatives */}
-          <div className="rounded-lg border border-border bg-card p-5">
+          <div className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-5">
             <h3 className="text-sm font-semibold text-foreground mb-3">Upcoming Initiatives</h3>
             {upcomingInitiatives.length === 0 && !isEditing && (
               <p className="text-sm text-muted-foreground italic">No initiatives added.</p>
@@ -105,7 +105,7 @@ export function ReportWrapUp() {
                   {isEditing ? (
                     <>
                       <input
-                        className="flex-1 bg-transparent text-sm text-foreground border-b border-transparent focus:border-border focus:outline-none"
+                        className="flex-1 bg-transparent text-sm text-foreground border-b border-transparent focus:border-[rgba(255,255,255,0.05)] focus:outline-none"
                         value={item}
                         onChange={(e) =>
                           setUpcomingInitiatives((prev) => prev.map((t, idx) => (idx === i ? e.target.value : t)))
@@ -132,7 +132,7 @@ export function ReportWrapUp() {
                   value={newInitiative}
                   onChange={(e) => setNewInitiative(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addInitiative()}
-                  className="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40"
+                  className="flex-1 rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40"
                 />
                 <button
                   onClick={addInitiative}

@@ -299,11 +299,11 @@ export default function TeamsPage() {
         ) : isLoading ? (
           <div className="space-y-10">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-lg border border-border bg-card p-6 space-y-4">
-                <div className="h-5 w-28 animate-pulse rounded bg-muted" />
+              <div key={i} className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-6 space-y-4">
+                <div className="h-5 w-28 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
                 <div className="grid grid-cols-5 gap-4">
                   {Array.from({ length: 5 }).map((_, j) => (
-                    <div key={j} className="h-10 animate-pulse rounded bg-muted" />
+                    <div key={j} className="h-10 animate-pulse rounded bg-[rgba(255,255,255,0.04)]" />
                   ))}
                 </div>
               </div>
@@ -342,12 +342,12 @@ export default function TeamsPage() {
               const deltaLabel = useComparePeriod ? "vs prev" : undefined;
 
               return (
-                <div key={team.id} className="rounded-lg border border-border bg-card">
-                  <div className="border-b border-border px-6 py-5">
+                <div key={team.id} className="glass">
+                  <div className="border-b border-[rgba(255,255,255,0.05)] px-6 py-5">
                     <div className="flex items-center justify-between">
                       <h2 className="text-lg font-semibold text-foreground">{team.team_name}</h2>
                       {useComparePeriod && (
-                        <span className="text-[10px] font-mono text-muted-foreground rounded border border-border px-2 py-0.5">
+                        <span className="text-[10px] font-mono text-muted-foreground rounded border border-[rgba(255,255,255,0.05)] px-2 py-0.5">
                           vs. {prevLabel}
                         </span>
                       )}
@@ -395,12 +395,12 @@ export default function TeamsPage() {
                       <div className="h-[60px] w-full max-w-[280px]">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={sparkData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                            <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                            <XAxis dataKey="month" tick={{ fontSize: 9, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
                             <Tooltip
-                              contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid hsl(var(--border))", backgroundColor: "hsl(var(--card))" }}
+                              contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.08)", backgroundColor: "rgba(26, 29, 35, 0.95)" }}
                               formatter={(v: number) => [v, "Placements"]}
                             />
-                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
+                            <Bar dataKey="count" fill="#b9e045" radius={[3, 3, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>

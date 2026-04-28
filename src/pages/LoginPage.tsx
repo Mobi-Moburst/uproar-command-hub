@@ -32,27 +32,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
-      {/* Full gradient background */}
-      <div className="absolute inset-0 gradient-brand opacity-90" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(74_70%_52%_/_0.3),_transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_hsl(199_92%_56%_/_0.4),_transparent_60%)]" />
-
-      {/* Geometric accents */}
-      <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-white/5 blur-2xl" />
-
-      {/* Login card */}
+    <div className="intercept-bg relative flex min-h-screen items-center justify-center overflow-hidden">
       <div className="relative z-10 w-full max-w-md mx-4">
-        <div className="rounded-2xl border border-white/20 bg-card/95 backdrop-blur-xl p-10 shadow-2xl">
+        <div className="glass p-10">
           <div className="text-center space-y-2">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl gradient-brand shadow-lg">
-              <span className="text-xl font-bold text-white">U</span>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-[#b9e045] shadow-[0_0_24px_rgba(185,224,69,0.3)]">
+              <span className="text-xl font-bold text-black">U</span>
             </div>
-            <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="mt-4 text-[20px] font-bold leading-[24px] tracking-[-0.5px] text-white">
               Uproar Command Center
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[#9ca3af]">
               by Moburst
             </p>
           </div>
@@ -85,7 +75,7 @@ export default function LoginPage() {
             </Button>
           </div>
 
-          <p className="mt-6 text-center text-xs text-muted-foreground">
+          <p className="mt-6 text-center text-xs text-[#9ca3af]">
             Access is invite-only. Contact your admin to get access.
           </p>
         </div>

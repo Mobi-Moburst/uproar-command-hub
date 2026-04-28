@@ -121,7 +121,7 @@ export default function ReportsPage() {
                 Drafts
               </h3>
               {drafts.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center">
+                <div className="rounded-lg border border-dashed border-[rgba(255,255,255,0.05)] bg-muted/20 p-8 text-center">
                   <FileText className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
                   <p className="text-sm text-muted-foreground">No drafts yet</p>
                   <p className="text-xs text-muted-foreground/60 mt-1">
@@ -148,7 +148,7 @@ export default function ReportsPage() {
                 Published
               </h3>
               {published.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center">
+                <div className="rounded-lg border border-dashed border-[rgba(255,255,255,0.05)] bg-muted/20 p-8 text-center">
                   <Globe className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
                   <p className="text-sm text-muted-foreground">No published reports</p>
                   <p className="text-xs text-muted-foreground/60 mt-1">
@@ -173,7 +173,7 @@ export default function ReportsPage() {
         )}
 
         {!selectedClient && (
-          <div className="rounded-xl border border-dashed border-border bg-muted/20 p-16 text-center">
+          <div className="rounded-xl border border-dashed border-[rgba(255,255,255,0.05)] bg-muted/20 p-16 text-center">
             <FileText className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-1">Select a Client</h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
@@ -196,7 +196,7 @@ function ReportCard({ report, onOpen, onDelete, onUnpublish }: { report: ClientR
     : null;
 
   return (
-    <div className="flex items-center gap-4 rounded-lg border border-border bg-card px-5 py-4 hover:shadow-sm transition-shadow">
+    <div className="flex items-center gap-4 rounded-lg border border-[rgba(255,255,255,0.05)] glass px-5 py-4 hover:shadow-sm transition-shadow">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
         {report.status === "published" ? (
           <Globe className="h-4 w-4 text-primary" />

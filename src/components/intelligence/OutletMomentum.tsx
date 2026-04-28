@@ -4,13 +4,15 @@ import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import type { OutletMomentumEntry } from "@/hooks/useCoverageIntelligence";
 
 const tooltipStyle = {
-  backgroundColor: "hsl(var(--card))",
-  border: "1px solid hsl(var(--border))",
-  borderRadius: 10,
+  backgroundColor: "rgba(26, 29, 35, 0.95)",
+  border: "1px solid rgba(255, 255, 255, 0.08)",
+  color: "#fff",
+  backdropFilter: "blur(16px)",
+  borderRadius: 12,
   fontSize: 12,
   fontFamily: "Geist Mono, monospace",
   padding: "10px 14px",
-  boxShadow: "0 4px 16px -4px rgba(0,0,0,0.12)",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
 };
 
 interface Props {
@@ -46,7 +48,7 @@ export function OutletMomentum({ momentum }: Props) {
   return (
     <div className="space-y-4">
       {selectedOutlet && chartData.length > 0 && (
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <div className="rounded-xl border border-[rgba(255,255,255,0.05)] glass p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-sm font-semibold text-foreground">{selectedOutlet} — 6-Month Trend</h4>
             <button
@@ -58,15 +60,15 @@ export function OutletMomentum({ momentum }: Props) {
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
               <XAxis
                 dataKey="month"
-                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "Geist Mono, monospace" }}
+                tick={{ fontSize: 11, fill: "#9ca3af", fontFamily: "Geist Mono, monospace" }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "Geist Mono, monospace" }}
+                tick={{ fontSize: 11, fill: "#9ca3af", fontFamily: "Geist Mono, monospace" }}
                 tickLine={false}
                 axisLine={false}
                 allowDecimals={false}
@@ -75,20 +77,20 @@ export function OutletMomentum({ momentum }: Props) {
               <Line
                 type="monotone"
                 dataKey="placements"
-                stroke="hsl(var(--primary))"
+                stroke="#b9e045"
                 strokeWidth={2.5}
-                dot={{ r: 4, fill: "hsl(var(--primary))", strokeWidth: 2, stroke: "hsl(var(--card))" }}
-                activeDot={{ r: 6, fill: "hsl(var(--primary))", strokeWidth: 2, stroke: "hsl(var(--card))" }}
+                dot={{ r: 4, fill: "#b9e045", strokeWidth: 2, stroke: "rgba(26, 29, 35, 0.95)" }}
+                activeDot={{ r: 6, fill: "#b9e045", strokeWidth: 2, stroke: "rgba(26, 29, 35, 0.95)" }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-[rgba(255,255,255,0.05)] shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/50">
+            <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(18,20,24,0.5)]">
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Outlet</th>
               <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Placements (6mo)</th>
               <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Trend</th>
@@ -100,10 +102,10 @@ export function OutletMomentum({ momentum }: Props) {
               <tr
                 key={o.outlet}
                 onClick={() => setSelectedOutlet(selectedOutlet === o.outlet ? null : o.outlet)}
-                className={`cursor-pointer border-b border-border last:border-0 transition-colors ${
+                className={`cursor-pointer border-b border-[rgba(255,255,255,0.05)] last:border-0 transition-colors ${
                   selectedOutlet === o.outlet
                     ? "bg-primary/8"
-                    : "hover:bg-muted/30"
+                    : "hover:bg-[rgba(255,255,255,0.03)]"
                 }`}
               >
                 <td className="px-4 py-3 font-sans font-medium text-foreground">{o.outlet}</td>

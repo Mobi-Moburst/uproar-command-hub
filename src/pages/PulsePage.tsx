@@ -29,7 +29,7 @@ function SignalCard({ signal }: { signal: PulseSignal }) {
     : "text-muted-foreground";
 
   return (
-    <Card className="group relative overflow-hidden transition-all hover:shadow-md">
+    <Card className="group relative overflow-hidden transition-all hover-lift">
       {/* Relevance indicator bar */}
       <div
         className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
@@ -69,7 +69,7 @@ function SignalCard({ signal }: { signal: PulseSignal }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/50">
+        <div className="flex items-center gap-2 mt-3 pt-2 border-t border-[rgba(255,255,255,0.05)]/50">
           {signal.source_url && (
             <a
               href={signal.source_url}

@@ -2,11 +2,10 @@ import { forwardRef, useState } from "react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Menu, X } from "lucide-react";
-import uproarLogo from "@/assets/uproar-dark-logo.png";
+import { Menu, X } from "lucide-react";
+import uproarLogo from "@/assets/uproar-white-logo.svg";
 
 const navItems = [
   { title: "Overview", path: "/" },
@@ -27,27 +26,26 @@ export const MobileNav = forwardRef<HTMLDivElement, Record<string, never>>(funct
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const { user, profile, signOut } = useAuthContext();
-  const { theme, toggleTheme } = useTheme();
 
   const displayName = profile?.display_name || user?.email || "";
 
   return (
     <div ref={ref} className="lg:hidden">
-      <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-md">
+      <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[rgba(255,255,255,0.06)] bg-[rgba(11,12,16,0.5)] px-4 backdrop-blur-[60px]">
         <div className="flex items-center gap-2">
-          <img src={uproarLogo} alt="Uproar by Moburst" className="h-6 object-contain" />
+          <img src={uproarLogo} alt="Uproar by Moburst" className="h-8 object-contain" />
         </div>
         <button
           onClick={() => setOpen(!open)}
-          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="rounded-lg p-2 text-[#9ca3af] transition-colors hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </header>
       {open && (
-        <div className="fixed inset-0 top-14 z-30 overflow-y-auto bg-background/95 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 top-14 z-30 overflow-y-auto bg-[rgba(11,12,16,0.92)] p-4 backdrop-blur-2xl">
           <nav>
-            <ul className="space-y-0.5">
+            <ul className="space-y-1">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -55,8 +53,8 @@ export const MobileNav = forwardRef<HTMLDivElement, Record<string, never>>(funct
                     <NavLink
                       to={item.path}
                       end
-                      className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                        isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      className={`block rounded-[12px] px-3 py-2.5 text-sm font-medium tracking-[-0.5px] transition-colors ${
+                        isActive ? "nav-active text-white" : "text-[#9ca3af] hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
                       }`}
                       activeClassName=""
                       onClick={() => setOpen(false)}
@@ -68,22 +66,16 @@ export const MobileNav = forwardRef<HTMLDivElement, Record<string, never>>(funct
               })}
             </ul>
           </nav>
-          <div className="mt-6 space-y-3 border-t border-border pt-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Theme</span>
-              <Button variant="ghost" size="sm" onClick={toggleTheme} className="h-7 w-7 p-0">
-                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
-            </div>
+          <div className="mt-6 space-y-3 border-t border-[rgba(255,255,255,0.06)] pt-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={profile?.avatar_url} />
-                <AvatarFallback className="bg-muted text-xs text-muted-foreground">
+                <AvatarFallback className="bg-[#b9e045] text-xs text-black font-bold">
                   {displayName.slice(0, 2).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
-              <p className="flex-1 truncate text-sm text-foreground">{displayName}</p>
-              <Button variant="ghost" size="sm" onClick={signOut} className="text-xs text-muted-foreground">
+              <p className="flex-1 truncate text-sm text-white">{displayName}</p>
+              <Button variant="ghost" size="sm" onClick={signOut} className="text-xs text-[#9ca3af]">
                 Sign out
               </Button>
             </div>

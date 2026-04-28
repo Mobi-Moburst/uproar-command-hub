@@ -36,15 +36,17 @@ const TYPE_COLORS: Record<string, string> = {
 
 const DEFAULT_COLOR = "hsl(220, 15%, 58%)";
 
-/* Shared tooltip styling using CSS variables */
+/* Intercept dark glass tooltip */
 const tooltipStyle = {
-  backgroundColor: "hsl(var(--card))",
-  border: "1px solid hsl(var(--border))",
-  borderRadius: 10,
+  backgroundColor: "rgba(26, 29, 35, 0.95)",
+  border: "1px solid rgba(255, 255, 255, 0.08)",
+  borderRadius: 12,
   fontSize: 12,
   fontFamily: "Geist Mono, monospace",
   padding: "10px 14px",
-  boxShadow: "0 4px 16px -4px rgba(0,0,0,0.12)",
+  color: "#fff",
+  backdropFilter: "blur(16px)",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
 };
 
 export function TypeTrendChart({ placements }: TypeTrendChartProps) {
@@ -83,27 +85,27 @@ export function TypeTrendChart({ placements }: TypeTrendChartProps) {
   if (chartData.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-      <h3 className="text-sm font-semibold text-foreground mb-6">
+    <div className="glass p-6">
+      <h3 className="text-[18px] leading-[28px] font-semibold tracking-[-0.5px] text-white mb-6">
         Coverage Type Breakdown Over Time
       </h3>
       <div className="h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "Geist Mono, monospace" }}
+              tick={{ fontSize: 11, fill: "#9ca3af", fontFamily: "Geist Mono, monospace" }}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontFamily: "Geist Mono, monospace" }}
+              tick={{ fontSize: 11, fill: "#9ca3af", fontFamily: "Geist Mono, monospace" }}
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
             />
-            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "hsl(var(--muted) / 0.4)" }} />
+            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "rgba(255, 255, 255, 0.03)" }} />
             <Legend
               wrapperStyle={{ fontSize: 11, paddingTop: 12, fontFamily: "Geist, sans-serif" }}
               iconType="circle"

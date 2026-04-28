@@ -145,8 +145,8 @@ export function TeamLeaderboard({ placements, awards, conversions, fromDate, toD
         {rankings.slice(0, 3).map((r, i) => (
           <div
             key={r.team}
-            className={`relative overflow-hidden rounded-xl border p-5 transition-shadow hover:shadow-md ${
-              i === 0 ? "border-primary/30 shadow-sm" : "border-border"
+            className={`relative overflow-hidden rounded-xl border p-5 transition-shadow hover-lift ${
+              i === 0 ? "border-primary/30 shadow-sm" : "border-[rgba(255,255,255,0.05)]"
             }`}
           >
             <div className="absolute inset-x-0 top-0 h-[2px] gradient-brand opacity-60" />
@@ -161,28 +161,28 @@ export function TeamLeaderboard({ placements, awards, conversions, fromDate, toD
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <div className="rounded-lg bg-muted/50 p-2">
+              <div className="rounded-lg bg-[rgba(18,20,24,0.5)] p-2">
                 <div className="flex items-center gap-1">
                   <Zap className="h-3 w-3 text-primary" />
                   <span className="text-[9px] font-mono text-muted-foreground uppercase">Placements</span>
                 </div>
                 <p className="text-lg font-bold text-foreground">{r.placements}</p>
               </div>
-              <div className="rounded-lg bg-muted/50 p-2">
+              <div className="rounded-lg bg-[rgba(18,20,24,0.5)] p-2">
                 <div className="flex items-center gap-1">
                   <TrendingUp className="h-3 w-3 text-accent" />
                   <span className="text-[9px] font-mono text-muted-foreground uppercase">Reach</span>
                 </div>
                 <p className="text-lg font-bold text-foreground">{formatNumber(r.reach)}</p>
               </div>
-              <div className="rounded-lg bg-muted/50 p-2">
+              <div className="rounded-lg bg-[rgba(18,20,24,0.5)] p-2">
                 <div className="flex items-center gap-1">
                   <Award className="h-3 w-3 text-brand-yellow" />
                   <span className="text-[9px] font-mono text-muted-foreground uppercase">Wins</span>
                 </div>
                 <p className="text-lg font-bold text-foreground">{r.awardWins}</p>
               </div>
-              <div className="rounded-lg bg-muted/50 p-2">
+              <div className="rounded-lg bg-[rgba(18,20,24,0.5)] p-2">
                 <div className="flex items-center gap-1">
                   <Target className="h-3 w-3 text-primary" />
                   <span className="text-[9px] font-mono text-muted-foreground uppercase">Conv.</span>
@@ -198,10 +198,10 @@ export function TeamLeaderboard({ placements, awards, conversions, fromDate, toD
 
       {/* Remaining teams */}
       {rankings.length > 3 && (
-        <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-[rgba(255,255,255,0.05)] shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/50">
+              <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(18,20,24,0.5)]">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground w-10">#</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Team</th>
                 <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -226,7 +226,7 @@ export function TeamLeaderboard({ placements, awards, conversions, fromDate, toD
             </thead>
             <tbody className="font-mono">
               {rankings.slice(3).map((r, i) => (
-                <tr key={r.team} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                <tr key={r.team} className="border-b border-[rgba(255,255,255,0.05)] last:border-0 hover:bg-[rgba(255,255,255,0.03)] transition-colors">
                   <td className="px-4 py-3 text-muted-foreground">{i + 4}</td>
                   <td className="px-4 py-3 font-sans font-medium text-foreground">{r.team}</td>
                   <td className="px-4 py-3 text-right font-bold text-primary">{Math.round(r.totalScore * 100)}</td>

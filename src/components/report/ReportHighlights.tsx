@@ -162,7 +162,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
                   value={categoryNarratives[type] || ""}
                   onChange={(e) => setCategoryNarrative(type, e.target.value)}
                   placeholder={`Add context about ${type} coverage…`}
-                  className="mb-2 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 resize-none print:hidden"
+                  className="mb-2 w-full rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 resize-none print:hidden"
                   rows={2}
                 />
               ) : categoryNarratives[type] ? (
@@ -192,7 +192,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
           <div>
             {manualEntries.map((m) => (
               <EditableSection key={m.id} id={`highlight-${m.id}`}>
-                <div className="flex items-center gap-4 rounded-lg border border-primary/20 bg-card px-5 py-3 mb-2">
+                <div className="flex items-center gap-4 rounded-lg border border-primary/20 glass px-5 py-3 mb-2">
                   {ogImages[m.link] && (
                     <img src={ogImages[m.link]!} alt="" className="h-12 w-12 rounded object-cover shrink-0" />
                   )}
@@ -219,7 +219,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
         {isEditing && !showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-5 py-4 text-sm text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors print:hidden"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-[rgba(255,255,255,0.05)] bg-[rgba(18,20,24,0.5)] px-5 py-4 text-sm text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors print:hidden"
           >
             <Plus className="h-4 w-4" />
             Add Coverage
@@ -227,12 +227,12 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
         )}
 
         {isEditing && showForm && (
-          <div className="rounded-lg border border-primary/30 bg-card p-5 space-y-3 print:hidden">
+          <div className="rounded-lg border border-primary/30 glass p-5 space-y-3 print:hidden">
             <div className="grid grid-cols-2 gap-3">
-              <input type="text" placeholder="Headline *" value={form.headline} onChange={(e) => setForm((f) => ({ ...f, headline: e.target.value }))} className="col-span-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40" />
-              <input type="text" placeholder="Outlet *" value={form.outlet} onChange={(e) => setForm((f) => ({ ...f, outlet: e.target.value }))} className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40" />
-              <input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40" />
-              <select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))} className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40">
+              <input type="text" placeholder="Headline *" value={form.headline} onChange={(e) => setForm((f) => ({ ...f, headline: e.target.value }))} className="col-span-2 rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40" />
+              <input type="text" placeholder="Outlet *" value={form.outlet} onChange={(e) => setForm((f) => ({ ...f, outlet: e.target.value }))} className="rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40" />
+              <input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} className="rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40" />
+              <select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))} className="rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40">
                 <option>Feature</option>
                 <option>Announcement</option>
                 <option>Interview</option>
@@ -240,11 +240,11 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
                 <option>Syndication</option>
                 <option>Mention</option>
               </select>
-              <input type="text" placeholder="Reach (e.g. 50K)" value={form.reach} onChange={(e) => setForm((f) => ({ ...f, reach: e.target.value }))} className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40" />
-              <input type="url" placeholder="Link (optional)" value={form.link} onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))} className="col-span-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40" />
+              <input type="text" placeholder="Reach (e.g. 50K)" value={form.reach} onChange={(e) => setForm((f) => ({ ...f, reach: e.target.value }))} className="rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40" />
+              <input type="url" placeholder="Link (optional)" value={form.link} onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))} className="col-span-2 rounded-md border border-[rgba(255,255,255,0.05)] bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40" />
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setUseAsHero((v) => !v)} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${useAsHero ? "bg-primary/10 text-primary border border-primary/30" : "border border-border text-muted-foreground hover:text-foreground hover:border-border"}`}>
+              <button type="button" onClick={() => setUseAsHero((v) => !v)} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${useAsHero ? "bg-primary/10 text-primary border border-primary/30" : "border border-[rgba(255,255,255,0.05)] text-muted-foreground hover:text-foreground hover:border-[rgba(255,255,255,0.05)]"}`}>
                 <Star className={`h-3 w-3 ${useAsHero ? "fill-primary" : ""}`} />
                 Use as Top Highlight
               </button>
@@ -262,7 +262,7 @@ export function ReportHighlights({ placements }: ReportHighlightsProps) {
 
 function HighlightHeroCard({ headline, outlet, date, type, reach, link, ogImage }: { headline: string; outlet: string; date: string; type: string; reach: string; link?: string; ogImage?: string }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
+    <div className="rounded-lg border border-[rgba(255,255,255,0.05)] glass p-6">
       <div className="flex items-start gap-4">
         {ogImage && (
           <img src={ogImage} alt="" className="h-24 w-36 rounded-md object-cover shrink-0 hidden sm:block" />
@@ -288,7 +288,7 @@ function HighlightHeroCard({ headline, outlet, date, type, reach, link, ogImage 
 
 function HighlightRow({ headline, outlet, date, reach, link, ogImage }: { headline: string; outlet: string; date: string; reach: number; link: string; ogImage?: string }) {
   return (
-    <div className="flex items-center gap-4 rounded-lg border border-border bg-card px-5 py-3">
+    <div className="flex items-center gap-4 rounded-lg border border-[rgba(255,255,255,0.05)] glass px-5 py-3">
       {ogImage && (
         <img src={ogImage} alt="" className="h-10 w-10 rounded object-cover shrink-0" />
       )}

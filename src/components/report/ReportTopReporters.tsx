@@ -42,10 +42,10 @@ export function ReportTopReporters({ conversions }: ReportTopReportersProps) {
         Top Converting Reporters
       </h2>
 
-      <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-[rgba(255,255,255,0.05)]">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/30">
+            <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(18,20,24,0.5)]">
               <th className="px-4 py-3 text-left font-medium text-muted-foreground">Reporter</th>
               <th className="px-4 py-3 text-right font-medium text-muted-foreground">Outreach</th>
               <th className="px-4 py-3 text-right font-medium text-muted-foreground">Covered</th>
@@ -55,7 +55,7 @@ export function ReportTopReporters({ conversions }: ReportTopReportersProps) {
           </thead>
           <tbody>
             {reporters.map((r) => (
-              <tr key={r.name} className="border-b border-border last:border-0">
+              <tr key={r.name} className="border-b border-[rgba(255,255,255,0.05)] last:border-0">
                 <td className="px-4 py-3 font-medium text-foreground">{r.name}</td>
                 <td className="px-4 py-3 text-right text-muted-foreground">{r.total}</td>
                 <td className="px-4 py-3 text-right text-foreground font-semibold">{r.converted}</td>
