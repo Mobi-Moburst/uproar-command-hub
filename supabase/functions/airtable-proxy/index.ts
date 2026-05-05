@@ -60,9 +60,20 @@ Deno.serve(async (req) => {
 
       const url = `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}?${params}`;
       console.log("Fetching Airtable URL:", url);
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-      });
+
+      // Fetch with retry on 429 (rate limit) using exponential backoff
+      let res!: Response;
+      let delay = 1000;
+      const maxAttempts = 6;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        res = await fetch(url, { headers: { Authorization: `Bearer ${apiKey}` } });
+        if (res.status !== 429) break;
+        await res.text(); // drain body
+        if (attempt === maxAttempts) break;
+        console.warn(`Airtable 429, retry ${attempt} in ${delay}ms`);
+        await new Promise((r) => setTimeout(r, delay));
+        delay *= 2;
+      }
 
       if (!res.ok) {
         const body = await res.text();
