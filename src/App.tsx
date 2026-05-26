@@ -22,6 +22,7 @@ import LoginPage from "./pages/LoginPage";
 import PulsePage from "./pages/PulsePage";
 import PublicReportPage from "./pages/PublicReportPage";
 import AccountPage from "./pages/AccountPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/briefings" element={<ProtectedRoute><BriefingsPage /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
             <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
