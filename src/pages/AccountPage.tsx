@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { LogOut, Save } from "lucide-react";
+import { LogOut, Save, Settings } from "lucide-react";
+import { useMyRoles, ROLE_LABEL } from "@/hooks/useMyRoles";
 
 export default function AccountPage() {
   const { user, profile, signOut, refreshProfile } = useAuthContext();
+  const { primaryRole, isAdmin } = useMyRoles();
   const [displayName, setDisplayName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
@@ -21,7 +23,6 @@ export default function AccountPage() {
 
   useEffect(() => {
     setDisplayName(profile?.display_name ?? "");
-    setAvatarUrl(profile?.avatar_url ?? "");
   }, [profile]);
 
   const initials =
@@ -37,7 +38,7 @@ export default function AccountPage() {
     setSavingProfile(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ display_name: displayName, avatar_url: avatarUrl })
+      .update({ display_name: displayName })
       .eq("id", user.id);
     setSavingProfile(false);
     if (error) {
@@ -74,11 +75,21 @@ export default function AccountPage() {
   return (
     <DashboardLayout>
       <div className="mx-auto w-full max-w-3xl space-y-8">
-        <header>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">Account Settings</h1>
-          <p className="mt-2 text-sm text-muted-foreground font-mono">
-            Manage your profile and session
-          </p>
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-foreground">Account Settings</h1>
+            <p className="mt-2 text-sm text-muted-foreground font-mono">
+              Manage your profile and session
+            </p>
+          </div>
+          {isAdmin && (
+            <Link to="/admin/users">
+              <Button variant="outline" size="sm" className="gap-2" title="User management">
+                <Settings className="h-4 w-4" />
+                Manage users
+              </Button>
+            </Link>
+          )}
         </header>
 
         {/* Profile */}
@@ -90,7 +101,7 @@ export default function AccountPage() {
 
           <div className="mt-6 flex items-center gap-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src={avatarUrl} />
+              <AvatarImage src={profile?.avatar_url} />
               <AvatarFallback className="bg-[#b9e045] text-base text-black font-bold">
                 {initials}
               </AvatarFallback>
@@ -112,13 +123,24 @@ export default function AccountPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="avatarUrl">Avatar URL</Label>
-              <Input
-                id="avatarUrl"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://..."
-              />
+              <Label>Role</Label>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-3 py-1 text-xs font-medium text-foreground">
+                  {ROLE_LABEL[primaryRole]}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {isAdmin
+                    ? "Full access including user management."
+                    : primaryRole === "view_only"
+                      ? "Read-only access to the dashboard."
+                      : "Standard dashboard access."}
+                </span>
+              </div>
+              {!isAdmin && (
+                <p className="text-[11px] text-muted-foreground">
+                  Only an admin can change your role.
+                </p>
+              )}
             </div>
             <div>
               <Button onClick={saveProfile} disabled={savingProfile} className="gap-2">
@@ -164,7 +186,7 @@ export default function AccountPage() {
           </section>
         )}
 
-        {/* Account info / session */}
+        {/* Session */}
         <section className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-6">
           <h2 className="text-lg font-semibold text-foreground">Session</h2>
           <dl className="mt-4 grid gap-3 text-sm">
