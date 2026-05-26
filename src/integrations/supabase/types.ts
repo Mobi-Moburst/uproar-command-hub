@@ -278,6 +278,69 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_wins: {
+        Row: {
+          ad_value: number
+          captured_at: string
+          client_name: string
+          date: string | null
+          headline: string
+          id: string
+          link: string
+          notes: string
+          outlet: string
+          readership_viewership: number
+          reporter_name: string
+          secured_by: string
+          team_name: string
+          topic_product: string
+          type: string
+          updated_at: string
+          vertical: string
+          week_start: string | null
+        }
+        Insert: {
+          ad_value?: number
+          captured_at?: string
+          client_name?: string
+          date?: string | null
+          headline?: string
+          id: string
+          link?: string
+          notes?: string
+          outlet?: string
+          readership_viewership?: number
+          reporter_name?: string
+          secured_by?: string
+          team_name?: string
+          topic_product?: string
+          type?: string
+          updated_at?: string
+          vertical?: string
+          week_start?: string | null
+        }
+        Update: {
+          ad_value?: number
+          captured_at?: string
+          client_name?: string
+          date?: string | null
+          headline?: string
+          id?: string
+          link?: string
+          notes?: string
+          outlet?: string
+          readership_viewership?: number
+          reporter_name?: string
+          secured_by?: string
+          team_name?: string
+          topic_product?: string
+          type?: string
+          updated_at?: string
+          vertical?: string
+          week_start?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
