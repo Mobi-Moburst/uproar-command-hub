@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { NavLink } from "@/components/NavLink";
+import { Link } from "react-router-dom";
 import uproarLogo from "@/assets/uproar-white-logo.svg";
 import { useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -72,16 +73,22 @@ export const AppSidebar = forwardRef<HTMLElement, Record<string, never>>(functio
 
       <div className="border-t border-[rgba(255,255,255,0.05)] p-3">
         <div className="glass-elevated flex items-center gap-2.5 p-2.5">
-          <div className="relative">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={profile?.avatar_url} />
-              <AvatarFallback className="bg-[#b9e045] text-[10px] text-black font-bold">{initials}</AvatarFallback>
-            </Avatar>
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#10b981] border-2 border-[#1a1d23]" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium text-white">{displayName}</p>
-          </div>
+          <Link
+            to="/account"
+            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-md transition-opacity hover:opacity-80"
+            aria-label="Account settings"
+          >
+            <div className="relative">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={profile?.avatar_url} />
+                <AvatarFallback className="bg-[#b9e045] text-[10px] text-black font-bold">{initials}</AvatarFallback>
+              </Avatar>
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#10b981] border-2 border-[#1a1d23]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium text-white">{displayName}</p>
+            </div>
+          </Link>
           <Button
             variant="ghost"
             size="sm"

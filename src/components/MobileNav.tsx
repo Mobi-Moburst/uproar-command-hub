@@ -1,6 +1,6 @@
 import { forwardRef, useState } from "react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -68,13 +68,19 @@ export const MobileNav = forwardRef<HTMLDivElement, Record<string, never>>(funct
           </nav>
           <div className="mt-6 space-y-3 border-t border-[rgba(255,255,255,0.06)] pt-4">
             <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={profile?.avatar_url} />
-                <AvatarFallback className="bg-[#b9e045] text-xs text-black font-bold">
-                  {displayName.slice(0, 2).toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <p className="flex-1 truncate text-sm text-white">{displayName}</p>
+              <Link
+                to="/account"
+                onClick={() => setOpen(false)}
+                className="flex flex-1 items-center gap-3 min-w-0 rounded-md transition-opacity hover:opacity-80"
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar_url} />
+                  <AvatarFallback className="bg-[#b9e045] text-xs text-black font-bold">
+                    {displayName.slice(0, 2).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <p className="flex-1 truncate text-sm text-white">{displayName}</p>
+              </Link>
               <Button variant="ghost" size="sm" onClick={signOut} className="text-xs text-[#9ca3af]">
                 Sign out
               </Button>
