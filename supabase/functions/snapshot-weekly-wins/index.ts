@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
     // 1. Fetch all currently-flagged wins + outlet lookup
     const [winRecords, outletRecords] = await Promise.all([
       fetchAirtable(baseId, "tblw34mWTvuaIUz16", apiKey, {
-        filterByFormula: "{Weekly Wins Trigger}=TRUE()",
+        filterByFormula: "{Weekly Wins Trigger}!=''",
       }),
       fetchAirtable(baseId, "tbl65cHPi8TIHTfpT", apiKey),
     ]);
