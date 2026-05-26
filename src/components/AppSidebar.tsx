@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { NavLink } from "@/components/NavLink";
+import { Link } from "react-router-dom";
 import uproarLogo from "@/assets/uproar-white-logo.svg";
 import { useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
