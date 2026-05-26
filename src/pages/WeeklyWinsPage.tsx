@@ -12,6 +12,30 @@ import { startOfWeek, endOfWeek, format, subWeeks, addWeeks, isSameWeek } from "
 
 export default function WeeklyWinsPage() {
   const { data: weeklyWins = [], isLoading, isError, refetch } = useWeeklyWins();
+  const queryClient = useQueryClient();
+
+  // Fire-and-forget: snapshot currently-flagged Airtable wins into the DB
+  // so a permanent history accumulates over time.
+  useEffect(() => {
+    let cancelled = false;
+    supabase.functions
+      .invoke("snapshot-weekly-wins")
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.warn("snapshot-weekly-wins failed:", error.message);
+          return;
+        }
+        if (data?.upserted > 0) {
+          queryClient.invalidateQueries({ queryKey: ["weeklyWins"] });
+        }
+      })
+      .catch((e) => console.warn("snapshot-weekly-wins error:", e));
+    return () => {
+      cancelled = true;
+    };
+  }, [queryClient]);
+
 
   const [selectedWeekStart, setSelectedWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 })
