@@ -98,8 +98,47 @@ export async function getPlacements(): Promise<MediaPlacement[]> {
   }
 }
 
-/** Fetch only placements flagged as weekly wins */
+/** Fetch persisted weekly wins history from the database */
 export async function getWeeklyWins(): Promise<MediaPlacement[]> {
-  const all = await getPlacements();
-  return all.filter((p) => p.weekly_wins_trigger);
+  const allRows: Record<string, unknown>[] = [];
+  const pageSize = 1000;
+  let from = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("weekly_wins")
+      .select("id, date, client_name, team_name, outlet, reporter_name, headline, link, type, vertical, readership_viewership, ad_value, secured_by, topic_product, notes")
+      .order("date", { ascending: false })
+      .range(from, from + pageSize - 1);
+
+    if (error) {
+      console.error("Failed to fetch weekly_wins:", error.message);
+      return [];
+    }
+
+    allRows.push(...(data ?? []));
+    hasMore = (data?.length ?? 0) === pageSize;
+    from += pageSize;
+  }
+
+  return allRows.map((row: Record<string, unknown>) => ({
+    id: String(row.id),
+    date: String(row.date ?? ""),
+    client_name: String(row.client_name ?? ""),
+    team_name: String(row.team_name ?? ""),
+    outlet: String(row.outlet ?? ""),
+    reporter_name: String(row.reporter_name ?? ""),
+    headline: String(row.headline ?? ""),
+    link: String(row.link ?? ""),
+    type: String(row.type ?? ""),
+    vertical: String(row.vertical ?? ""),
+    readership_viewership: Number(row.readership_viewership) || 0,
+    ad_value: Number(row.ad_value) || 0,
+    secured_by: String(row.secured_by ?? ""),
+    topic_product: String(row.topic_product ?? ""),
+    notes: String(row.notes ?? ""),
+    weekly_wins_trigger: true,
+  }));
 }
+
