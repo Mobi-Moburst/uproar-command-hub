@@ -13,8 +13,29 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ShieldCheck, UserPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface AdminUser {
   id: string;
@@ -36,6 +57,16 @@ export default function AdminUsersPage() {
   const { isAdmin, loading: rolesLoading } = useMyRoles();
   const [users, setUsers] = useState<AdminUser[] | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Invite dialog state
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<AppRole>("user");
+  const [inviting, setInviting] = useState(false);
+
+  // Delete confirm state
+  const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.functions.invoke("admin-list-users");
@@ -61,7 +92,6 @@ export default function AdminUsersPage() {
       return;
     }
     setUpdatingId(target.id);
-    // Remove all existing roles, then insert the new single role.
     const { error: delErr } = await supabase
       .from("user_roles")
       .delete()
@@ -85,6 +115,44 @@ export default function AdminUsersPage() {
     toast.success(`Updated ${target.email} to ${ROLE_LABEL[nextRole]}`);
   };
 
+  const inviteUser = async () => {
+    const email = inviteEmail.trim().toLowerCase();
+    if (!email.includes("@")) {
+      toast.error("Enter a valid email");
+      return;
+    }
+    setInviting(true);
+    const { data, error } = await supabase.functions.invoke("admin-manage-users", {
+      body: { action: "invite", email, role: inviteRole, redirectTo: window.location.origin },
+    });
+    setInviting(false);
+    if (error || data?.error) {
+      toast.error(data?.error ?? error?.message ?? "Invite failed");
+      return;
+    }
+    toast.success(`Invite sent to ${email}`);
+    setInviteEmail("");
+    setInviteRole("user");
+    setInviteOpen(false);
+    load();
+  };
+
+  const deleteUser = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    const { data, error } = await supabase.functions.invoke("admin-manage-users", {
+      body: { action: "delete", user_id: confirmDelete.id },
+    });
+    setDeleting(false);
+    if (error || data?.error) {
+      toast.error(data?.error ?? error?.message ?? "Delete failed");
+      return;
+    }
+    toast.success(`Removed ${confirmDelete.email}`);
+    setUsers((prev) => prev?.filter((u) => u.id !== confirmDelete.id) ?? null);
+    setConfirmDelete(null);
+  };
+
   return (
     <DashboardLayout>
       <div className="mx-auto w-full max-w-5xl space-y-8">
@@ -102,14 +170,65 @@ export default function AdminUsersPage() {
               Set access levels for everyone with a dashboard account.
             </p>
           </div>
+
+          <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-2">
+                <UserPlus className="h-4 w-4" />
+                Add user
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite a new user</DialogTitle>
+                <DialogDescription>
+                  We'll email them a sign-in link. They'll appear here once they accept.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="inviteEmail">Email</Label>
+                  <Input
+                    id="inviteEmail"
+                    type="email"
+                    placeholder="name@moburst.com"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Role</Label>
+                  <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as AppRole)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="view_only">View only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setInviteOpen(false)} disabled={inviting}>
+                  Cancel
+                </Button>
+                <Button onClick={inviteUser} disabled={inviting}>
+                  {inviting ? "Sending..." : "Send invite"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </header>
 
         <section className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]">
-          <div className="grid grid-cols-[1.5fr_2fr_1.2fr_1fr] gap-4 border-b border-[rgba(255,255,255,0.06)] px-6 py-3 text-[11px] uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-[1.4fr_1.8fr_1fr_1fr_60px] gap-4 border-b border-[rgba(255,255,255,0.06)] px-6 py-3 text-[11px] uppercase tracking-wider text-muted-foreground">
             <div>Name</div>
             <div>Email</div>
             <div>Current role</div>
             <div className="text-right">Change to</div>
+            <div></div>
           </div>
 
           {!users && (
@@ -130,7 +249,7 @@ export default function AdminUsersPage() {
             return (
               <div
                 key={u.id}
-                className="grid grid-cols-[1.5fr_2fr_1.2fr_1fr] items-center gap-4 border-b border-[rgba(255,255,255,0.04)] px-6 py-4 last:border-0"
+                className="grid grid-cols-[1.4fr_1.8fr_1fr_1fr_60px] items-center gap-4 border-b border-[rgba(255,255,255,0.04)] px-6 py-4 last:border-0"
               >
                 <div className="flex items-center gap-2 text-sm text-foreground">
                   {u.display_name || "—"}
@@ -162,6 +281,18 @@ export default function AdminUsersPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive disabled:opacity-30"
+                    disabled={isSelf}
+                    title={isSelf ? "You can't delete your own account" : "Remove user"}
+                    onClick={() => setConfirmDelete(u)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             );
           })}
@@ -185,6 +316,28 @@ export default function AdminUsersPage() {
           </Button>
         </div>
       </div>
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove this user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete?.email} will lose access immediately. Their profile and role
+              assignments will be deleted. This can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteUser}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Removing..." : "Remove user"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
