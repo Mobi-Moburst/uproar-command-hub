@@ -67,7 +67,7 @@ export function usePulseSignals() {
         .order("relevance_score", { ascending: false });
 
       if (error) throw error;
-      return (data || []) as PulseSignal[];
+      return (data || []) as unknown as PulseSignal[];
     },
   });
 }
