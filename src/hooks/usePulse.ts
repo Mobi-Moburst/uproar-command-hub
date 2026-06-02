@@ -3,6 +3,29 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+export interface MatchedReporter {
+  id: string;
+  name: string;
+  outlet: string;
+  source: "internal" | "web";
+  score: number;
+  rationale: string;
+  beats: string[];
+  recent_examples: { headline: string; url?: string; date?: string }[];
+  internal_stats?: {
+    placements: number;
+    conversion_rate: number;
+    last_coverage_date: string;
+  };
+}
+
+export interface DraftedPitch {
+  subject: string;
+  body: string;
+  drafted_at: string;
+  model: string;
+}
+
 export interface PulseSignal {
   id: string;
   client_name: string;
@@ -16,6 +39,8 @@ export interface PulseSignal {
   claimed_at: string | null;
   dismissed: boolean;
   created_at: string;
+  matched_reporters: MatchedReporter[];
+  drafted_pitches: Record<string, DraftedPitch>;
 }
 
 export interface ClientEnrichment {
