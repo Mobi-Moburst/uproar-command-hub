@@ -133,7 +133,8 @@ async function findWebCandidates(
       }),
     });
     const data = await res.json();
-    const results = (data?.data || data?.web || []) as any[];
+    const d = data?.data;
+    const results = (Array.isArray(d) ? d : (d?.web || d?.news || data?.web || [])) as any[];
     const candidates: ReporterCandidate[] = [];
 
     for (const r of results) {

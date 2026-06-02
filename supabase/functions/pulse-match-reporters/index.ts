@@ -74,7 +74,8 @@ async function findWebCandidates(firecrawlKey: string, signal: any) {
       body: JSON.stringify({ query, limit: 5, tbs: "qdr:m" }),
     });
     const data = await res.json();
-    const results = (data?.data || data?.web || []) as any[];
+    const d = data?.data;
+    const results = (Array.isArray(d) ? d : (d?.web || d?.news || data?.web || [])) as any[];
     const out = [];
     for (const r of results) {
       const author = r?.metadata?.author || r?.metadata?.["article:author"];
