@@ -8,11 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Zap, Radar, ExternalLink, UserCheck, X, Plus, Save, Loader2, Info, Tag } from "lucide-react";
-import { usePulseSignals, useClaimSignal, useDismissSignal, useScanPulse, useClientEnrichments, useSaveEnrichment, type PulseSignal } from "@/hooks/usePulse";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Zap, Radar, ExternalLink, UserCheck, X, Plus, Save, Loader2, Info, Tag, Users, ChevronDown, Mail, Copy, RefreshCw, Sparkles } from "lucide-react";
+import { usePulseSignals, useClaimSignal, useDismissSignal, useScanPulse, useClientEnrichments, useSaveEnrichment, useDraftPitch, useMatchReporters, type PulseSignal, type MatchedReporter } from "@/hooks/usePulse";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useClients } from "@/hooks/useClients";
 import { EmptyState } from "@/components/EmptyState";
+import { useToast } from "@/hooks/use-toast";
 
 function SignalCard({ signal }: { signal: PulseSignal }) {
   const { user } = useAuthContext();
