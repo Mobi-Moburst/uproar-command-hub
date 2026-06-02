@@ -8,11 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Zap, Radar, ExternalLink, UserCheck, X, Plus, Save, Loader2, Info, Tag } from "lucide-react";
-import { usePulseSignals, useClaimSignal, useDismissSignal, useScanPulse, useClientEnrichments, useSaveEnrichment, type PulseSignal } from "@/hooks/usePulse";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Zap, Radar, ExternalLink, UserCheck, X, Plus, Save, Loader2, Info, Tag, Users, ChevronDown, Mail, Copy, RefreshCw, Sparkles } from "lucide-react";
+import { usePulseSignals, useClaimSignal, useDismissSignal, useScanPulse, useClientEnrichments, useSaveEnrichment, useDraftPitch, useMatchReporters, type PulseSignal, type MatchedReporter } from "@/hooks/usePulse";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useClients } from "@/hooks/useClients";
 import { EmptyState } from "@/components/EmptyState";
+import { useToast } from "@/hooks/use-toast";
 
 function SignalCard({ signal }: { signal: PulseSignal }) {
   const { user } = useAuthContext();
@@ -119,8 +121,156 @@ function SignalCard({ signal }: { signal: PulseSignal }) {
             )}
           </div>
         </div>
+
+        <ReportersSection signal={signal} />
       </CardContent>
     </Card>
+  );
+}
+
+function ReportersSection({ signal }: { signal: PulseSignal }) {
+  const [open, setOpen] = useState(false);
+  const matchMutation = useMatchReporters();
+  const reporters = signal.matched_reporters || [];
+  const hasReporters = reporters.length > 0;
+
+  return (
+    <div className="mt-3 pt-3 border-t border-[rgba(255,255,255,0.05)]/50">
+      {!hasReporters ? (
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-7 text-[11px] gap-1.5"
+          onClick={() => matchMutation.mutate(signal.id)}
+          disabled={matchMutation.isPending}
+        >
+          {matchMutation.isPending ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Users className="h-3 w-3" />
+          )}
+          {matchMutation.isPending ? "Matching..." : "Match reporters"}
+        </Button>
+      ) : (
+        <Collapsible open={open} onOpenChange={setOpen}>
+          <CollapsibleTrigger asChild>
+            <button className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+              <Users className="h-3 w-3" />
+              <span className="font-medium">{reporters.length} reporters to pitch</span>
+              <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2 space-y-2">
+            {reporters.map((r) => (
+              <ReporterRow key={r.id} signal={signal} reporter={r} />
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+    </div>
+  );
+}
+
+function ReporterRow({ signal, reporter }: { signal: PulseSignal; reporter: MatchedReporter }) {
+  const [showPitch, setShowPitch] = useState(false);
+  const draftMutation = useDraftPitch();
+  const { toast } = useToast();
+  const cachedPitch = signal.drafted_pitches?.[reporter.id];
+
+  const handleDraft = (force = false) => {
+    setShowPitch(true);
+    if (cachedPitch && !force) return;
+    draftMutation.mutate({ signalId: signal.id, reporterId: reporter.id, force });
+  };
+
+  const handleCopy = () => {
+    if (!cachedPitch) return;
+    const text = `Subject: ${cachedPitch.subject}\n\n${cachedPitch.body}`;
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied", description: "Pitch copied to clipboard." });
+  };
+
+  const scoreColor = reporter.score >= 75 ? "text-accent" : reporter.score >= 50 ? "text-brand-yellow" : "text-muted-foreground";
+
+  return (
+    <div className="rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)] p-2.5">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-xs font-semibold text-foreground">{reporter.name}</span>
+            <span className="text-[10px] text-muted-foreground">·</span>
+            <span className="text-[11px] text-muted-foreground">{reporter.outlet}</span>
+            <Badge variant="outline" className="text-[9px] h-4 px-1 ml-1">
+              {reporter.source === "internal" ? "Internal" : "Web"}
+            </Badge>
+            <span className={`text-[10px] font-mono font-bold ml-auto ${scoreColor}`}>{reporter.score}</span>
+          </div>
+          {reporter.rationale && (
+            <p className="text-[11px] text-muted-foreground mt-1 leading-snug">{reporter.rationale}</p>
+          )}
+          {reporter.beats.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {reporter.beats.slice(0, 4).map((b) => (
+                <Badge key={b} variant="secondary" className="text-[9px] h-4 px-1.5">{b}</Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1.5 mt-2">
+        <Button
+          size="sm"
+          variant={cachedPitch ? "outline" : "default"}
+          className="h-6 text-[10px] px-2 gap-1"
+          onClick={() => handleDraft(false)}
+          disabled={draftMutation.isPending}
+        >
+          {draftMutation.isPending && draftMutation.variables?.reporterId === reporter.id ? (
+            <Loader2 className="h-2.5 w-2.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-2.5 w-2.5" />
+          )}
+          {cachedPitch ? "View pitch" : "Draft pitch"}
+        </Button>
+        {reporter.recent_examples?.[0]?.url && (
+          <a
+            href={reporter.recent_examples[0].url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
+          >
+            <ExternalLink className="h-2.5 w-2.5" />
+            Article
+          </a>
+        )}
+      </div>
+
+      {showPitch && cachedPitch && (
+        <div className="mt-2 rounded-md bg-[rgba(0,0,0,0.25)] p-2.5 space-y-1.5">
+          <div className="flex items-center gap-1.5 mb-1">
+            <Mail className="h-3 w-3 text-accent" />
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Subject</span>
+          </div>
+          <p className="text-xs font-semibold text-foreground">{cachedPitch.subject}</p>
+          <p className="text-[11px] text-foreground/90 whitespace-pre-wrap leading-relaxed mt-2">{cachedPitch.body}</p>
+          <div className="flex items-center gap-1.5 pt-2">
+            <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2 gap-1" onClick={handleCopy}>
+              <Copy className="h-2.5 w-2.5" /> Copy
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 text-[10px] px-2 gap-1"
+              onClick={() => handleDraft(true)}
+              disabled={draftMutation.isPending}
+            >
+              <RefreshCw className="h-2.5 w-2.5" /> Regenerate
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -3,6 +3,29 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+export interface MatchedReporter {
+  id: string;
+  name: string;
+  outlet: string;
+  source: "internal" | "web";
+  score: number;
+  rationale: string;
+  beats: string[];
+  recent_examples: { headline: string; url?: string; date?: string }[];
+  internal_stats?: {
+    placements: number;
+    conversion_rate: number;
+    last_coverage_date: string;
+  };
+}
+
+export interface DraftedPitch {
+  subject: string;
+  body: string;
+  drafted_at: string;
+  model: string;
+}
+
 export interface PulseSignal {
   id: string;
   client_name: string;
@@ -16,6 +39,8 @@ export interface PulseSignal {
   claimed_at: string | null;
   dismissed: boolean;
   created_at: string;
+  matched_reporters: MatchedReporter[];
+  drafted_pitches: Record<string, DraftedPitch>;
 }
 
 export interface ClientEnrichment {
@@ -42,7 +67,7 @@ export function usePulseSignals() {
         .order("relevance_score", { ascending: false });
 
       if (error) throw error;
-      return (data || []) as PulseSignal[];
+      return (data || []) as unknown as PulseSignal[];
     },
   });
 }
@@ -149,6 +174,51 @@ export function useSaveEnrichment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client-enrichments"] });
       toast({ title: "Saved", description: "Client enrichment updated." });
+    },
+  });
+}
+
+export function useDraftPitch() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ signalId, reporterId, force }: { signalId: string; reporterId: string; force?: boolean }) => {
+      const { data, error } = await supabase.functions.invoke("pulse-draft-pitch", {
+        body: { signal_id: signalId, reporter_id: reporterId, force: !!force },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { pitch: DraftedPitch; cached: boolean };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pulse-signals"] });
+    },
+    onError: (err: any) => {
+      toast({ title: "Draft failed", description: err?.message || "Unknown error", variant: "destructive" });
+    },
+  });
+}
+
+export function useMatchReporters() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (signalId: string) => {
+      const { data, error } = await supabase.functions.invoke("pulse-match-reporters", {
+        body: { signal_id: signalId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { matched_reporters: MatchedReporter[] };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pulse-signals"] });
+      toast({ title: "Reporters matched", description: "Suggested reporters added." });
+    },
+    onError: (err: any) => {
+      toast({ title: "Match failed", description: err?.message || "Unknown error", variant: "destructive" });
     },
   });
 }

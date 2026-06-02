@@ -240,11 +240,13 @@ export type Database = {
           client_name: string
           created_at: string
           dismissed: boolean
+          drafted_pitches: Json
           generated_date: string
           headline: string
           hook: string
           id: string
           industry: string | null
+          matched_reporters: Json
           relevance_score: number
           source_url: string | null
         }
@@ -254,11 +256,13 @@ export type Database = {
           client_name: string
           created_at?: string
           dismissed?: boolean
+          drafted_pitches?: Json
           generated_date?: string
           headline: string
           hook: string
           id?: string
           industry?: string | null
+          matched_reporters?: Json
           relevance_score?: number
           source_url?: string | null
         }
@@ -268,11 +272,13 @@ export type Database = {
           client_name?: string
           created_at?: string
           dismissed?: boolean
+          drafted_pitches?: Json
           generated_date?: string
           headline?: string
           hook?: string
           id?: string
           industry?: string | null
+          matched_reporters?: Json
           relevance_score?: number
           source_url?: string | null
         }
