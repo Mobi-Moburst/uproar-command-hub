@@ -213,9 +213,16 @@ export function useMatchReporters() {
       if (data?.error) throw new Error(data.error);
       return data as { matched_reporters: MatchedReporter[] };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["pulse-signals"] });
-      toast({ title: "Reporters matched", description: "Suggested reporters added." });
+      const n = data?.matched_reporters?.length || 0;
+      toast({
+        title: n > 0 ? "Reporters matched" : "No reporters found",
+        description: n > 0
+          ? `Added ${n} suggested reporter${n === 1 ? "" : "s"}.`
+          : "No internal or web matches surfaced for this signal. Try refining the client's keywords.",
+        variant: n > 0 ? "default" : "destructive",
+      });
     },
     onError: (err: any) => {
       toast({ title: "Match failed", description: err?.message || "Unknown error", variant: "destructive" });
