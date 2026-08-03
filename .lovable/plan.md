@@ -1,66 +1,67 @@
-# HubSpot Media Contacts → Pulse Reporter Matcher
+# Reporter Directory: Airtable-first, HubSpot as enrichment
 
-Fix the "No reporters found" problem by adding a third candidate source: the 1,063 media contacts already sitting in HubSpot. Pitch Intelligence stays "Coming Soon" — the outreach data isn't there.
+Fix the "No reporters found" problem in Pulse by building a real reporter directory from Uproar's own coverage history, then enriching those people with HubSpot contact details where a match exists. HubSpot media contacts that Uproar has never worked with are ignored.
 
-## Why this
+## Why this direction
 
-Today the matcher has two sources:
-- **Internal** — `placements_archive`, matched with literal `ilike` on vertical/topic. Too strict, usually returns nothing.
-- **Web** — Firecrawl search, but most results have no author metadata, so they get dropped.
+The 1,063 media contacts in HubSpot are almost entirely unattributed to the Uproar team — Sales/Kitcaster-owned or stale. Pitching from that list would surface people no one on the team knows. Airtable placements are the opposite: every reporter there represents real, earned coverage.
 
-HubSpot gives a clean, pre-qualified list: real people, real outlets, job titles like reporter/editor/producer. That's the missing middle layer.
+So: Airtable is the source of truth for *who*. HubSpot is a lookup for *how to reach them*.
 
-## Step 1 — Media contact cache table
+## Step 1 — `reporter_directory` table
 
-New table `media_contacts`, synced from HubSpot (not queried live — 1,063 contacts is one sync, not a per-signal API call).
+One row per reporter+outlet, built from placements.
 
-Columns: `id`, `hubspot_id`, `name`, `email`, `outlet`, `job_title`, `beats text[]`, `linkedin_url`, `last_synced_at`, `source` ('hubspot' | 'airtable').
+Columns: `id`, `reporter_key` (unique, `lower(name)|lower(outlet)`), `name`, `outlet`, `beats text[]`, `placement_count`, `last_coverage_date`, `clients_covered text[]`, `top_headlines jsonb`, plus enrichment fields `email`, `job_title`, `linkedin_url`, `hubspot_contact_id`, `hubspot_matched_at`, `last_synced_at`.
 
 Authenticated read; service-role write. Standard GRANTs + RLS.
 
-## Step 2 — Sync edge function
+## Step 2 — Build the directory from Airtable + archive
 
-`hubspot-sync-media-contacts`:
-- Searches HubSpot contacts with `CONTAINS_TOKEN` on job title (reporter, editor, journalist, producer, correspondent, writer, host, contributor).
-- Normalizes outlet from company field, falling back to email domain.
-- Derives `beats` from HubSpot lifecycle/industry properties where present.
-- Upserts on `hubspot_id`.
-- Run manually now, and on a weekly cron afterward.
+Edge function `sync-reporter-directory`:
+- Reads `placements_archive` (2025 and earlier) plus live Airtable placements via the existing proxy.
+- Groups by reporter+outlet, aggregating count, beats (from vertical/topic), clients covered, most recent 3 headlines, last coverage date.
+- Upserts on `reporter_key`. Idempotent, safe to re-run.
+- Run manually now; weekly cron after.
 
-## Step 3 — Broaden internal matching
+This alone gives the matcher a clean, deduped pool it currently has to recompute on every call.
 
-Current `findInternalCandidates` requires a literal substring hit on `vertical` or `topic_product`. Loosen it:
-- Tokenize the signal's industry + client keywords into individual words; drop stopwords.
-- Match on any token, not the full phrase.
-- Add `headline` to the searched columns.
-- If still empty, fall back to the client's own historical reporters (any placement for that client), which are always relevant even if the beat text doesn't line up.
+## Step 3 — Cross-reference against HubSpot
 
-## Step 4 — Merge HubSpot into the candidate pool
+Second pass in the same function (or a separate `enrich-reporters-hubspot` so it can run independently):
 
-In both `pulse-match-reporters` and `pulse-scan`:
-- Query `media_contacts` for outlet/beat/title overlap with the signal.
-- Merge into the pool alongside internal + web, deduping on the existing `sha1(name|outlet)` reporter ID.
-- When a HubSpot contact matches an internal reporter, keep the internal stats and attach the HubSpot email/title — best of both.
-- New `source` value: `"hubspot"`.
-- Guarantee a non-empty pool: if all three sources come back empty, return the client's top historical reporters rather than nothing.
+- For each directory row without `hubspot_contact_id`, search HubSpot contacts by name, scoped to media job titles.
+- Confirm a match only when **name matches AND** the outlet lines up with the contact's company or email domain. Name-only matches are skipped — false positives are worse than blanks here.
+- On match, write `email`, `job_title`, `linkedin_url`, `hubspot_contact_id`, `hubspot_matched_at`.
+- Report coverage back: how many of N directory reporters got a HubSpot hit. That number tells you whether HubSpot is worth keeping in the loop at all.
+
+Batched and rate-limit aware; HubSpot search is 4 req/sec.
+
+## Step 4 — Point the Pulse matcher at the directory
+
+In `pulse-scan` and `pulse-match-reporters`, replace `findInternalCandidates`' live `placements_archive` scan with a `reporter_directory` query:
+
+- Token-match the signal's industry + client keywords against `beats` (array overlap) rather than the current full-phrase `ilike`, which is why matches come back empty.
+- Boost reporters who have already covered this client.
+- Guaranteed fallback: if beat matching yields nothing, return the client's own top historical reporters. The matcher should never return an empty list.
+- Keep web discovery as a supplement for net-new names, unchanged.
+- Attach `email` to the candidate when enrichment found one.
 
 ## Step 5 — UI
 
-On the reporter rows in `PulsePage.tsx`:
-- Add a **HubSpot** source tag next to the existing Internal/Web tags.
-- Show the contact email when known, with a copy button.
-- Replace the "No reporters found" dead end with a short explanation plus a link to the client's enrichment keywords, since weak keywords are the usual cause.
+- Reporter rows in `PulsePage.tsx`: show contact email with a copy button when known; small "In HubSpot" indicator otherwise absent.
+- Replace the "No reporters found" dead end with a message pointing at the client's enrichment keywords, since weak keywords are the usual cause.
+- Optional follow-up: a Reporters page view backed by the directory, so the team can browse and search it directly.
 
 ## Technical details
 
-- HubSpot access goes through the existing gateway connection (`hubspot` connector) from edge functions only.
-- Reporter ID stays `sha1(lower(name)|lower(outlet)).slice(0,12)` so dedupe holds across sources.
-- Sync is idempotent; re-running only refreshes `last_synced_at` and changed fields.
-- No change to the AI ranking pass — it just receives a richer candidate list.
-- One migration: `media_contacts` table + indexes on `outlet` and `hubspot_id`.
+- HubSpot calls go through the existing gateway connection from edge functions only.
+- `reporter_key` matches the matcher's existing `sha1(name|outlet)` convention so IDs stay stable across sources.
+- Beats stored as a text array with a GIN index for overlap queries.
+- One migration: `reporter_directory` + indexes on `reporter_key`, `outlet`, and `beats`.
 
 ## Out of scope
 
 - Pitch → coverage / reply rate metrics (HubSpot has no logged PR outreach).
+- Importing HubSpot media contacts Uproar has no coverage history with.
 - Writing back to HubSpot from the app.
-- Contact enrichment from third-party media databases.
