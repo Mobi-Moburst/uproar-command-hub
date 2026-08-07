@@ -149,7 +149,7 @@ export default function VoiceProfilesPage() {
                       <SelectValue placeholder="Preview against a campaign" />
                     </SelectTrigger>
                     <SelectContent>
-                      {(campaigns.data ?? []).map((c) => (
+                      {campaigns.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.client_name} — {c.angle}
                         </SelectItem>
