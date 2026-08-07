@@ -20,6 +20,7 @@ import { useClientSows } from "@/hooks/useClientSows";
 import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Info, Upload, Download, Trash2, FileText, Star, Loader2 } from "lucide-react";
 import { ClientLogoUpload } from "@/components/ClientLogoUpload";
+import { ClientHubspotPanel } from "@/components/ClientHubspotPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -322,6 +323,10 @@ export default function ClientsPage() {
                       <p className="mt-1 text-sm font-medium text-foreground">{selectedClient.active_campaign}</p>
                     </div>
                   )}
+
+                  <ClientHubspotPanel clientName={selectedClient.name} />
+
+
 
                   <div className="mt-8">
                     <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
