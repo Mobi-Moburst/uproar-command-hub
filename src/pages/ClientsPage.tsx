@@ -21,6 +21,7 @@ import { formatNumber, formatCurrency, formatDateShort } from "@/lib/format";
 import { Info, Upload, Download, Trash2, FileText, Star, Loader2 } from "lucide-react";
 import { ClientLogoUpload } from "@/components/ClientLogoUpload";
 import { ClientHubspotPanel } from "@/components/ClientHubspotPanel";
+import { ClientCoveragePanel } from "@/components/ClientCoveragePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -325,6 +326,8 @@ export default function ClientsPage() {
                   )}
 
                   <ClientHubspotPanel clientName={selectedClient.name} />
+
+                  <ClientCoveragePanel clientName={selectedClient.name} placements={placements} />
 
 
 

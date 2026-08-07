@@ -53,6 +53,45 @@ export type Database = {
         }
         Relationships: []
       }
+      client_coverage_intel: {
+        Row: {
+          brief: Json
+          client_name: string
+          created_at: string
+          id: string
+          placement_count: number
+          synced_at: string
+          total_reach: number
+          updated_at: string
+          window_end: string | null
+          window_start: string | null
+        }
+        Insert: {
+          brief?: Json
+          client_name: string
+          created_at?: string
+          id?: string
+          placement_count?: number
+          synced_at?: string
+          total_reach?: number
+          updated_at?: string
+          window_end?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          brief?: Json
+          client_name?: string
+          created_at?: string
+          id?: string
+          placement_count?: number
+          synced_at?: string
+          total_reach?: number
+          updated_at?: string
+          window_end?: string | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       client_enrichment: {
         Row: {
           client_name: string
