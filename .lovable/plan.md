@@ -145,6 +145,6 @@ Each phase is usable on its own:
 
 **Parsing:** CSV/XLSX read client-side with SheetJS; only mapped rows are persisted, no file upload to storage.
 
-**HubSpot scopes needed on the connection key (phase 1 onward, since import writes):** `crm.objects.contacts.read`, `crm.objects.contacts.write`, `tickets`, and `crm.objects.emails.write` (phase 3). Explicitly **not** `sales-email-write`. If the current key is missing any, it gets regenerated in HubSpot with them before phase 1 ships.
+**HubSpot scopes needed on the connection key (phase 1 onward, since import writes):** `crm.objects.contacts.read`, `crm.objects.contacts.write`, `tickets`, plus whatever sequence enrollment requires (phase 3). Explicitly **not** `sales-email-write`; `crm.objects.emails.write` only if sequences turn out not to log their own sends. If the current key is missing any, it gets regenerated in HubSpot with them before phase 1 ships.
 
 **Verified live (Aug 2026):** pipeline `923698812` exists with the 8 stages above and currently holds 0 tickets; contact, ticket, and email objects are writable on the connection; the `pr_contact`, `pr_owner`, `media_relationship_status`, `journalist_tier`, `beats__topics_covered`, `last_pitched_date`, `last_coverage_date`, `contact_source`, `pitch_preferences__notes`, and `is_podcast_outreach_contact` fields already exist on the contact object.
