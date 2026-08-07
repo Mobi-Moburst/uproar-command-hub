@@ -17,6 +17,8 @@ const CONTACT_PROPS = [
   "lastname",
   "company",
   "jobtitle",
+  "city",
+  "lifecyclestage",
   "hubspot_owner_id",
   "pr_contact",
   "pr_owner",
@@ -29,6 +31,10 @@ const CONTACT_PROPS = [
   "pitch_preferences__notes",
   "is_podcast_outreach_contact",
 ];
+
+// Never demote a real sales relationship back to "Other".
+const PROTECTED_LIFECYCLE = new Set(["customer", "opportunity", "salesqualifiedlead"]);
+
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
