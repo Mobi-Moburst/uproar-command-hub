@@ -166,7 +166,7 @@ function unionBeats(existing: string, incoming: string) {
 }
 
 /** Additive property patch — never clobbers a populated HubSpot field with a blank cell. */
-function buildPatch(row: Row, existing: Record<string, unknown> | null) {
+function buildPatch(row: Row, existing: Record<string, unknown> | null, ownerId?: string | null) {
   const p = existing ?? {};
   const patch: Record<string, string> = {
     pr_contact: "true",
@@ -177,6 +177,9 @@ function buildPatch(row: Row, existing: Record<string, unknown> | null) {
   if (lastname && !p.lastname) patch.lastname = lastname;
   if (row.outlet && !p.company) patch.company = row.outlet;
   if (row.title && !p.jobtitle) patch.jobtitle = row.title;
+  if (row.location && !p.city) patch.city = row.location;
+  if (row.notes && !p.pitch_preferences__notes) patch.pitch_preferences__notes = row.notes;
+  if (!p.media_relationship_status) patch.media_relationship_status = "New";
   if (row.beat) {
     const merged = unionBeats(String(p.beats__topics_covered ?? ""), row.beat);
     if (merged && merged !== String(p.beats__topics_covered ?? "")) {
@@ -184,6 +187,15 @@ function buildPatch(row: Row, existing: Record<string, unknown> | null) {
     }
   }
   if (row.tier && !p.journalist_tier) patch.journalist_tier = row.tier;
+
+  // Contact Owner: fill only when empty — enroll is the authoritative owner-set.
+  if (ownerId && !p.hubspot_owner_id) patch.hubspot_owner_id = ownerId;
+
+  // Lifecycle: keep journalists out of the lead funnel, but never demote real sales stages.
+  const lifecycle = String(p.lifecyclestage ?? "").toLowerCase();
+  if (!PROTECTED_LIFECYCLE.has(lifecycle) && lifecycle !== "other") {
+    patch.lifecyclestage = "other";
+  }
   return patch;
 }
 
@@ -194,9 +206,11 @@ interface Row {
   beat: string;
   title: string;
   location: string;
+  notes?: string;
   tier?: string;
   source_row?: Record<string, unknown>;
 }
+
 
 interface Signals {
   hubspot_contact_id: string | null;
