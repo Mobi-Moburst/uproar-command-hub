@@ -63,15 +63,28 @@ Nothing blocks. Warnings make the risk visible, and any contact can be excluded 
 
 **Guardrail authority:** the primary source is an explicit, structured per-client do-not-pitch list maintained in the app. Guardrails mined from client emails (`client_comms_intel`) stay as a **soft** signal — labeled "inferred from emails" and never the sole basis for flagging a draft.
 
-## 5. Sending
+## 5. Sending — HubSpot sequences
 
-Sends go out through the **PR owner's connected HubSpot inbox**. The app logs the email as an engagement on the contact record; the actual delivery comes from that mailbox, which is what captures opens and replies onto the record.
+Pitches go out through a **HubSpot sequence enrolled from the PR owner's account**. HubSpot sends each step 1:1 from the enrolling user's connected inbox, and opens/replies thread back onto the contact automatically. Sequences are covered by the existing Service Hub Enterprise seats.
 
-Explicitly not using HubSpot sales email or sequences — those need a Sales seat and route journalists back through sales tooling, breaking the firewall.
+- The approved pitch is written to a contact property (`pitch_body`); one **shared** sequence template references it as `{{ contact.pitch_body }}`. Not one sequence per user — HubSpot already sends as whoever enrolled.
+- **Generate and enroll in the same step**, so the token is consumed immediately.
+- The sequence owns follow-up cadence and auto-unenrolls on reply, so the app builds no follow-up scheduler.
+- **Human approve-then-enroll is mandatory.** Nothing auto-sends; drafts stay editable until approval.
+- Bulk enrollment respects HubSpot's per-user daily sequence send cap.
+- **Write-back on enroll:** `last_pitched_date` is stamped to today, and a `media_relationship_status` of New advances to Warm. Without this write the "recently pitched" badge never fires for anyone.
 
-- **Human approve-then-send is mandatory.** Nothing auto-sends. Drafts stay editable up to the moment of approval.
-- **Bulk sends are throttled** into spaced batches to protect deliverability.
-- **Write-back on send:** `last_pitched_date` is stamped to today on the contact, and a `media_relationship_status` of New advances to Warm. Without this write, the "recently pitched" badge never fires for anyone.
+Explicitly not using sales email one-offs. Because sequences log their own sends, `crm.objects.emails.write` is likely unnecessary — this gets confirmed before phase 3 ships rather than requested up front.
+
+### Deferred until multi-user rollout
+
+The shared `pitch_body` token is safe for one user testing sequentially, but has a concurrency flaw at 20+ users. These get resolved before rollout, not before testing:
+
+1. **Per-contact enrollment lock** — only one active PR enrollment per reporter at a time, promoting the "recently pitched / in conversation" badge to a hard block. Makes the shared property safe and is correct PR hygiene anyway.
+2. **Verify token-resolution timing** — confirm whether HubSpot renders `{{ contact.pitch_body }}` at enrollment (snapshot) or at each send (live re-read). If live re-read, the body must be made immutable per send instead.
+3. Per-user sending is already handled by who enrolls — no per-user sequences get built.
+
+Phases 1-2 need none of this; drafting can stay copy-to-clipboard until the above is settled.
 
 ## 6. Tickets
 
@@ -88,7 +101,7 @@ In Conversation → Committed → Published (Won) / Closed Lost
 
 - The board **reads** stage from HubSpot and caches it for display, refreshing on load and after every write.
 - Dragging a card **writes to HubSpot, then refetches**. There is no local stage store that can drift.
-- Sending advances the ticket to **Pitched** in HubSpot.
+- Enrolling a contact into the sequence advances the ticket to **Pitched** in HubSpot.
 - **Write-back on Won:** when a ticket enters **Published (Won)**, the user is prompted for the published clip URL; `last_coverage_date` is stamped to today and the link stored on the contact. This feeds the "already covered us" badge and builds owned coverage history over time.
 - No bidirectional sync loop.
 
@@ -107,7 +120,7 @@ Each phase is usable on its own:
 
 1. **Campaigns + Muck Rack import + HubSpot upsert + conflict review** — the import already touches HubSpot, so contacts and badges are real from day one
 2. **AI pitch drafting** (custom + bulk), copy-to-clipboard
-3. **Approve → ticket creation → send via connected inbox → stage read**
+3. **Approve → ticket creation → sequence enrollment → stage read**
 4. **Kanban board and cross-client pipeline view**
 
 ## Technical notes
@@ -124,7 +137,7 @@ Each phase is usable on its own:
 - `find-or-create-contact` (import) — in: parsed row. out: `hubspot_contact_id`, `matched`, plus the signal fields for the conflict badges. Implements the de-dup logic above: portal-wide email match, conflict re-fetch on race, and the name+outlet secondary match surfaced for review on email-less rows.
 - `conflict-check` (import) — in: contact ids. out: warnings[].
 - `create-ticket` (approval) — in: campaign, contact id. out: `hubspot_ticket_id`, stage resolved through the pipeline map.
-- `send-email` (approval) — in: draft, contact id, from-inbox. out: engagement id; advances the ticket to Pitched and stamps `last_pitched_date` (plus New → Warm) on the contact.
+- `enroll-sequence` (approval) — in: approved draft, contact id, enrolling PR owner. Writes the body to the `pitch_body` contact property, enrolls the contact in the shared sequence in the same step, advances the ticket to Pitched, and stamps `last_pitched_date` (plus New → Warm) on the contact.
 - `set-stage` (drag or programmatic) — in: ticket id, target stage label. Writes via the pipeline map, then refetches. On entering Published (Won), also writes `last_coverage_date` and the clip URL to the contact.
 - `read-stages` (board load / after write) — in: ticket ids. out: current stages.
 
@@ -132,6 +145,6 @@ Each phase is usable on its own:
 
 **Parsing:** CSV/XLSX read client-side with SheetJS; only mapped rows are persisted, no file upload to storage.
 
-**HubSpot scopes needed on the connection key (phase 1 onward, since import writes):** `crm.objects.contacts.read`, `crm.objects.contacts.write`, `tickets`, and `crm.objects.emails.write` (phase 3). Explicitly **not** `sales-email-write`. If the current key is missing any, it gets regenerated in HubSpot with them before phase 1 ships.
+**HubSpot scopes needed on the connection key (phase 1 onward, since import writes):** `crm.objects.contacts.read`, `crm.objects.contacts.write`, `tickets`, plus whatever sequence enrollment requires (phase 3). Explicitly **not** `sales-email-write`; `crm.objects.emails.write` only if sequences turn out not to log their own sends. If the current key is missing any, it gets regenerated in HubSpot with them before phase 1 ships.
 
 **Verified live (Aug 2026):** pipeline `923698812` exists with the 8 stages above and currently holds 0 tickets; contact, ticket, and email objects are writable on the connection; the `pr_contact`, `pr_owner`, `media_relationship_status`, `journalist_tier`, `beats__topics_covered`, `last_pitched_date`, `last_coverage_date`, `contact_source`, `pitch_preferences__notes`, and `is_podcast_outreach_contact` fields already exist on the contact object.
