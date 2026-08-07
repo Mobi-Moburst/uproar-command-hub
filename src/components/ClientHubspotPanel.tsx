@@ -5,6 +5,7 @@ import { formatCurrency, formatDateShort } from "@/lib/format";
 import { useClientHubspot } from "@/hooks/useClientHubspot";
 import { useMyRoles } from "@/hooks/useMyRoles";
 import { ClientHubspotLinkSheet } from "./ClientHubspotLinkSheet";
+import { ClientCommsPanel } from "./ClientCommsPanel";
 
 export function ClientHubspotPanel({ clientName }: { clientName: string }) {
   const { link, snapshot, portalId, isLoading, linkCompany, sync } = useClientHubspot(clientName);
