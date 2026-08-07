@@ -63,15 +63,28 @@ Nothing blocks. Warnings make the risk visible, and any contact can be excluded 
 
 **Guardrail authority:** the primary source is an explicit, structured per-client do-not-pitch list maintained in the app. Guardrails mined from client emails (`client_comms_intel`) stay as a **soft** signal — labeled "inferred from emails" and never the sole basis for flagging a draft.
 
-## 5. Sending
+## 5. Sending — HubSpot sequences
 
-Sends go out through the **PR owner's connected HubSpot inbox**. The app logs the email as an engagement on the contact record; the actual delivery comes from that mailbox, which is what captures opens and replies onto the record.
+Pitches go out through a **HubSpot sequence enrolled from the PR owner's account**. HubSpot sends each step 1:1 from the enrolling user's connected inbox, and opens/replies thread back onto the contact automatically. Sequences are covered by the existing Service Hub Enterprise seats.
 
-Explicitly not using HubSpot sales email or sequences — those need a Sales seat and route journalists back through sales tooling, breaking the firewall.
+- The approved pitch is written to a contact property (`pitch_body`); one **shared** sequence template references it as `{{ contact.pitch_body }}`. Not one sequence per user — HubSpot already sends as whoever enrolled.
+- **Generate and enroll in the same step**, so the token is consumed immediately.
+- The sequence owns follow-up cadence and auto-unenrolls on reply, so the app builds no follow-up scheduler.
+- **Human approve-then-enroll is mandatory.** Nothing auto-sends; drafts stay editable until approval.
+- Bulk enrollment respects HubSpot's per-user daily sequence send cap.
+- **Write-back on enroll:** `last_pitched_date` is stamped to today, and a `media_relationship_status` of New advances to Warm. Without this write the "recently pitched" badge never fires for anyone.
 
-- **Human approve-then-send is mandatory.** Nothing auto-sends. Drafts stay editable up to the moment of approval.
-- **Bulk sends are throttled** into spaced batches to protect deliverability.
-- **Write-back on send:** `last_pitched_date` is stamped to today on the contact, and a `media_relationship_status` of New advances to Warm. Without this write, the "recently pitched" badge never fires for anyone.
+Explicitly not using sales email one-offs. Because sequences log their own sends, `crm.objects.emails.write` is likely unnecessary — this gets confirmed before phase 3 ships rather than requested up front.
+
+### Deferred until multi-user rollout
+
+The shared `pitch_body` token is safe for one user testing sequentially, but has a concurrency flaw at 20+ users. These get resolved before rollout, not before testing:
+
+1. **Per-contact enrollment lock** — only one active PR enrollment per reporter at a time, promoting the "recently pitched / in conversation" badge to a hard block. Makes the shared property safe and is correct PR hygiene anyway.
+2. **Verify token-resolution timing** — confirm whether HubSpot renders `{{ contact.pitch_body }}` at enrollment (snapshot) or at each send (live re-read). If live re-read, the body must be made immutable per send instead.
+3. Per-user sending is already handled by who enrolls — no per-user sequences get built.
+
+Phases 1-2 need none of this; drafting can stay copy-to-clipboard until the above is settled.
 
 ## 6. Tickets
 
