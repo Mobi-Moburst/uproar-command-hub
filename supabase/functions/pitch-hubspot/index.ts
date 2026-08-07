@@ -381,9 +381,6 @@ serve(async (req) => {
           else if (signals.hubspot_contact_id) created++;
           if (signals.hubspot_contact_id) signals.warnings.push(...ownerWarning);
         } catch (e) {
-          if (signals.matched) matched++;
-          else if (signals.hubspot_contact_id) created++;
-        } catch (e) {
           failed++;
           console.error(`import row failed (${row.email || row.name}): ${e}`);
           signals = {
