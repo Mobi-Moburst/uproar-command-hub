@@ -286,7 +286,7 @@ async function findOrCreateContact(row: Row, owners: Map<string, { name: string;
     }
     const created = await hs("/crm/v3/objects/contacts", {
       method: "POST",
-      body: JSON.stringify({ properties: buildPatch(row, null) }),
+      body: JSON.stringify({ properties: buildPatch(row, null, ownerId) }),
     });
     return { hubspot_contact_id: String(created.id), matched: false, warnings: [] };
   }
