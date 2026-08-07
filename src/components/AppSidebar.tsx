@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Users, Newspaper, Trophy, Package, FileText, Star, UserSearch, Brain, UsersRound, ClipboardList, Zap } from "lucide-react";
+import { BarChart3, Users, Newspaper, Trophy, Package, FileText, Star, UserSearch, Brain, UsersRound, ClipboardList, Zap, Send } from "lucide-react";
 
 const navItems = [
   { title: "Overview", path: "/", icon: BarChart3 },
@@ -19,6 +19,7 @@ const navItems = [
   { title: "Reporter Analytics", path: "/reporters", icon: UserSearch },
   { title: "Intelligence", path: "/intelligence", icon: Brain },
   { title: "Pulse Center", path: "/pulse", icon: Zap },
+  { title: "Pitch Pipeline", path: "/pitch-pipeline", icon: Send },
   { title: "Teams", path: "/teams", icon: UsersRound },
   { title: "Reports", path: "/reports", icon: ClipboardList },
 ];
