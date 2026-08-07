@@ -412,11 +412,18 @@ serve(async (req) => {
           };
         }
 
+        if (signals.hubspot_contact_id && seenHubspot.has(signals.hubspot_contact_id)) {
+          skipped++;
+          continue;
+        }
+        if (rowEmail) seenEmails.add(rowEmail);
+        if (signals.hubspot_contact_id) seenHubspot.add(signals.hubspot_contact_id);
+
         inserts.push({
           campaign_id: campaignId,
           name: row.name ?? "",
           outlet: row.outlet ?? "",
-          email: row.email ? String(row.email).trim().toLowerCase() : null,
+          email: rowEmail || null,
           beat: row.beat ?? "",
           title: row.title ?? "",
           location: row.location ?? "",
@@ -431,10 +438,12 @@ serve(async (req) => {
         });
       }
 
-      const { error } = await supabase.from("pitch_contacts").insert(inserts);
-      if (error) throw new Error(error.message);
+      if (inserts.length) {
+        const { error } = await supabase.from("pitch_contacts").insert(inserts);
+        if (error) throw new Error(error.message);
+      }
 
-      return json({ ok: true, imported: inserts.length, created, matched, failed });
+      return json({ ok: true, imported: inserts.length, created, matched, failed, skipped });
     }
 
     if (action === "portal") {
