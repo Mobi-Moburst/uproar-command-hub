@@ -255,7 +255,7 @@ Rules:
 - Body: max 150 words, 2 short paragraphs max, plain text (no markdown, no signature block).
 - One sentence connecting the angle to this reporter's beat/outlet.
 - End with one specific, easy-to-say-yes-to offer (interview, exclusive data, exec quote, embargoed release).
-- Rationale: one sentence on why this reporter and how guardrails were respected.`;
+- Do not include any rationale, commentary, or notes — return the email only.`;
 
         const raw = await callModel(system, user);
         const parsed = JSON.parse(raw) as { subject?: string; body?: string };
