@@ -17,6 +17,8 @@ const CONTACT_PROPS = [
   "lastname",
   "company",
   "jobtitle",
+  "city",
+  "lifecyclestage",
   "hubspot_owner_id",
   "pr_contact",
   "pr_owner",
@@ -29,6 +31,10 @@ const CONTACT_PROPS = [
   "pitch_preferences__notes",
   "is_podcast_outreach_contact",
 ];
+
+// Never demote a real sales relationship back to "Other".
+const PROTECTED_LIFECYCLE = new Set(["customer", "opportunity", "salesqualifiedlead"]);
+
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -77,9 +83,11 @@ async function getPortalId(): Promise<string | null> {
 }
 
 let ownerCache: Map<string, { name: string; email: string }> | null = null;
+let ownerByEmail: Map<string, string> | null = null;
 async function getOwners() {
   if (ownerCache) return ownerCache;
   const map = new Map<string, { name: string; email: string }>();
+  const byEmail = new Map<string, string>();
   try {
     const data = await hs("/crm/v3/owners?limit=500");
     for (const o of data?.results ?? []) {
@@ -87,11 +95,21 @@ async function getOwners() {
         name: [o.firstName, o.lastName].filter(Boolean).join(" ") || o.email || "",
         email: o.email ?? "",
       });
+      if (o.email) byEmail.set(String(o.email).trim().toLowerCase(), String(o.id));
     }
   } catch (_e) { /* owners are optional */ }
   ownerCache = map;
+  ownerByEmail = byEmail;
   return map;
 }
+
+/** Resolve the importing user's login email to a CRM owner id, if they are seated. */
+async function ownerIdForEmail(email: string | undefined): Promise<string | null> {
+  await getOwners();
+  if (!email) return null;
+  return ownerByEmail?.get(email.trim().toLowerCase()) ?? null;
+}
+
 
 // { label -> stageId } resolved live from the Pipelines API. Never hardcoded.
 let pipelineCache: Record<string, string> | null = null;
@@ -148,7 +166,7 @@ function unionBeats(existing: string, incoming: string) {
 }
 
 /** Additive property patch — never clobbers a populated HubSpot field with a blank cell. */
-function buildPatch(row: Row, existing: Record<string, unknown> | null) {
+function buildPatch(row: Row, existing: Record<string, unknown> | null, ownerId?: string | null) {
   const p = existing ?? {};
   const patch: Record<string, string> = {
     pr_contact: "true",
@@ -159,6 +177,9 @@ function buildPatch(row: Row, existing: Record<string, unknown> | null) {
   if (lastname && !p.lastname) patch.lastname = lastname;
   if (row.outlet && !p.company) patch.company = row.outlet;
   if (row.title && !p.jobtitle) patch.jobtitle = row.title;
+  if (row.location && !p.city) patch.city = row.location;
+  if (row.notes && !p.pitch_preferences__notes) patch.pitch_preferences__notes = row.notes;
+  if (!p.media_relationship_status) patch.media_relationship_status = "New";
   if (row.beat) {
     const merged = unionBeats(String(p.beats__topics_covered ?? ""), row.beat);
     if (merged && merged !== String(p.beats__topics_covered ?? "")) {
@@ -166,6 +187,15 @@ function buildPatch(row: Row, existing: Record<string, unknown> | null) {
     }
   }
   if (row.tier && !p.journalist_tier) patch.journalist_tier = row.tier;
+
+  // Contact Owner: fill only when empty — enroll is the authoritative owner-set.
+  if (ownerId && !p.hubspot_owner_id) patch.hubspot_owner_id = ownerId;
+
+  // Lifecycle: keep journalists out of the lead funnel, but never demote real sales stages.
+  const lifecycle = String(p.lifecyclestage ?? "").toLowerCase();
+  if (!PROTECTED_LIFECYCLE.has(lifecycle) && lifecycle !== "other") {
+    patch.lifecyclestage = "other";
+  }
   return patch;
 }
 
@@ -176,9 +206,11 @@ interface Row {
   beat: string;
   title: string;
   location: string;
+  notes?: string;
   tier?: string;
   source_row?: Record<string, unknown>;
 }
+
 
 interface Signals {
   hubspot_contact_id: string | null;
@@ -227,7 +259,7 @@ function contactWarnings(props: Record<string, unknown>, owners: Map<string, { n
   return warnings;
 }
 
-async function findOrCreateContact(row: Row, owners: Map<string, { name: string; email: string }>, portalId: string | null): Promise<Signals> {
+async function findOrCreateContact(row: Row, owners: Map<string, { name: string; email: string }>, portalId: string | null, ownerId: string | null): Promise<Signals> {
   const email = String(row.email ?? "").trim().toLowerCase();
   const { firstname, lastname } = splitName(row.name);
 
@@ -254,7 +286,7 @@ async function findOrCreateContact(row: Row, owners: Map<string, { name: string;
     }
     const created = await hs("/crm/v3/objects/contacts", {
       method: "POST",
-      body: JSON.stringify({ properties: buildPatch(row, null) }),
+      body: JSON.stringify({ properties: buildPatch(row, null, ownerId) }),
     });
     return { hubspot_contact_id: String(created.id), matched: false, warnings: [] };
   }
@@ -264,7 +296,7 @@ async function findOrCreateContact(row: Row, owners: Map<string, { name: string;
   if (!existing) {
     const res = await hsRaw("/crm/v3/objects/contacts", {
       method: "POST",
-      body: JSON.stringify({ properties: { email, ...buildPatch(row, null) } }),
+      body: JSON.stringify({ properties: { email, ...buildPatch(row, null, ownerId) } }),
     });
     if (res.status === 409) {
       // Race: another import created it first. Re-fetch by email and reuse.
@@ -282,7 +314,7 @@ async function findOrCreateContact(row: Row, owners: Map<string, { name: string;
   if (!existing) throw new Error(`Could not resolve contact for ${email}`);
 
   const props = existing.properties ?? {};
-  const patch = buildPatch(row, props);
+  const patch = buildPatch(row, props, ownerId);
   await hs(`/crm/v3/objects/contacts/${existing.id}`, {
     method: "PATCH",
     body: JSON.stringify({ properties: patch }),
@@ -327,6 +359,14 @@ serve(async (req) => {
 
       const owners = await getOwners();
       const portalId = await getPortalId();
+      const importerOwnerId = await ownerIdForEmail(user.email ?? undefined);
+      const ownerWarning = importerOwnerId
+        ? []
+        : [{
+          kind: "owner_unmatched",
+          label: "Owner not set",
+          detail: `No CRM user matches ${user.email ?? "your login"}, so Contact Owner was left as-is.`,
+        }];
 
       let created = 0;
       let matched = 0;
@@ -336,9 +376,10 @@ serve(async (req) => {
       for (const row of rows) {
         let signals: Signals;
         try {
-          signals = await findOrCreateContact(row, owners, portalId);
+          signals = await findOrCreateContact(row, owners, portalId, importerOwnerId);
           if (signals.matched) matched++;
           else if (signals.hubspot_contact_id) created++;
+          if (signals.hubspot_contact_id) signals.warnings.push(...ownerWarning);
         } catch (e) {
           failed++;
           console.error(`import row failed (${row.email || row.name}): ${e}`);

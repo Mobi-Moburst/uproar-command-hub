@@ -17,6 +17,7 @@ const WARNING_STYLES: Record<string, string> = {
   recently_pitched: "border-[hsl(var(--warning))]/40 bg-[hsl(var(--warning))]/10 text-[hsl(var(--warning))]",
   podcast_team: "border-[hsl(var(--warning))]/40 bg-[hsl(var(--warning))]/10 text-[hsl(var(--warning))]",
   owned_by_sales: "border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] text-muted-foreground",
+  owner_unmatched: "border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] text-muted-foreground",
   possible_duplicate: "border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] text-muted-foreground",
   hubspot_error: "border-[hsl(var(--coral))]/40 bg-[hsl(var(--coral))]/10 text-[hsl(var(--coral))]",
 };

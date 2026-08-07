@@ -12,6 +12,7 @@ const FIELD_ALIASES: Record<keyof Omit<ImportRow, "source_row">, string[]> = {
   beat: ["beat", "beats", "topics", "topics covered", "categories"],
   title: ["title", "job title", "position", "role"],
   location: ["location", "city", "country", "region", "market"],
+  notes: ["notes", "pitch preferences", "preferences", "comments", "bio"],
 };
 
 function normalizeKey(key: string) {
@@ -46,6 +47,7 @@ function toImportRows(raw: Record<string, unknown>[]): ImportRow[] {
       beat: pick(row, FIELD_ALIASES.beat),
       title: pick(row, FIELD_ALIASES.title),
       location: pick(row, FIELD_ALIASES.location),
+      notes: pick(row, FIELD_ALIASES.notes),
       source_row: row,
     }))
     .filter((r) => r.name || r.email);

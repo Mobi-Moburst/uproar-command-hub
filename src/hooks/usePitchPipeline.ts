@@ -41,6 +41,7 @@ export interface ImportRow {
   beat: string;
   title: string;
   location: string;
+  notes: string;
   source_row: Record<string, unknown>;
 }
 
