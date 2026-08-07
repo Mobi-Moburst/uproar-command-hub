@@ -218,6 +218,36 @@ export type Database = {
         }
         Relationships: []
       }
+      client_pitch_guardrails: {
+        Row: {
+          client_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          rule: string
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          rule: string
+          scope?: string
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          rule?: string
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_reports: {
         Row: {
           client_name: string
@@ -316,6 +346,151 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: []
+      }
+      pitch_campaigns: {
+        Row: {
+          angle: string
+          client_name: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          press_release_body: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          angle: string
+          client_name: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          press_release_body?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          angle?: string
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          press_release_body?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pitch_contacts: {
+        Row: {
+          beat: string
+          campaign_id: string
+          created_at: string
+          email: string | null
+          excluded: boolean
+          hubspot_contact_id: string | null
+          hubspot_ticket_id: string | null
+          id: string
+          location: string
+          name: string
+          outlet: string
+          source_row: Json
+          stage_cache: string | null
+          title: string
+          updated_at: string
+          warnings: Json
+        }
+        Insert: {
+          beat?: string
+          campaign_id: string
+          created_at?: string
+          email?: string | null
+          excluded?: boolean
+          hubspot_contact_id?: string | null
+          hubspot_ticket_id?: string | null
+          id?: string
+          location?: string
+          name?: string
+          outlet?: string
+          source_row?: Json
+          stage_cache?: string | null
+          title?: string
+          updated_at?: string
+          warnings?: Json
+        }
+        Update: {
+          beat?: string
+          campaign_id?: string
+          created_at?: string
+          email?: string | null
+          excluded?: boolean
+          hubspot_contact_id?: string | null
+          hubspot_ticket_id?: string | null
+          id?: string
+          location?: string
+          name?: string
+          outlet?: string
+          source_row?: Json
+          stage_cache?: string | null
+          title?: string
+          updated_at?: string
+          warnings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pitch_contacts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "pitch_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pitch_drafts: {
+        Row: {
+          body: string
+          contact_id: string
+          created_at: string
+          id: string
+          mode: string
+          sent_at: string | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          contact_id: string
+          created_at?: string
+          id?: string
+          mode?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          contact_id?: string
+          created_at?: string
+          id?: string
+          mode?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pitch_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "pitch_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       placements_archive: {
         Row: {
