@@ -22,9 +22,8 @@ const DRAFT_SCHEMA = {
   properties: {
     subject: { type: "string" },
     body: { type: "string" },
-    rationale: { type: "string" },
   },
-  required: ["subject", "body", "rationale"],
+  required: ["subject", "body"],
 };
 
 /** Streams /v1/responses and returns the accumulated output text. */
