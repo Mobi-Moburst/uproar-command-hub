@@ -151,7 +151,7 @@ Each phase is usable on its own:
 - `find-or-create-contact` (import) — in: parsed row. out: `hubspot_contact_id`, `matched`, plus the signal fields for the conflict badges. Implements the de-dup logic above: portal-wide email match, conflict re-fetch on race, and the name+outlet secondary match surfaced for review on email-less rows.
 - `conflict-check` (import) — in: contact ids. out: warnings[].
 - `create-ticket` (approval) — in: campaign, contact id. out: `hubspot_ticket_id`, stage resolved through the pipeline map.
-- `enroll-sequence` (approval) — in: approved draft, contact id, enrolling PR owner. Writes the body to the `pitch_body` contact property, enrolls the contact in the shared sequence in the same step, advances the ticket to Pitched, and stamps `last_pitched_date` (plus New → Warm) on the contact.
+- `approve-and-arm` (approval) — in: approved draft, contact id, enrolling PR user. Writes `pitch_body`, sets Contact Owner to that PR user, flips the enrollment trigger (property or list), advances the ticket to Pitched, and stamps `last_pitched_date` (plus New → Warm). The HubSpot workflow performs the actual enrollment and sends as Contact Owner — the app calls no sequence API.
 - `set-stage` (drag or programmatic) — in: ticket id, target stage label. Writes via the pipeline map, then refetches. On entering Published (Won), also writes `last_coverage_date` and the clip URL to the contact.
 - `read-stages` (board load / after write) — in: ticket ids. out: current stages.
 
