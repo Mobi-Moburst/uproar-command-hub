@@ -83,9 +83,11 @@ async function getPortalId(): Promise<string | null> {
 }
 
 let ownerCache: Map<string, { name: string; email: string }> | null = null;
+let ownerByEmail: Map<string, string> | null = null;
 async function getOwners() {
   if (ownerCache) return ownerCache;
   const map = new Map<string, { name: string; email: string }>();
+  const byEmail = new Map<string, string>();
   try {
     const data = await hs("/crm/v3/owners?limit=500");
     for (const o of data?.results ?? []) {
@@ -93,11 +95,21 @@ async function getOwners() {
         name: [o.firstName, o.lastName].filter(Boolean).join(" ") || o.email || "",
         email: o.email ?? "",
       });
+      if (o.email) byEmail.set(String(o.email).trim().toLowerCase(), String(o.id));
     }
   } catch (_e) { /* owners are optional */ }
   ownerCache = map;
+  ownerByEmail = byEmail;
   return map;
 }
+
+/** Resolve the importing user's login email to a CRM owner id, if they are seated. */
+async function ownerIdForEmail(email: string | undefined): Promise<string | null> {
+  await getOwners();
+  if (!email) return null;
+  return ownerByEmail?.get(email.trim().toLowerCase()) ?? null;
+}
+
 
 // { label -> stageId } resolved live from the Pipelines API. Never hardcoded.
 let pipelineCache: Record<string, string> | null = null;
