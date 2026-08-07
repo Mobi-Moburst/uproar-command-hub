@@ -63,18 +63,28 @@ Nothing blocks. Warnings make the risk visible, and any contact can be excluded 
 
 **Guardrail authority:** the primary source is an explicit, structured per-client do-not-pitch list maintained in the app. Guardrails mined from client emails (`client_comms_intel`) stay as a **soft** signal — labeled "inferred from emails" and never the sole basis for flagging a draft.
 
-## 5. Sending — HubSpot sequences
+## 5. Sending — sequence enrolled by a HubSpot workflow
 
-Pitches go out through a **HubSpot sequence enrolled from the PR owner's account**. HubSpot sends each step 1:1 from the enrolling user's connected inbox, and opens/replies thread back onto the contact automatically. Sequences are covered by the existing Service Hub Enterprise seats.
+Pitches go out through a **HubSpot sequence**, and enrollment is performed by a **HubSpot workflow** — the same enroll-in-sequence action the sales team already uses — not by the app. The action is set to **send as Contact Owner**, so each pitch goes 1:1 from the owning PR person's connected inbox, with opens and replies threading back onto the contact automatically. The sending PR user needs a Service Hub Enterprise seat with a connected inbox.
 
-- The approved pitch is written to a contact property (`pitch_body`); one **shared** sequence template references it as `{{ contact.pitch_body }}`. Not one sequence per user — HubSpot already sends as whoever enrolled.
-- **Generate and enroll in the same step**, so the token is consumed immediately.
+Because "send as Contact Owner" drives the sender, the **Contact Owner on a `pr_contact` record must be the PR person doing the outreach**. That is safe here: the firewall keeps sales off journalist records, so nothing competes for the owner field.
+
+- At enroll time the app sets **Contact Owner = the enrolling PR user**, then flips the enrollment trigger. With the per-contact lock below there is only ever one active pitcher, so the owner never thrashes.
+- The custom `pr_owner` field becomes redundant for journalists — dropped in favour of native Contact Owner, or kept only as a synced alias.
+
+App-side flow (no sequence API call):
+
+- Write the approved pitch to `pitch_body`, set Contact Owner = enrolling PR user, and set the enrollment trigger (property flip or list add) — all in the same step.
+- The HubSpot workflow enrolls the contact into the one shared PR sequence, sending as Contact Owner. The body rides the `{{ contact.pitch_body }}` token.
 - The sequence owns follow-up cadence and auto-unenrolls on reply, so the app builds no follow-up scheduler.
+
+Rules:
+
 - **Human approve-then-enroll is mandatory.** Nothing auto-sends; drafts stay editable until approval.
 - Bulk enrollment respects HubSpot's per-user daily sequence send cap.
 - **Write-back on enroll:** `last_pitched_date` is stamped to today, and a `media_relationship_status` of New advances to Warm. Without this write the "recently pitched" badge never fires for anyone.
 
-Explicitly not using sales email one-offs. Because sequences log their own sends, `crm.objects.emails.write` is likely unnecessary — this gets confirmed before phase 3 ships rather than requested up front.
+Explicitly not using sales email one-offs. Because sequences log their own sends, `crm.objects.emails.write` is likely unnecessary — confirmed before phase 3 ships rather than requested up front.
 
 ### Deferred until multi-user rollout
 
@@ -82,7 +92,7 @@ The shared `pitch_body` token is safe for one user testing sequentially, but has
 
 1. **Per-contact enrollment lock** — only one active PR enrollment per reporter at a time, promoting the "recently pitched / in conversation" badge to a hard block. Makes the shared property safe and is correct PR hygiene anyway.
 2. **Verify token-resolution timing** — confirm whether HubSpot renders `{{ contact.pitch_body }}` at enrollment (snapshot) or at each send (live re-read). If live re-read, the body must be made immutable per send instead.
-3. Per-user sending is already handled by who enrolls — no per-user sequences get built.
+3. **Contact Owner assignment** — settle how native Contact Owner is set on journalist records (recommended: at enroll, to the current pitcher) and reconcile with `pr_owner`.
 
 Phases 1-2 need none of this; drafting can stay copy-to-clipboard until the above is settled.
 
@@ -105,14 +115,18 @@ In Conversation → Committed → Published (Won) / Closed Lost
 - **Write-back on Won:** when a ticket enters **Published (Won)**, the user is prompted for the published clip URL; `last_coverage_date` is stamped to today and the link stored on the contact. This feeds the "already covered us" badge and builds owned coverage history over time.
 - No bidirectional sync loop.
 
-## 8. Outside the app: HubSpot workflow (RevOps)
+## 8. Outside the app: two HubSpot workflows (RevOps)
 
-A HubSpot workflow — owned by RevOps, not the app — enforces the firewall at the send level:
+**Workflow A — the firewall:**
 
 - **Trigger:** `pr_contact = true` OR `is_podcast_outreach_contact = true`
 - **Actions:** set the contact to non-marketing; add to the suppression list "Outreach Contacts — Exclude from Sales/Marketing"
 
 Sales sequences and marketing sends exclude that list. The app does not set non-marketing status itself.
+
+**Workflow B — PR sequence enrollment:** mirrors the existing sales enroll-in-sequence action. Triggers on the app's enrollment signal (§5), enrolls the contact into the shared PR sequence, **send as Contact Owner**.
+
+The two stay distinct — one firewalls sales and marketing, the other runs PR outreach.
 
 ## Build order
 
@@ -137,7 +151,7 @@ Each phase is usable on its own:
 - `find-or-create-contact` (import) — in: parsed row. out: `hubspot_contact_id`, `matched`, plus the signal fields for the conflict badges. Implements the de-dup logic above: portal-wide email match, conflict re-fetch on race, and the name+outlet secondary match surfaced for review on email-less rows.
 - `conflict-check` (import) — in: contact ids. out: warnings[].
 - `create-ticket` (approval) — in: campaign, contact id. out: `hubspot_ticket_id`, stage resolved through the pipeline map.
-- `enroll-sequence` (approval) — in: approved draft, contact id, enrolling PR owner. Writes the body to the `pitch_body` contact property, enrolls the contact in the shared sequence in the same step, advances the ticket to Pitched, and stamps `last_pitched_date` (plus New → Warm) on the contact.
+- `approve-and-arm` (approval) — in: approved draft, contact id, enrolling PR user. Writes `pitch_body`, sets Contact Owner to that PR user, flips the enrollment trigger (property or list), advances the ticket to Pitched, and stamps `last_pitched_date` (plus New → Warm). The HubSpot workflow performs the actual enrollment and sends as Contact Owner — the app calls no sequence API.
 - `set-stage` (drag or programmatic) — in: ticket id, target stage label. Writes via the pipeline map, then refetches. On entering Published (Won), also writes `last_coverage_date` and the clip URL to the contact.
 - `read-stages` (board load / after write) — in: ticket ids. out: current stages.
 
@@ -145,6 +159,6 @@ Each phase is usable on its own:
 
 **Parsing:** CSV/XLSX read client-side with SheetJS; only mapped rows are persisted, no file upload to storage.
 
-**HubSpot scopes needed on the connection key (phase 1 onward, since import writes):** `crm.objects.contacts.read`, `crm.objects.contacts.write`, `tickets`, plus whatever sequence enrollment requires (phase 3). Explicitly **not** `sales-email-write`; `crm.objects.emails.write` only if sequences turn out not to log their own sends. If the current key is missing any, it gets regenerated in HubSpot with them before phase 1 ships.
+**HubSpot scopes needed on the connection key (phase 1 onward, since import writes):** `crm.objects.contacts.read`, `crm.objects.contacts.write`, `tickets`. No sequence scope is needed — enrollment happens inside a HubSpot workflow, not via the API. Explicitly **not** `sales-email-write`; `crm.objects.emails.write` only if sequences turn out not to log their own sends. If the current key is missing any, it gets regenerated in HubSpot with them before phase 1 ships.
 
 **Verified live (Aug 2026):** pipeline `923698812` exists with the 8 stages above and currently holds 0 tickets; contact, ticket, and email objects are writable on the connection; the `pr_contact`, `pr_owner`, `media_relationship_status`, `journalist_tier`, `beats__topics_covered`, `last_pitched_date`, `last_coverage_date`, `contact_source`, `pitch_preferences__notes`, and `is_podcast_outreach_contact` fields already exist on the contact object.
