@@ -63,18 +63,28 @@ Nothing blocks. Warnings make the risk visible, and any contact can be excluded 
 
 **Guardrail authority:** the primary source is an explicit, structured per-client do-not-pitch list maintained in the app. Guardrails mined from client emails (`client_comms_intel`) stay as a **soft** signal — labeled "inferred from emails" and never the sole basis for flagging a draft.
 
-## 5. Sending — HubSpot sequences
+## 5. Sending — sequence enrolled by a HubSpot workflow
 
-Pitches go out through a **HubSpot sequence enrolled from the PR owner's account**. HubSpot sends each step 1:1 from the enrolling user's connected inbox, and opens/replies thread back onto the contact automatically. Sequences are covered by the existing Service Hub Enterprise seats.
+Pitches go out through a **HubSpot sequence**, and enrollment is performed by a **HubSpot workflow** — the same enroll-in-sequence action the sales team already uses — not by the app. The action is set to **send as Contact Owner**, so each pitch goes 1:1 from the owning PR person's connected inbox, with opens and replies threading back onto the contact automatically. The sending PR user needs a Service Hub Enterprise seat with a connected inbox.
 
-- The approved pitch is written to a contact property (`pitch_body`); one **shared** sequence template references it as `{{ contact.pitch_body }}`. Not one sequence per user — HubSpot already sends as whoever enrolled.
-- **Generate and enroll in the same step**, so the token is consumed immediately.
+Because "send as Contact Owner" drives the sender, the **Contact Owner on a `pr_contact` record must be the PR person doing the outreach**. That is safe here: the firewall keeps sales off journalist records, so nothing competes for the owner field.
+
+- At enroll time the app sets **Contact Owner = the enrolling PR user**, then flips the enrollment trigger. With the per-contact lock below there is only ever one active pitcher, so the owner never thrashes.
+- The custom `pr_owner` field becomes redundant for journalists — dropped in favour of native Contact Owner, or kept only as a synced alias.
+
+App-side flow (no sequence API call):
+
+- Write the approved pitch to `pitch_body`, set Contact Owner = enrolling PR user, and set the enrollment trigger (property flip or list add) — all in the same step.
+- The HubSpot workflow enrolls the contact into the one shared PR sequence, sending as Contact Owner. The body rides the `{{ contact.pitch_body }}` token.
 - The sequence owns follow-up cadence and auto-unenrolls on reply, so the app builds no follow-up scheduler.
+
+Rules:
+
 - **Human approve-then-enroll is mandatory.** Nothing auto-sends; drafts stay editable until approval.
 - Bulk enrollment respects HubSpot's per-user daily sequence send cap.
 - **Write-back on enroll:** `last_pitched_date` is stamped to today, and a `media_relationship_status` of New advances to Warm. Without this write the "recently pitched" badge never fires for anyone.
 
-Explicitly not using sales email one-offs. Because sequences log their own sends, `crm.objects.emails.write` is likely unnecessary — this gets confirmed before phase 3 ships rather than requested up front.
+Explicitly not using sales email one-offs. Because sequences log their own sends, `crm.objects.emails.write` is likely unnecessary — confirmed before phase 3 ships rather than requested up front.
 
 ### Deferred until multi-user rollout
 
@@ -82,7 +92,7 @@ The shared `pitch_body` token is safe for one user testing sequentially, but has
 
 1. **Per-contact enrollment lock** — only one active PR enrollment per reporter at a time, promoting the "recently pitched / in conversation" badge to a hard block. Makes the shared property safe and is correct PR hygiene anyway.
 2. **Verify token-resolution timing** — confirm whether HubSpot renders `{{ contact.pitch_body }}` at enrollment (snapshot) or at each send (live re-read). If live re-read, the body must be made immutable per send instead.
-3. Per-user sending is already handled by who enrolls — no per-user sequences get built.
+3. **Contact Owner assignment** — settle how native Contact Owner is set on journalist records (recommended: at enroll, to the current pitcher) and reconcile with `pr_owner`.
 
 Phases 1-2 need none of this; drafting can stay copy-to-clipboard until the above is settled.
 
