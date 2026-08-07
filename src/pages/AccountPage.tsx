@@ -83,12 +83,20 @@ export default function AccountPage() {
             </p>
           </div>
           {isAdmin && (
-            <Link to="/admin/users">
-              <Button variant="outline" size="sm" className="gap-2" title="User management">
-                <Settings className="h-4 w-4" />
-                Manage users
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/admin/voice">
+                <Button variant="outline" size="sm" className="gap-2" title="Pitch voice">
+                  <Settings className="h-4 w-4" />
+                  Pitch voice
+                </Button>
+              </Link>
+              <Link to="/admin/users">
+                <Button variant="outline" size="sm" className="gap-2" title="User management">
+                  <Settings className="h-4 w-4" />
+                  Manage users
+                </Button>
+              </Link>
+            </div>
           )}
         </header>
 
