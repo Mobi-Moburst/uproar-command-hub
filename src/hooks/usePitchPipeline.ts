@@ -148,7 +148,7 @@ export function usePitchContacts(campaignId: string | undefined) {
 
   const importRows = useMutation({
     mutationFn: (rows: ImportRow[]) =>
-      invoke<{ imported: number; created: number; matched: number; failed: number }>({
+      invoke<{ imported: number; created: number; matched: number; failed: number; skipped?: number }>({
         action: "import",
         campaign_id: campaignId,
         rows,
@@ -156,6 +156,7 @@ export function usePitchContacts(campaignId: string | undefined) {
     onSuccess: (res) => {
       refresh();
       const parts = [`${res.imported} imported`];
+      if (res.skipped) parts.push(`${res.skipped} already on this campaign`);
       if (res.matched) parts.push(`${res.matched} matched in CRM`);
       if (res.created) parts.push(`${res.created} added to CRM`);
       if (res.failed) parts.push(`${res.failed} failed`);
