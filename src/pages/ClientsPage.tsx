@@ -323,6 +323,10 @@ export default function ClientsPage() {
                     </div>
                   )}
 
+                  <ClientHubspotPanel clientName={selectedClient.name} />
+
+
+
                   <div className="mt-8">
                     <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
                       Recent Placements
