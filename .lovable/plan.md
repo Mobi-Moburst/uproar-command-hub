@@ -101,7 +101,7 @@ In Conversation → Committed → Published (Won) / Closed Lost
 
 - The board **reads** stage from HubSpot and caches it for display, refreshing on load and after every write.
 - Dragging a card **writes to HubSpot, then refetches**. There is no local stage store that can drift.
-- Sending advances the ticket to **Pitched** in HubSpot.
+- Enrolling a contact into the sequence advances the ticket to **Pitched** in HubSpot.
 - **Write-back on Won:** when a ticket enters **Published (Won)**, the user is prompted for the published clip URL; `last_coverage_date` is stamped to today and the link stored on the contact. This feeds the "already covered us" badge and builds owned coverage history over time.
 - No bidirectional sync loop.
 
