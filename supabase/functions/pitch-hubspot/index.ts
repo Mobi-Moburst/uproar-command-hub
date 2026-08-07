@@ -359,6 +359,14 @@ serve(async (req) => {
 
       const owners = await getOwners();
       const portalId = await getPortalId();
+      const importerOwnerId = await ownerIdForEmail(user.email ?? undefined);
+      const ownerWarning = importerOwnerId
+        ? []
+        : [{
+          kind: "owner_unmatched",
+          label: "Owner not set",
+          detail: `No CRM user matches ${user.email ?? "your login"}, so Contact Owner was left as-is.`,
+        }];
 
       let created = 0;
       let matched = 0;
@@ -368,7 +376,11 @@ serve(async (req) => {
       for (const row of rows) {
         let signals: Signals;
         try {
-          signals = await findOrCreateContact(row, owners, portalId);
+          signals = await findOrCreateContact(row, owners, portalId, importerOwnerId);
+          if (signals.matched) matched++;
+          else if (signals.hubspot_contact_id) created++;
+          if (signals.hubspot_contact_id) signals.warnings.push(...ownerWarning);
+        } catch (e) {
           if (signals.matched) matched++;
           else if (signals.hubspot_contact_id) created++;
         } catch (e) {
