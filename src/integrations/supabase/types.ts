@@ -50,6 +50,96 @@ export type Database = {
         }
         Relationships: []
       }
+      client_hubspot_links: {
+        Row: {
+          client_name: string
+          created_at: string
+          hubspot_company_id: string | null
+          id: string
+          linked_at: string | null
+          match_confidence: string
+          matched_by: string
+          suggestions: Json
+          updated_at: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          hubspot_company_id?: string | null
+          id?: string
+          linked_at?: string | null
+          match_confidence?: string
+          matched_by?: string
+          suggestions?: Json
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          hubspot_company_id?: string | null
+          id?: string
+          linked_at?: string | null
+          match_confidence?: string
+          matched_by?: string
+          suggestions?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      client_hubspot_snapshot: {
+        Row: {
+          city: string | null
+          client_name: string
+          company_name: string | null
+          contacts: Json
+          created_at: string
+          deals: Json
+          domain: string | null
+          hubspot_company_id: string
+          id: string
+          industry: string | null
+          last_activity_date: string | null
+          lifecycle_stage: string | null
+          owner_name: string | null
+          synced_at: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          client_name: string
+          company_name?: string | null
+          contacts?: Json
+          created_at?: string
+          deals?: Json
+          domain?: string | null
+          hubspot_company_id: string
+          id?: string
+          industry?: string | null
+          last_activity_date?: string | null
+          lifecycle_stage?: string | null
+          owner_name?: string | null
+          synced_at?: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          client_name?: string
+          company_name?: string | null
+          contacts?: Json
+          created_at?: string
+          deals?: Json
+          domain?: string | null
+          hubspot_company_id?: string
+          id?: string
+          industry?: string | null
+          last_activity_date?: string | null
+          lifecycle_stage?: string | null
+          owner_name?: string | null
+          synced_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_reports: {
         Row: {
           client_name: string
