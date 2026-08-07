@@ -326,6 +326,8 @@ export default function ClientsPage() {
 
                   <ClientHubspotPanel clientName={selectedClient.name} />
 
+                  <ClientCoveragePanel clientName={selectedClient.name} placements={placements} />
+
 
 
                   <div className="mt-8">
