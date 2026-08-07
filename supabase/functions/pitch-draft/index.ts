@@ -108,9 +108,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { campaign_id, contact_ids, mode } = await req.json();
+    const { campaign_id, contact_ids, mode, preview, voice_override } = await req.json();
     if (!campaign_id) throw new Error("campaign_id is required");
-    if (!Array.isArray(contact_ids) || contact_ids.length === 0) {
+    const isPreview = preview === true;
+    if (!isPreview && (!Array.isArray(contact_ids) || contact_ids.length === 0)) {
       throw new Error("contact_ids is required");
     }
     const draftMode = mode === "bulk" ? "bulk" : "custom";
