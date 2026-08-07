@@ -75,6 +75,7 @@ export function ClientHubspotLinkSheet({
     if (open) {
       setTerm("");
       search.reset();
+      if (!suggestions.length && clientName) search.mutate(clientName);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, clientName]);
