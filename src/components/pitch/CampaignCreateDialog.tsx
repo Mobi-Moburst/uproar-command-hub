@@ -74,8 +74,8 @@ export function CampaignCreateDialog({ open, onOpenChange, onCreate, isCreating 
               </SelectTrigger>
               <SelectContent className="max-h-72">
                 {(clients ?? []).map((c) => (
-                  <SelectItem key={c.client_name} value={c.client_name}>
-                    {c.client_name}
+                  <SelectItem key={c.id} value={c.name}>
+                    {c.name}
                   </SelectItem>
                 ))}
               </SelectContent>
