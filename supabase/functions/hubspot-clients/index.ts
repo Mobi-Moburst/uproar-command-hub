@@ -148,11 +148,11 @@ async function syncClient(supabase: any, clientName: string, companyId: string) 
     hubspot_url: portalId ? `https://app.hubspot.com/contacts/${portalId}/contact/${c.id}` : "",
   }));
 
+  const stageLabels = await getDealStages();
   const deals = dealRecords.map((d: any) => ({
     id: String(d.id),
     name: d.properties?.dealname ?? "",
-    stage: (await getDealStages()).get(String(d.properties?.dealstage ?? "")) ??
-      (d.properties?.dealstage ?? ""),
+    stage: stageLabels.get(String(d.properties?.dealstage ?? "")) ?? (d.properties?.dealstage ?? ""),
     amount: d.properties?.amount ? Number(d.properties.amount) : null,
     close_date: d.properties?.closedate ?? null,
     hubspot_url: portalId ? `https://app.hubspot.com/contacts/${portalId}/deal/${d.id}` : "",
