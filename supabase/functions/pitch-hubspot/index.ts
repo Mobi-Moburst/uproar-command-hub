@@ -259,7 +259,7 @@ function contactWarnings(props: Record<string, unknown>, owners: Map<string, { n
   return warnings;
 }
 
-async function findOrCreateContact(row: Row, owners: Map<string, { name: string; email: string }>, portalId: string | null): Promise<Signals> {
+async function findOrCreateContact(row: Row, owners: Map<string, { name: string; email: string }>, portalId: string | null, ownerId: string | null): Promise<Signals> {
   const email = String(row.email ?? "").trim().toLowerCase();
   const { firstname, lastname } = splitName(row.name);
 
