@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_comms_intel: {
+        Row: {
+          brief: Json
+          client_name: string
+          created_at: string
+          email_count: number
+          hubspot_company_id: string | null
+          id: string
+          last_email_at: string | null
+          synced_at: string
+          threads: Json
+          updated_at: string
+        }
+        Insert: {
+          brief?: Json
+          client_name: string
+          created_at?: string
+          email_count?: number
+          hubspot_company_id?: string | null
+          id?: string
+          last_email_at?: string | null
+          synced_at?: string
+          threads?: Json
+          updated_at?: string
+        }
+        Update: {
+          brief?: Json
+          client_name?: string
+          created_at?: string
+          email_count?: number
+          hubspot_company_id?: string | null
+          id?: string
+          last_email_at?: string | null
+          synced_at?: string
+          threads?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_enrichment: {
         Row: {
           client_name: string
