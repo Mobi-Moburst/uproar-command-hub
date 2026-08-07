@@ -71,6 +71,7 @@ Explicitly not using HubSpot sales email or sequences — those need a Sales sea
 
 - **Human approve-then-send is mandatory.** Nothing auto-sends. Drafts stay editable up to the moment of approval.
 - **Bulk sends are throttled** into spaced batches to protect deliverability.
+- **Write-back on send:** `last_pitched_date` is stamped to today on the contact, and a `media_relationship_status` of New advances to Warm. Without this write, the "recently pitched" badge never fires for anyone.
 
 ## 6. Tickets
 
