@@ -108,9 +108,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { campaign_id, contact_ids, mode } = await req.json();
+    const { campaign_id, contact_ids, mode, preview, voice_override } = await req.json();
     if (!campaign_id) throw new Error("campaign_id is required");
-    if (!Array.isArray(contact_ids) || contact_ids.length === 0) {
+    const isPreview = preview === true;
+    if (!isPreview && (!Array.isArray(contact_ids) || contact_ids.length === 0)) {
       throw new Error("contact_ids is required");
     }
     const draftMode = mode === "bulk" ? "bulk" : "custom";
@@ -128,30 +129,63 @@ serve(async (req) => {
     if (cErr) throw cErr;
     if (!campaign) throw new Error("Campaign not found");
 
-    const [{ data: contacts }, { data: guardrails }, { data: comms }, { data: coverage }] =
-      await Promise.all([
-        supabase
-          .from("pitch_contacts")
-          .select("id, name, outlet, email, beat, title, location, source_row, warnings")
-          .eq("campaign_id", campaign_id)
-          .in("id", contact_ids),
-        supabase
-          .from("client_pitch_guardrails")
-          .select("rule, scope")
-          .eq("client_name", campaign.client_name),
-        supabase
-          .from("client_comms_intel")
-          .select("brief")
-          .eq("client_name", campaign.client_name)
-          .maybeSingle(),
-        supabase
-          .from("client_coverage_intel")
-          .select("brief")
-          .eq("client_name", campaign.client_name)
-          .maybeSingle(),
-      ]);
+    const contactsQuery = supabase
+      .from("pitch_contacts")
+      .select("id, name, outlet, email, beat, title, location, source_row, warnings")
+      .eq("campaign_id", campaign_id);
+    if (isPreview) {
+      contactsQuery.limit(1);
+    } else {
+      contactsQuery.in("id", contact_ids);
+    }
+
+    const [
+      { data: contacts },
+      { data: guardrails },
+      { data: comms },
+      { data: coverage },
+      { data: voiceProfiles },
+    ] = await Promise.all([
+      contactsQuery,
+      supabase
+        .from("client_pitch_guardrails")
+        .select("rule, scope")
+        .eq("client_name", campaign.client_name),
+      supabase
+        .from("client_comms_intel")
+        .select("brief")
+        .eq("client_name", campaign.client_name)
+        .maybeSingle(),
+      supabase
+        .from("client_coverage_intel")
+        .select("brief")
+        .eq("client_name", campaign.client_name)
+        .maybeSingle(),
+      supabase
+        .from("pitch_voice_profiles")
+        .select("client_name, name, guidance, active")
+        .eq("active", true)
+        .or(`client_name.is.null,client_name.eq.${campaign.client_name}`),
+    ]);
 
     if (!contacts || contacts.length === 0) throw new Error("No contacts found for this campaign");
+
+    const globalVoice = (voiceProfiles ?? []).find((v) => !v.client_name)?.guidance ?? "";
+    const clientVoice =
+      (voiceProfiles ?? []).find((v) => v.client_name === campaign.client_name)?.guidance ?? "";
+    const overrideVoice = typeof voice_override === "string" ? voice_override : "";
+
+    const voiceBlock = [
+      (overrideVoice || globalVoice).trim()
+        ? `UPROAR HOUSE VOICE (write in this voice):\n${(overrideVoice || globalVoice).trim().slice(0, 6000)}`
+        : "",
+      clientVoice.trim()
+        ? `CLIENT VOICE OVERRIDE for ${campaign.client_name} (layers on top of the house voice):\n${clientVoice.trim().slice(0, 4000)}`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
 
     const commsBrief = (comms?.brief ?? {}) as Record<string, unknown>;
     const coverageBrief = (coverage?.brief ?? {}) as Record<string, unknown>;
@@ -180,11 +214,16 @@ serve(async (req) => {
       .filter(Boolean)
       .join("\n\n");
 
-    const system =
-      "You are a senior PR strategist at Uproar writing 1:1 media pitches. " +
-      "You write tight, specific, human copy. No 'Hope you're well', no buzzwords, no exclamation marks. " +
-      "Hard guardrails are absolute: never pitch anything they forbid. " +
-      "Return only the structured fields requested.";
+    const system = [
+      "You are a senior PR strategist at Uproar writing 1:1 media pitches.",
+      "You write tight, specific, human copy. No 'Hope you're well', no buzzwords, no exclamation marks.",
+      "Hard guardrails are absolute: never pitch anything they forbid — they outrank voice guidance.",
+      voiceBlock,
+      "Structural rules always apply, whatever the voice guidance says: subject max 9 words, body max 150 words, plain text only.",
+      "Return only the structured fields requested.",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     const results: Array<{ contact_id: string; subject?: string; body?: string; error?: string }> = [];
 
@@ -226,6 +265,11 @@ Rules:
           .join("")
           .trim();
         if (!subject || !body) throw new Error("Incomplete draft returned");
+
+        if (isPreview) {
+          return json({ preview: true, contact_name: contact.name, subject, body });
+        }
+
 
         const { data: existing } = await supabase
           .from("pitch_drafts")

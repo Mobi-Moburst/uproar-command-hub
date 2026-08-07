@@ -25,6 +25,7 @@ import PulsePage from "./pages/PulsePage";
 import PublicReportPage from "./pages/PublicReportPage";
 import AccountPage from "./pages/AccountPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
+import VoiceProfilesPage from "./pages/VoiceProfilesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,8 @@ const App = () => (
             <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
             <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
+            <Route path="/admin/voice" element={<ProtectedRoute><VoiceProfilesPage /></ProtectedRoute>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

@@ -492,6 +492,39 @@ export type Database = {
           },
         ]
       }
+      pitch_voice_profiles: {
+        Row: {
+          active: boolean
+          client_name: string | null
+          created_at: string
+          guidance: string
+          id: string
+          name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          client_name?: string | null
+          created_at?: string
+          guidance?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          client_name?: string | null
+          created_at?: string
+          guidance?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       placements_archive: {
         Row: {
           ad_value: number
