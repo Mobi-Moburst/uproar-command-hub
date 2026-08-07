@@ -314,7 +314,7 @@ async function findOrCreateContact(row: Row, owners: Map<string, { name: string;
   if (!existing) throw new Error(`Could not resolve contact for ${email}`);
 
   const props = existing.properties ?? {};
-  const patch = buildPatch(row, props);
+  const patch = buildPatch(row, props, ownerId);
   await hs(`/crm/v3/objects/contacts/${existing.id}`, {
     method: "PATCH",
     body: JSON.stringify({ properties: patch }),
