@@ -9,8 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ExternalLink, EyeOff, Undo2 } from "lucide-react";
-import type { PitchContact, PitchWarning } from "@/hooks/usePitchPipeline";
+import { ExternalLink, EyeOff, Undo2, Sparkles } from "lucide-react";
+import type { PitchContact, PitchDraft, PitchWarning } from "@/hooks/usePitchPipeline";
 
 const WARNING_STYLES: Record<string, string> = {
   do_not_pitch: "border-[hsl(var(--coral))]/40 bg-[hsl(var(--coral))]/10 text-[hsl(var(--coral))]",
@@ -45,10 +45,18 @@ function WarningBadge({ warning }: { warning: PitchWarning }) {
 interface Props {
   contacts: PitchContact[];
   portalId?: string | null;
+  drafts?: Record<string, PitchDraft>;
   onToggleExclude: (contact: PitchContact) => void;
+  onOpenDraft?: (contact: PitchContact) => void;
 }
 
-export function PitchContactsTable({ contacts, portalId, onToggleExclude }: Props) {
+export function PitchContactsTable({
+  contacts,
+  portalId,
+  drafts = {},
+  onToggleExclude,
+  onOpenDraft,
+}: Props) {
   return (
     <div className="overflow-hidden rounded-lg border border-[rgba(255,255,255,0.08)]">
       <Table>
@@ -58,6 +66,7 @@ export function PitchContactsTable({ contacts, portalId, onToggleExclude }: Prop
             <TableHead>Outlet</TableHead>
             <TableHead>Beat</TableHead>
             <TableHead>Flags</TableHead>
+            <TableHead className="w-[130px]">Pitch</TableHead>
             <TableHead className="w-[110px] text-right">CRM</TableHead>
             <TableHead className="w-[60px]" />
           </TableRow>
@@ -89,6 +98,22 @@ export function PitchContactsTable({ contacts, portalId, onToggleExclude }: Prop
                       <span className="text-xs text-muted-foreground font-mono">clear</span>
                     )}
                   </div>
+                </TableCell>
+                <TableCell>
+                  {(() => {
+                    const draft = drafts[contact.id];
+                    return (
+                      <Button
+                        variant={draft ? "outline" : "ghost"}
+                        size="sm"
+                        className="h-7 gap-1.5 px-2 text-xs"
+                        onClick={() => onOpenDraft?.(contact)}
+                      >
+                        <Sparkles className="h-3.5 w-3.5" />
+                        {draft ? (draft.status === "approved" ? "Approved" : "Draft ready") : "Draft"}
+                      </Button>
+                    );
+                  })()}
                 </TableCell>
                 <TableCell className="text-right">
                   {contact.hubspot_contact_id && portalId ? (
