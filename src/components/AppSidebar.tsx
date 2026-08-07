@@ -11,6 +11,7 @@ import { BarChart3, Users, Newspaper, Trophy, Package, FileText, Star, UserSearc
 const navItems = [
   { title: "Overview", path: "/", icon: BarChart3 },
   { title: "Clients", path: "/clients", icon: Users },
+  { title: "Pitch Pipeline", path: "/pitch-pipeline", icon: Send },
   { title: "Media Placements", path: "/placements", icon: Newspaper },
   { title: "Awards Pipeline", path: "/awards", icon: Trophy },
   { title: "Samples", path: "/samples", icon: Package },
@@ -19,7 +20,6 @@ const navItems = [
   { title: "Reporter Analytics", path: "/reporters", icon: UserSearch },
   { title: "Intelligence", path: "/intelligence", icon: Brain },
   { title: "Pulse Center", path: "/pulse", icon: Zap },
-  { title: "Pitch Pipeline", path: "/pitch-pipeline", icon: Send },
   { title: "Teams", path: "/teams", icon: UsersRound },
   { title: "Reports", path: "/reports", icon: ClipboardList },
 ];
