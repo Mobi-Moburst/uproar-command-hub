@@ -48,7 +48,7 @@ const App = () => (
             <Route path="/reporters" element={<ProtectedRoute><ReportersPage /></ProtectedRoute>} />
             <Route path="/intelligence" element={<ProtectedRoute><IntelligencePage /></ProtectedRoute>} />
             <Route path="/pulse" element={<ProtectedRoute><PulsePage /></ProtectedRoute>} />
-            <Route path="/pitch-pipeline" element={<ProtectedRoute><PitchPipelinePage /></ProtectedRoute>} />
+            <Route path="/pitch-pipeline/:campaignId" element={<ProtectedRoute><PitchCampaignPage /></ProtectedRoute>} />
             
             <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
             <Route path="/samples" element={<ProtectedRoute><SamplesPage /></ProtectedRoute>} />
