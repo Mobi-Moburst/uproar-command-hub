@@ -266,6 +266,11 @@ Rules:
           .trim();
         if (!subject || !body) throw new Error("Incomplete draft returned");
 
+        if (isPreview) {
+          return json({ preview: true, contact_name: contact.name, subject, body });
+        }
+
+
         const { data: existing } = await supabase
           .from("pitch_drafts")
           .select("id, status")
