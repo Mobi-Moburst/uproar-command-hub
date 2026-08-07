@@ -25,6 +25,7 @@ import PulsePage from "./pages/PulsePage";
 import PublicReportPage from "./pages/PublicReportPage";
 import AccountPage from "./pages/AccountPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
+import VoiceProfilesPage from "./pages/VoiceProfilesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
