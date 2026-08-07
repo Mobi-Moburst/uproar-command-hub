@@ -115,14 +115,18 @@ In Conversation → Committed → Published (Won) / Closed Lost
 - **Write-back on Won:** when a ticket enters **Published (Won)**, the user is prompted for the published clip URL; `last_coverage_date` is stamped to today and the link stored on the contact. This feeds the "already covered us" badge and builds owned coverage history over time.
 - No bidirectional sync loop.
 
-## 8. Outside the app: HubSpot workflow (RevOps)
+## 8. Outside the app: two HubSpot workflows (RevOps)
 
-A HubSpot workflow — owned by RevOps, not the app — enforces the firewall at the send level:
+**Workflow A — the firewall:**
 
 - **Trigger:** `pr_contact = true` OR `is_podcast_outreach_contact = true`
 - **Actions:** set the contact to non-marketing; add to the suppression list "Outreach Contacts — Exclude from Sales/Marketing"
 
 Sales sequences and marketing sends exclude that list. The app does not set non-marketing status itself.
+
+**Workflow B — PR sequence enrollment:** mirrors the existing sales enroll-in-sequence action. Triggers on the app's enrollment signal (§5), enrolls the contact into the shared PR sequence, **send as Contact Owner**.
+
+The two stay distinct — one firewalls sales and marketing, the other runs PR outreach.
 
 ## Build order
 
