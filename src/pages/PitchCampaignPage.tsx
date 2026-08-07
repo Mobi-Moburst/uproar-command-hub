@@ -17,6 +17,7 @@ import {
 import { MediaListImport } from "@/components/pitch/MediaListImport";
 import { PitchContactsTable } from "@/components/pitch/PitchContactsTable";
 import { PitchDraftSheet } from "@/components/pitch/PitchDraftSheet";
+import { AddReporterDialog } from "@/components/pitch/AddReporterDialog";
 
 export default function PitchCampaignPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
@@ -85,10 +86,16 @@ export default function PitchCampaignPage() {
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">{campaign.angle}</p>
             </div>
-            <MediaListImport
+            <div className="flex flex-wrap gap-2">
+              <AddReporterDialog
+                isImporting={importRows.isPending}
+                onAdd={(row) => importRows.mutate([row])}
+              />
+              <MediaListImport
               isImporting={importRows.isPending}
-              onImport={(rows) => importRows.mutate(rows)}
-            />
+                onImport={(rows) => importRows.mutate(rows)}
+              />
+            </div>
           </div>
         </div>
 
@@ -196,7 +203,7 @@ export default function PitchCampaignPage() {
             <div className="rounded-lg border border-dashed border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-12 text-center">
               <p className="text-sm font-medium text-foreground">No reporters yet</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Import a Muck Rack CSV or XLSX. Each reporter is matched or created in the CRM on import,
+                Import a Muck Rack CSV or XLSX, or add one manually. Each reporter is matched or created in the CRM on import,
                 so conflicts show up before anyone pitches.
               </p>
             </div>
