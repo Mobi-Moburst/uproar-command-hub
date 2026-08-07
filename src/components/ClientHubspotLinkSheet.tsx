@@ -110,9 +110,13 @@ export function ClientHubspotLinkSheet({
         </form>
 
         <div className="mt-4 space-y-2">
-          {results.length === 0 ? (
+          {search.isPending && !results.length ? (
+            <p className="flex items-center gap-2 text-sm font-mono text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Looking for matches...
+            </p>
+          ) : results.length === 0 ? (
             <p className="text-sm font-mono text-muted-foreground">
-              No suggestions yet — try searching above.
+              No matches found — try searching a different name above.
             </p>
           ) : (
             results.map((c) => (
