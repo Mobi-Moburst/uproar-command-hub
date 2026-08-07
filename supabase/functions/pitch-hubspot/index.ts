@@ -296,7 +296,7 @@ async function findOrCreateContact(row: Row, owners: Map<string, { name: string;
   if (!existing) {
     const res = await hsRaw("/crm/v3/objects/contacts", {
       method: "POST",
-      body: JSON.stringify({ properties: { email, ...buildPatch(row, null) } }),
+      body: JSON.stringify({ properties: { email, ...buildPatch(row, null, ownerId) } }),
     });
     if (res.status === 409) {
       // Race: another import created it first. Re-fetch by email and reuse.
