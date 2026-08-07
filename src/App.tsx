@@ -14,6 +14,7 @@ import WeeklyWinsPage from "./pages/WeeklyWinsPage";
 import ReportersPage from "./pages/ReportersPage";
 import IntelligencePage from "./pages/IntelligencePage";
 import PitchPipelinePage from "./pages/PitchPipelinePage";
+import PitchCampaignPage from "./pages/PitchCampaignPage";
 
 import TeamsPage from "./pages/TeamsPage";
 import SamplesPage from "./pages/SamplesPage";
