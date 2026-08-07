@@ -120,7 +120,7 @@ Each phase is usable on its own:
 
 1. **Campaigns + Muck Rack import + HubSpot upsert + conflict review** — the import already touches HubSpot, so contacts and badges are real from day one
 2. **AI pitch drafting** (custom + bulk), copy-to-clipboard
-3. **Approve → ticket creation → send via connected inbox → stage read**
+3. **Approve → ticket creation → sequence enrollment → stage read**
 4. **Kanban board and cross-client pipeline view**
 
 ## Technical notes
