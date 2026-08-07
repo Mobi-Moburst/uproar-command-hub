@@ -5,15 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { ArrowLeft, Plus, X, Sparkles } from "lucide-react";
 import {
   usePitchCampaign,
   usePitchContacts,
   useClientGuardrails,
   useHubspotPortalId,
+  usePitchDrafts,
+  type PitchContact,
 } from "@/hooks/usePitchPipeline";
 import { MediaListImport } from "@/components/pitch/MediaListImport";
 import { PitchContactsTable } from "@/components/pitch/PitchContactsTable";
+import { PitchDraftSheet } from "@/components/pitch/PitchDraftSheet";
 
 export default function PitchCampaignPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
@@ -24,6 +27,14 @@ export default function PitchCampaignPage() {
   const { guardrails, addGuardrail, removeGuardrail } = useClientGuardrails(campaign?.client_name);
   const { data: portal } = useHubspotPortalId();
   const [newRule, setNewRule] = useState("");
+  const [draftContact, setDraftContact] = useState<PitchContact | null>(null);
+  const contactIds = useMemo(() => contacts.map((c) => c.id), [contacts]);
+  const { drafts, generate, saveDraft, setStatus } = usePitchDrafts(campaignId, contactIds);
+  const activeDraft = draftContact ? drafts[draftContact.id] : undefined;
+  const needsDraft = useMemo(
+    () => contacts.filter((c) => !c.excluded && !drafts[c.id]).map((c) => c.id),
+    [contacts, drafts],
+  );
 
   const counts = useMemo(() => {
     const active = contacts.filter((c) => !c.excluded);
@@ -81,11 +92,12 @@ export default function PitchCampaignPage() {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-4">
           {[
             { label: "Reporters", value: counts.total },
             { label: "In play", value: counts.active },
             { label: "Flagged", value: counts.flagged },
+            { label: "Drafted", value: Object.keys(drafts).length },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -152,7 +164,32 @@ export default function PitchCampaignPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">Media list</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold text-foreground">Media list</h2>
+            {needsDraft.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={generate.isPending}
+                  onClick={() => generate.mutate({ contact_ids: needsDraft, mode: "custom" })}
+                >
+                  <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                  {generate.isPending ? "Drafting…" : `Draft all (${needsDraft.length})`}
+                </Button>
+                {campaign.press_release_body && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={generate.isPending}
+                    onClick={() => generate.mutate({ contact_ids: needsDraft, mode: "bulk" })}
+                  >
+                    Bulk from release
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
           {contactsLoading ? (
             <Skeleton className="h-64 w-full rounded-lg" />
           ) : contacts.length === 0 ? (
@@ -167,12 +204,32 @@ export default function PitchCampaignPage() {
             <PitchContactsTable
               contacts={contacts}
               portalId={portal?.portal_id}
+              drafts={drafts}
+              onOpenDraft={(contact) => setDraftContact(contact)}
               onToggleExclude={(contact) =>
                 setExcluded.mutate({ id: contact.id, excluded: !contact.excluded })
               }
             />
           )}
         </section>
+
+        <PitchDraftSheet
+          contact={draftContact}
+          draft={activeDraft}
+          isGenerating={generate.isPending}
+          isSaving={saveDraft.isPending}
+          onClose={() => setDraftContact(null)}
+          onGenerate={(mode) =>
+            draftContact && generate.mutate({ contact_ids: [draftContact.id], mode })
+          }
+          onSave={(subject, body) =>
+            activeDraft && saveDraft.mutate({ id: activeDraft.id, subject, body })
+          }
+          onApprove={(approved) =>
+            activeDraft &&
+            setStatus.mutate({ id: activeDraft.id, status: approved ? "approved" : "draft" })
+          }
+        />
       </div>
     </DashboardLayout>
   );

@@ -239,3 +239,88 @@ export function useHubspotPortalId() {
     queryFn: () => invoke<{ portal_id: string | null }>({ action: "portal" }),
   });
 }
+
+export interface PitchDraft {
+  id: string;
+  contact_id: string;
+  subject: string;
+  body: string;
+  mode: string;
+  status: string;
+  sent_at: string | null;
+  updated_at: string;
+}
+
+export function usePitchDrafts(campaignId: string | undefined, contactIds: string[]) {
+  const queryClient = useQueryClient();
+  const key = ["pitch-drafts", campaignId];
+
+  const drafts = useQuery({
+    queryKey: key,
+    enabled: !!campaignId && contactIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pitch_drafts")
+        .select("id, contact_id, subject, body, mode, status, sent_at, updated_at")
+        .in("contact_id", contactIds);
+      if (error) throw error;
+      const map: Record<string, PitchDraft> = {};
+      for (const d of (data ?? []) as PitchDraft[]) map[d.contact_id] = d;
+      return map;
+    },
+  });
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: key });
+
+  const generate = useMutation({
+    mutationFn: async ({
+      contact_ids,
+      mode,
+    }: {
+      contact_ids: string[];
+      mode: "custom" | "bulk";
+    }) => {
+      const { data, error } = await supabase.functions.invoke("pitch-draft", {
+        body: { campaign_id: campaignId, contact_ids, mode },
+      });
+      if (error) throw error;
+      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+      return data as { drafted: number; failed: number };
+    },
+    onSuccess: (res) => {
+      refresh();
+      if (res.drafted) toast.success(`${res.drafted} draft${res.drafted === 1 ? "" : "s"} ready`);
+      if (res.failed) toast.error(`${res.failed} draft${res.failed === 1 ? "" : "s"} failed`);
+    },
+    onError: (e: Error) => toast.error(e.message || "Drafting failed"),
+  });
+
+  const saveDraft = useMutation({
+    mutationFn: async ({ id, subject, body }: { id: string; subject: string; body: string }) => {
+      const { error } = await supabase.from("pitch_drafts").update({ subject, body }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refresh();
+      toast.success("Draft saved");
+    },
+    onError: (e: Error) => toast.error(e.message || "Could not save the draft"),
+  });
+
+  const setStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase.from("pitch_drafts").update({ status }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: refresh,
+    onError: (e: Error) => toast.error(e.message || "Could not update the draft"),
+  });
+
+  return {
+    drafts: drafts.data ?? {},
+    isLoading: drafts.isLoading,
+    generate,
+    saveDraft,
+    setStatus,
+  };
+}
