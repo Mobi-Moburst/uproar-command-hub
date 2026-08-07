@@ -129,30 +129,63 @@ serve(async (req) => {
     if (cErr) throw cErr;
     if (!campaign) throw new Error("Campaign not found");
 
-    const [{ data: contacts }, { data: guardrails }, { data: comms }, { data: coverage }] =
-      await Promise.all([
-        supabase
-          .from("pitch_contacts")
-          .select("id, name, outlet, email, beat, title, location, source_row, warnings")
-          .eq("campaign_id", campaign_id)
-          .in("id", contact_ids),
-        supabase
-          .from("client_pitch_guardrails")
-          .select("rule, scope")
-          .eq("client_name", campaign.client_name),
-        supabase
-          .from("client_comms_intel")
-          .select("brief")
-          .eq("client_name", campaign.client_name)
-          .maybeSingle(),
-        supabase
-          .from("client_coverage_intel")
-          .select("brief")
-          .eq("client_name", campaign.client_name)
-          .maybeSingle(),
-      ]);
+    const contactsQuery = supabase
+      .from("pitch_contacts")
+      .select("id, name, outlet, email, beat, title, location, source_row, warnings")
+      .eq("campaign_id", campaign_id);
+    if (isPreview) {
+      contactsQuery.limit(1);
+    } else {
+      contactsQuery.in("id", contact_ids);
+    }
+
+    const [
+      { data: contacts },
+      { data: guardrails },
+      { data: comms },
+      { data: coverage },
+      { data: voiceProfiles },
+    ] = await Promise.all([
+      contactsQuery,
+      supabase
+        .from("client_pitch_guardrails")
+        .select("rule, scope")
+        .eq("client_name", campaign.client_name),
+      supabase
+        .from("client_comms_intel")
+        .select("brief")
+        .eq("client_name", campaign.client_name)
+        .maybeSingle(),
+      supabase
+        .from("client_coverage_intel")
+        .select("brief")
+        .eq("client_name", campaign.client_name)
+        .maybeSingle(),
+      supabase
+        .from("pitch_voice_profiles")
+        .select("client_name, name, guidance, active")
+        .eq("active", true)
+        .or(`client_name.is.null,client_name.eq.${campaign.client_name}`),
+    ]);
 
     if (!contacts || contacts.length === 0) throw new Error("No contacts found for this campaign");
+
+    const globalVoice = (voiceProfiles ?? []).find((v) => !v.client_name)?.guidance ?? "";
+    const clientVoice =
+      (voiceProfiles ?? []).find((v) => v.client_name === campaign.client_name)?.guidance ?? "";
+    const overrideVoice = typeof voice_override === "string" ? voice_override : "";
+
+    const voiceBlock = [
+      (overrideVoice || globalVoice).trim()
+        ? `UPROAR HOUSE VOICE (write in this voice):\n${(overrideVoice || globalVoice).trim().slice(0, 6000)}`
+        : "",
+      clientVoice.trim()
+        ? `CLIENT VOICE OVERRIDE for ${campaign.client_name} (layers on top of the house voice):\n${clientVoice.trim().slice(0, 4000)}`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
 
     const commsBrief = (comms?.brief ?? {}) as Record<string, unknown>;
     const coverageBrief = (coverage?.brief ?? {}) as Record<string, unknown>;
