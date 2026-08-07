@@ -18,6 +18,7 @@ const navItems = [
   { title: "Reporter Analytics", path: "/reporters" },
   { title: "Intelligence", path: "/intelligence" },
   { title: "Pulse Center", path: "/pulse" },
+  { title: "Pitch Pipeline", path: "/pitch-pipeline" },
   { title: "Teams", path: "/teams" },
   { title: "Reports", path: "/reports" },
 ];
