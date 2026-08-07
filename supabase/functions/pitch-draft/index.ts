@@ -258,11 +258,9 @@ Rules:
 - Rationale: one sentence on why this reporter and how guardrails were respected.`;
 
         const raw = await callModel(system, user);
-        const parsed = JSON.parse(raw) as { subject?: string; body?: string; rationale?: string };
+        const parsed = JSON.parse(raw) as { subject?: string; body?: string };
         const subject = (parsed.subject ?? "").trim();
-        const body = [(parsed.body ?? "").trim(), parsed.rationale ? `\n\n—\nWhy this reporter: ${parsed.rationale.trim()}` : ""]
-          .join("")
-          .trim();
+        const body = (parsed.body ?? "").trim();
         if (!subject || !body) throw new Error("Incomplete draft returned");
 
         if (isPreview) {
