@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Building2, ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatCurrency, formatDateShort } from "@/lib/format";
+import { formatDateShort } from "@/lib/format";
 import { useClientHubspot } from "@/hooks/useClientHubspot";
 import { useMyRoles } from "@/hooks/useMyRoles";
 import { ClientHubspotLinkSheet } from "./ClientHubspotLinkSheet";
