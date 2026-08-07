@@ -22,9 +22,8 @@ const DRAFT_SCHEMA = {
   properties: {
     subject: { type: "string" },
     body: { type: "string" },
-    rationale: { type: "string" },
   },
-  required: ["subject", "body", "rationale"],
+  required: ["subject", "body"],
 };
 
 /** Streams /v1/responses and returns the accumulated output text. */
@@ -256,14 +255,12 @@ Rules:
 - Body: max 150 words, 2 short paragraphs max, plain text (no markdown, no signature block).
 - One sentence connecting the angle to this reporter's beat/outlet.
 - End with one specific, easy-to-say-yes-to offer (interview, exclusive data, exec quote, embargoed release).
-- Rationale: one sentence on why this reporter and how guardrails were respected.`;
+- Do not include any rationale, commentary, or notes — return the email only.`;
 
         const raw = await callModel(system, user);
-        const parsed = JSON.parse(raw) as { subject?: string; body?: string; rationale?: string };
+        const parsed = JSON.parse(raw) as { subject?: string; body?: string };
         const subject = (parsed.subject ?? "").trim();
-        const body = [(parsed.body ?? "").trim(), parsed.rationale ? `\n\n—\nWhy this reporter: ${parsed.rationale.trim()}` : ""]
-          .join("")
-          .trim();
+        const body = (parsed.body ?? "").trim();
         if (!subject || !body) throw new Error("Incomplete draft returned");
 
         if (isPreview) {
