@@ -79,88 +79,11 @@ export function ClientHubspotPanel({ clientName }: { clientName: string }) {
                 </a>
               )}
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Stage</p>
-                <p className="text-xs font-mono text-foreground">{snapshot.lifecycle_stage || "—"}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Owner</p>
-                <p className="text-xs font-mono text-foreground">{snapshot.owner_name || "—"}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last activity</p>
-                <p className="text-xs font-mono text-foreground">
-                  {snapshot.last_activity_date ? formatDateShort(snapshot.last_activity_date) : "—"}
-                </p>
-              </div>
-            </div>
           </div>
 
-          <div>
-            <p className="mb-2 text-xs font-medium text-muted-foreground">Key contacts</p>
-            {snapshot.contacts.length ? (
-              <div className="space-y-2">
-                {snapshot.contacts.slice(0, 6).map((c) => (
-                  <div
-                    key={c.id}
-                    className="flex items-center justify-between gap-3 rounded-md border border-[rgba(255,255,255,0.05)] p-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm text-foreground">{c.name || c.email || "Unnamed"}</p>
-                      <p className="truncate text-xs font-mono text-muted-foreground">
-                        {[c.title, c.email].filter(Boolean).join(" · ") || "—"}
-                      </p>
-                    </div>
-                    {c.hubspot_url && (
-                      <a
-                        href={c.hubspot_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="shrink-0 text-muted-foreground hover:text-foreground"
-                        aria-label={`View ${c.name} in HubSpot`}
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm font-mono text-muted-foreground">No contacts on this account.</p>
-            )}
-          </div>
-
-          <div>
-            <p className="mb-2 text-xs font-medium text-muted-foreground">Deals</p>
-            {snapshot.deals.length ? (
-              <div className="space-y-2">
-                {snapshot.deals.slice(0, 6).map((d) => (
-                  <div
-                    key={d.id}
-                    className="flex items-center justify-between gap-3 rounded-md border border-[rgba(255,255,255,0.05)] p-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm text-foreground">{d.name || "Untitled deal"}</p>
-                      <p className="truncate text-xs font-mono text-muted-foreground">
-                        {[d.stage, d.close_date ? formatDateShort(d.close_date) : ""]
-                          .filter(Boolean)
-                          .join(" · ") || "—"}
-                      </p>
-                    </div>
-                    {!isViewOnly && d.amount !== null && (
-                      <span className="shrink-0 font-mono text-sm text-foreground">
-                        {formatCurrency(d.amount)}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm font-mono text-muted-foreground">No deals on this account.</p>
-            )}
-          </div>
+          <ClientCommsPanel clientName={clientName} linked companyUrl={companyUrl} />
         </div>
+
       ) : notInHubspot ? (
         <div className="flex items-center justify-between gap-3 rounded-md border border-[rgba(255,255,255,0.05)] p-4">
           <p className="text-sm font-mono text-muted-foreground">This client isn't in HubSpot.</p>
