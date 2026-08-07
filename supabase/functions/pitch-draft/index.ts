@@ -214,11 +214,16 @@ serve(async (req) => {
       .filter(Boolean)
       .join("\n\n");
 
-    const system =
-      "You are a senior PR strategist at Uproar writing 1:1 media pitches. " +
-      "You write tight, specific, human copy. No 'Hope you're well', no buzzwords, no exclamation marks. " +
-      "Hard guardrails are absolute: never pitch anything they forbid. " +
-      "Return only the structured fields requested.";
+    const system = [
+      "You are a senior PR strategist at Uproar writing 1:1 media pitches.",
+      "You write tight, specific, human copy. No 'Hope you're well', no buzzwords, no exclamation marks.",
+      "Hard guardrails are absolute: never pitch anything they forbid — they outrank voice guidance.",
+      voiceBlock,
+      "Structural rules always apply, whatever the voice guidance says: subject max 9 words, body max 150 words, plain text only.",
+      "Return only the structured fields requested.",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     const results: Array<{ contact_id: string; subject?: string; body?: string; error?: string }> = [];
 
