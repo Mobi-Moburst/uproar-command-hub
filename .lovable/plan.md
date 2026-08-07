@@ -1,31 +1,60 @@
-# Import write-back: Contact Owner + Lifecycle Stage
+# Import write-back: Contact Owner, Lifecycle Stage, missing fields
 
-## What changes
+This supersedes the earlier "owner always overwritten" note. The revised spec wins:
+import fills a default, enroll sets the real sender.
 
-When a media list is imported, every contact written to the CRM will also get:
+## Contact Owner — fill only if empty
 
-1. **Contact Owner = the person doing the import.** The importing user's login email is matched against the CRM owner list to find their owner record. Set on create, and re-set on every update so the owner always reflects the most recent person to touch the contact.
-2. **Lifecycle Stage = "Other"**, set on both create and update.
+On import, each contact gets an owner **only when it has none**:
 
-If the importing user's email has no matching owner in the CRM (they aren't a seated user there), the contact is still imported — owner is left as-is and the row gets a small "Owner not set" note so it's visible rather than silent.
+- Match the importing user's login email against the CRM owner list.
+- If the contact already has an owner, leave it untouched — a re-import must never
+  seize a record or flip the sender off an active pitcher.
+- If the importer isn't a seated CRM user, still import the row and show an
+  "Owner not set" note on it, so it's visible rather than silent.
 
-## Yes — this conflicts with two earlier rules
+Enroll (Phase 3) is the authoritative owner-set: it overwrites Contact Owner to the
+enrolling PR user, because the sequence sends as Contact Owner.
 
-You asked me to flag conflicts, so:
+## Lifecycle Stage — "Other", but never a demotion
 
-1. **"Never overwrite an existing owner."** The original spec said the import must never touch an existing owner field. Your new rule does exactly that. I'll follow the new rule: owner is always overwritten by the importer. Worth knowing this means if a sales rep owned a journalist record, the import silently takes it over. The "Owned by sales" badge is computed from the *pre-import* state, so you'll still see the warning on that row — but the takeover will already have happened.
-2. **"Never overwrite lifecycle stage."** Same situation. Lifecycle now always gets forced to Other.
+Set Lifecycle Stage to Other on create and update, **unless** the contact is already
+Customer, Opportunity, or Sales Qualified Lead — those are real sales relationships and
+stay as they are. This keeps journalists out of the lead funnel without stepping on
+revenue reporting.
 
-A third, softer one: the later spec set Contact Owner at *enroll* time (so a sequence sends from the pitcher's inbox). That still works — enroll simply re-stamps the owner. Importer owns it until someone actually pitches. No change needed there, just noting the field gets written twice in the lifecycle.
+Two things to confirm on the CRM side (outside the app): that "Other" is understood by
+RevOps as the PR/journalist stage, and that the "lifecycle stage can't move backwards"
+account setting won't reject the write. If that setting blocks it, the write fails
+quietly on some rows and we'd surface it as a per-row note.
 
-Everything else stays additive: name, outlet, title, tier are still fill-only-if-empty, and beats are still merged.
+## Fields currently missed on import
+
+The test run showed these never get written. Adding them, all fill-only-if-empty:
+
+- **Location** (city/state from the media list)
+- **Media relationship status** — set to "New" only when blank; never touch an
+  existing value, especially "Do Not Pitch"
+- **Pitch preferences / notes** — from the notes column when the list has one
+
+Everything else stays as-is: name, outlet, title and tier fill only if empty, beats
+merge as a union, and no blank cell ever clears a populated field.
 
 ## Technical notes
 
-- `supabase/functions/pitch-hubspot/index.ts`:
-  - Resolve the caller's email from the authenticated Supabase user (already available in the handler).
-  - Reuse the existing `getOwners()` cache, adding an email-keyed lookup (lowercased) to map that email to a HubSpot owner id.
-  - In `buildPatch`, add `lifecyclestage: "other"` unconditionally, and `hubspot_owner_id` unconditionally when the owner id resolved.
-  - Pass the resolved owner id through `findOrCreateContact` (both the create and PATCH paths).
-  - When no owner matches, push a `warnings` entry of kind `owner_unmatched`.
-- `src/components/pitch/PitchContactsTable.tsx`: render the new warning kind with the existing badge styling.
+- `supabase/functions/pitch-hubspot/index.ts`
+  - Resolve the caller's email from the authenticated user in the handler.
+  - Extend `getOwners()` with a lowercased email → owner id index.
+  - `buildPatch(row, existing, ownerId)`:
+    - `hubspot_owner_id` only when `!existing?.hubspot_owner_id` and `ownerId` resolved.
+    - `lifecyclestage: "other"` unless existing stage is in
+      `{customer, opportunity, salesqualifiedlead}`.
+    - `city`/location, `media_relationship_status` (default "New"), and
+      `pitch_preferences__notes` — each only when the existing value is blank.
+  - Push a `warnings` entry `owner_unmatched` when the importer has no owner record.
+  - Add `city` (or the portal's location property) to `CONTACT_PROPS` so the
+    "is it empty?" check reads real state.
+- `src/components/pitch/PitchContactsTable.tsx`: render the `owner_unmatched` badge
+  with the existing warning styling.
+- `src/components/pitch/MediaListImport.tsx`: pass the notes column through on the
+  parsed row if it isn't already mapped.
