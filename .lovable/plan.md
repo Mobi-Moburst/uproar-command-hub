@@ -25,13 +25,18 @@ Each campaign shows the client's do-not-pitch list, saturated topics from the la
 
 Drag a Muck Rack CSV or Excel export onto the campaign. For each parsed row:
 
-1. **Match on email** against existing HubSpot contacts. Match found, use it — no duplicate. No email or no match, create the contact.
-2. **Stamp the PR firewall fields** on create/update: `pr_contact = true`, `contact_source = "Import"`, plus outlet, `beats__topics_covered`, and `journalist_tier` when present in the file. Existing owner and lifecycle stage are never overwritten.
-3. Store the returned `hubspot_contact_id` on the campaign contact row.
+1. **Match on email, portal-wide.** The email is normalised (lowercase, trimmed) and searched across the whole HubSpot portal — not scoped to the current user or campaign — so a contact someone else imported last month is found and reused. No match, create.
+2. **Stamp the PR firewall fields, additively.** `pr_contact = true` and `contact_source = "Import"` are safe to re-set every time. Outlet, `beats__topics_covered` and `journalist_tier` fill only if empty, and multi-value beats union rather than replace. An existing owner, lifecycle stage, or any populated field is never overwritten by a blank cell from the file.
+3. Store `hubspot_contact_id` on the campaign contact row and associate the contact to this campaign. A second campaign adds a second association — never a second contact.
 
 The importer previews the first rows, auto-maps common Muck Rack columns (Name, Outlet, Email, Beat, Title, Location) with manual override dropdowns, flags rows with no email, and de-dupes within the file.
 
-Writing at import is what makes real de-duplication and the conflict badges below possible, and applies the sales firewall the moment a reporter enters the system.
+### De-duplication across users and campaigns
+
+- **Email is the primary key.** The portal-wide search before every create is what makes one user's import reuse the contact another user created. HubSpot also enforces email uniqueness at the API, so if two imports race on the same email the second create returns a conflict — handled by re-fetching by email and using that record. An emailed reporter cannot end up duplicated.
+- **Email-less rows are the one gap.** Muck Rack exports often omit email and HubSpot only enforces uniqueness on email, so the same email-less reporter imported twice would otherwise create two records. Before creating one, a secondary match on name + outlet (plus social handle when present) runs, and any hit is surfaced as "possible duplicate — link to this contact, or create new?". Fuzzy matches are never auto-merged.
+
+Writing at import applies the sales firewall the moment a reporter enters the system, and is what makes the "recently pitched" badge possible — the shared contact carries one `last_pitched_date` visible to everyone.
 
 Muck Rack has no accessible API on standard plans, so file import is the supported path.
 
