@@ -10,6 +10,7 @@ import uproarLogo from "@/assets/uproar-white-logo.svg";
 const navItems = [
   { title: "Overview", path: "/" },
   { title: "Clients", path: "/clients" },
+  { title: "Pitch Pipeline", path: "/pitch-pipeline" },
   { title: "Media Placements", path: "/placements" },
   { title: "Awards Pipeline", path: "/awards" },
   { title: "Samples", path: "/samples" },
@@ -18,7 +19,6 @@ const navItems = [
   { title: "Reporter Analytics", path: "/reporters" },
   { title: "Intelligence", path: "/intelligence" },
   { title: "Pulse Center", path: "/pulse" },
-  { title: "Pitch Pipeline", path: "/pitch-pipeline" },
   { title: "Teams", path: "/teams" },
   { title: "Reports", path: "/reports" },
 ];
