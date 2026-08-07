@@ -79,6 +79,24 @@ async function getOwners(): Promise<Map<string, string>> {
   return map;
 }
 
+let stageCache: Map<string, string> | null = null;
+async function getDealStages(): Promise<Map<string, string>> {
+  if (stageCache) return stageCache;
+  const map = new Map<string, string>();
+  try {
+    const data = await hs("/crm/v3/pipelines/deals");
+    for (const pipeline of data?.results ?? []) {
+      for (const stage of pipeline?.stages ?? []) {
+        map.set(String(stage.id), stage.label ?? "");
+      }
+    }
+  } catch (_e) { /* stage labels are optional */ }
+  stageCache = map;
+  return map;
+}
+
+
+
 const norm = (s: string) =>
   (s || "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 
