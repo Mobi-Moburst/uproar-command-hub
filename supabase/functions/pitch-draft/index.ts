@@ -329,6 +329,8 @@ Rules:
     return json({
       drafted: results.filter((r) => !r.error).length,
       failed: results.filter((r) => r.error).length,
+      provider: lastProvider,
+
       results,
     });
   } catch (e) {
