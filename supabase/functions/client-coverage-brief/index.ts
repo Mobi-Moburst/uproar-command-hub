@@ -1,4 +1,4 @@
-import { anthropicJson, withFallback } from "../_shared/ai-writer.ts";
+import { anthropicJson, hasAnthropic, withFallback } from "../_shared/ai-writer.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!LOVABLE_API_KEY && !hasAnthropic()) throw new Error("No AI provider is configured");
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
