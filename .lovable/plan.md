@@ -1,85 +1,36 @@
-# Pitch Pipeline — Phase 3 (approve → ticket → enroll → stage) + Phase 4 (board)
+# Add Claude (Anthropic) for narrative writing tasks
 
-Phases 1–2 are live: campaigns, media-list import with additive CRM upsert, conflict
-badges, AI drafting with voice profiles. This plan builds the send-and-track half,
-with HubSpot as the system of record for both ticket stage and outreach state.
+Lovable AI's built-in gateway serves OpenAI and Google models only — Anthropic isn't in it. So this uses your own Anthropic API key, stored as a project secret, called directly from the edge functions. Those calls bill to your Anthropic account and won't appear in Lovable's AI usage logs.
 
-## What the user will see
+## Which functions switch to Claude
 
-1. **Approve → Arm for send.** In the draft sheet, Approve gains a second step:
-   "Approve & arm". It creates the reporter's ticket, writes the approved body onto
-   the CRM contact, makes the approving user the contact owner, and flips the
-   enrollment trigger. The HubSpot workflow does the actual sequence enrollment and
-   sends as contact owner — nothing is ever auto-sent from the app.
-2. **Stage on the contact row.** Each contact in the campaign table shows its live
-   ticket stage, refreshed on load and after every write.
-3. **Pitch board.** A kanban across all campaigns with the eight pipeline columns.
-   Dragging a card writes the stage to HubSpot and refetches. Dropping into
-   Published (Won) prompts for the clip URL, which is stamped back on the contact.
+Claude becomes the primary model for the four writing/narrative jobs:
 
-## Behaviour rules
+- `pitch-draft` — pitch subject + body
+- `client-coverage-brief` — coverage themes and angle suggestions
+- `ai-coverage-summary` — narrative coverage synthesis
+- `pulse-draft-pitch` — Pulse pitch angle drafts
 
-- Ticket is created at approval, never at import. One ticket per reporter per campaign,
-  named `{client} / {angle} — {reporter}`, associated to the reporter contact only.
-  Client is carried on the ticket's `pr_client` text property — no company or deal
-  association.
-- Stage IDs are always resolved from the live pipeline (`923698812`) label→ID map,
-  cached per function instance. Nothing hardcoded; sanity check that
-  Researching resolves to `1414076054`.
-- HubSpot stage is canonical. The local `stage_cache` column is display only and is
-  overwritten from HubSpot on every read; no local writes that can diverge.
-- On arm: stamp `last_pitched_date = today`, advance `media_relationship_status`
-  New → Warm, set contact owner to the arming user, advance ticket to Pitched.
-- On Won: prompt for clip URL, stamp `last_coverage_date = today` and store the link
-  on the contact.
-- If the arming user has no CRM owner record, block arming with a clear message —
-  the sequence sends as contact owner, so an unresolved owner would send as nobody.
-- Concurrency safeguards (per-contact enrollment lock, immutable per-send body) are
-  deferred to multi-user rollout as the spec states; the solo test build uses the
-  shared `pitch_body` token.
+Left on Lovable AI (extraction/classification, not writing): `pulse-scan`, `pulse-match-reporters`, `hubspot-client-comms`, `extract-sow`.
+
+## Fallback behavior
+
+Every Claude call is wrapped: if Anthropic returns an error (rate limit, credit, outage, or the key isn't set at all), the exact same prompt is re-sent to the existing Lovable AI model and the feature completes normally. The response tells the UI which provider actually answered, so failures are visible without breaking anything.
+
+Rules:
+- No key configured → silently use Lovable AI (nothing breaks before the key is added).
+- Anthropic 429/5xx → fall back immediately, log the reason.
+- Anthropic 400 (bad request) → fall back and log loudly; that's a bug to fix, not a transient issue.
+- One attempt at Anthropic per request, no retry loops.
 
 ## Technical notes
 
-`supabase/functions/pitch-hubspot/index.ts` gains actions, reusing the existing
-`hs()` gateway helper, `loadPipeline()` map and `ownerIdForEmail()`:
-
-- `create-ticket` — POST `/crm/v3/objects/tickets` with `hs_pipeline`,
-  `hs_pipeline_stage` (label→ID), `subject`, `pr_client`; then contact association
-  (`/associations/contacts/{id}/contact_to_ticket`). Returns `hubspot_ticket_id`.
-- `approve-and-arm` — resolves owner from the caller's login email, PATCHes the
-  contact (`pitch_body`, `hubspot_owner_id`, `pr_pitch_ready` trigger flag,
-  `last_pitched_date`, New→Warm), creates the ticket if absent, moves it to Pitched,
-  persists `hubspot_ticket_id`/`stage_cache` on `pitch_contacts`.
-- `set-stage` — PATCH ticket stage via the map, refetch, return current stage; Won
-  branch also PATCHes `last_coverage_date` and the clip URL onto the contact.
-- `read-stages` — batch read `/crm/v3/objects/tickets/batch/read` for ticket ids,
-  returns id→stage label, used to refresh `stage_cache`.
-
-Frontend:
-
-- `src/hooks/usePitchPipeline.ts` — add `useApproveAndArm`, `useSetStage`,
-  `usePitchBoard` (all campaigns' contacts + drafts joined), and a stage refresh that
-  runs on board/campaign load.
-- `src/components/pitch/PitchDraftSheet.tsx` — replace the trailing "sending lands in
-  the next phase" note with the arm action, owner-missing warning, and armed state.
-- `src/components/pitch/PitchContactsTable.tsx` — stage column driven by `stage_cache`.
-- New `src/components/pitch/PitchBoard.tsx` plus a Won clip-URL dialog, rendered on
-  `src/pages/PitchPipelinePage.tsx` behind a Campaigns / Board toggle. Drag and drop
-  via native HTML5 handlers (no new dependency).
-
-No schema change needed — `hubspot_ticket_id` and `stage_cache` already exist on
-`pitch_contacts`.
-
-## Prerequisites on the HubSpot side (outside the app)
-
-These are RevOps setup steps; the app code ships either way but arming stays inert
-until they exist:
-
-- Contact properties `pitch_body` (multi-line text) and the enrollment trigger flag,
-  plus ticket property `pr_client`.
-- The PR sequence-enrollment workflow (trigger on the flag, enroll, send as contact
-  owner) and the sales/marketing firewall workflow.
-- `tickets` scope on the connection.
-
-I can verify the pipeline map and a live ticket write with a throwaway ticket before
-building the board, so we know the writes land.
+- New shared module `supabase/functions/_shared/ai-writer.ts`:
+  - `callWriter({ system, user, jsonSchema, fallback })` — tries Anthropic Messages API (`https://api.anthropic.com/v1/messages`, `anthropic-version: 2023-06-01`, streaming so long generations don't hit the ~2 min function timeout), then falls back to the caller-supplied Lovable AI call.
+  - Model: `claude-sonnet-4-5` (configurable via an `ANTHROPIC_MODEL` secret if you want to pin something else).
+  - JSON output is enforced via a single Anthropic tool with the existing JSON schema (Anthropic's equivalent of structured output), so `pitch-draft`'s strict `{subject, body}` shape and the brief schemas keep working unchanged.
+  - No timeout wrappers or abort timers on either provider.
+- Each of the four functions is refactored to build its prompt once and hand it to `callWriter`, keeping its current Lovable AI request as the fallback closure. Response shape returned to the frontend is unchanged, plus an optional `provider` field.
+- Frontend: no functional change. A small "drafted by Claude / Lovable AI" indicator can be added to the pitch draft sheet if you want the provenance visible — say the word.
+- Secret: `ANTHROPIC_API_KEY` requested via the secure secret form (get it from console.anthropic.com → API Keys). It stays server-side only.
+- Verification: after deploy, invoke each of the four functions once and confirm a real Claude response, then temporarily use a bad key to confirm the fallback path returns a valid result.
