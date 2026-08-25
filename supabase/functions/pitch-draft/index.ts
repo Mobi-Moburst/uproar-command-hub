@@ -278,15 +278,17 @@ Rules:
 - End with one specific, easy-to-say-yes-to offer (interview, exclusive data, exec quote, embargoed release).
 - Do not include any rationale, commentary, or notes — return the email only.`;
 
-        const raw = await callModel(system, user);
+        const { result: raw, provider } = await callModel(system, user);
+        lastProvider = provider;
         const parsed = JSON.parse(raw) as { subject?: string; body?: string };
         const subject = (parsed.subject ?? "").trim();
         const body = (parsed.body ?? "").trim();
         if (!subject || !body) throw new Error("Incomplete draft returned");
 
         if (isPreview) {
-          return json({ preview: true, contact_name: contact.name, subject, body });
+          return json({ preview: true, contact_name: contact.name, subject, body, provider });
         }
+
 
 
         const { data: existing } = await supabase
