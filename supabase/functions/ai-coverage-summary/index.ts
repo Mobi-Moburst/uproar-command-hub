@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { anthropicTextStreamAsOpenAI, hasAnthropic } from "../_shared/ai-writer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,7 +16,7 @@ serve(async (req) => {
     const { clientName, periodLabel, metrics } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!LOVABLE_API_KEY && !hasAnthropic()) throw new Error("No AI provider is configured");
 
     const systemPrompt = `You are a senior PR & communications analyst writing for Uproar PR (a division of Moburst). 
 Write a concise, insight-driven monthly/periodic coverage summary for a client. 
@@ -55,6 +56,27 @@ ${metrics.topReporters.map((r: any) => `  - ${r.name}: ${r.conversions} conversi
 
 Monthly Reach Trend (recent months):
 ${metrics.monthlyReach.map((m: any) => `  - ${m.label}: ${m.reach.toLocaleString()} reach, ${m.count} placements`).join("\n")}`;
+
+    // Claude first — its SSE is re-framed as OpenAI-style chat frames so the
+    // client stream parser is identical for both providers.
+    if (hasAnthropic()) {
+      try {
+        const stream = await anthropicTextStreamAsOpenAI({
+          system: systemPrompt,
+          user: userPrompt,
+          maxTokens: 3000,
+        });
+        return new Response(stream, {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "text/event-stream",
+            "X-AI-Provider": "anthropic",
+          },
+        });
+      } catch (e) {
+        console.warn("[ai-coverage-summary] Claude unavailable, using Lovable AI:", e);
+      }
+    }
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -97,7 +119,7 @@ ${metrics.monthlyReach.map((m: any) => `  - ${m.label}: ${m.reach.toLocaleString
     }
 
     return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream", "X-AI-Provider": "lovable" },
     });
   } catch (e) {
     console.error("ai-coverage-summary error:", e);
