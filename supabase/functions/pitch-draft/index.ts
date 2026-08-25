@@ -98,6 +98,26 @@ async function callLovableModel(system: string, user: string): Promise<string> {
   return text;
 }
 
+/** Claude first (better prose), Lovable AI as automatic fallback. */
+async function callModel(system: string, user: string) {
+  return await withFallback(
+    async () =>
+      JSON.stringify(
+        await anthropicJson({
+          system,
+          user,
+          schema: DRAFT_SCHEMA,
+          toolName: "pitch_draft",
+          description: "Return the pitch email subject line and body.",
+          maxTokens: 1500,
+        }),
+      ),
+    () => callLovableModel(system, user),
+  );
+}
+
+
+
 function line(label: string, value: unknown) {
   const v = Array.isArray(value) ? value.join(", ") : value;
   return v ? `${label}: ${v}` : "";
