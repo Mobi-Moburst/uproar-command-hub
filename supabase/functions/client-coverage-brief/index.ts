@@ -1,3 +1,4 @@
+import { anthropicJson, hasAnthropic, withFallback } from "../_shared/ai-writer.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -33,7 +34,7 @@ Deno.serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!LOVABLE_API_KEY && !hasAnthropic()) throw new Error("No AI provider is configured");
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -103,46 +104,94 @@ ${rows
   )
   .join("\n")}`;
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+    const BRIEF_SCHEMA = {
+      type: "object",
+      properties: {
+        summary: { type: "string" },
+        themes: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              theme: { type: "string" },
+              detail: { type: "string" },
+              count: { type: "number" },
+            },
+            required: ["theme", "detail", "count"],
+          },
+        },
+        saturated: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { point: { type: "string" }, detail: { type: "string" } },
+            required: ["point", "detail"],
+          },
+        },
+        gaps: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { point: { type: "string" }, detail: { type: "string" } },
+            required: ["point", "detail"],
+          },
+        },
+        fresh_angles: { type: "array", items: { type: "string" } },
       },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
+      required: ["summary", "themes", "saturated", "gaps", "fresh_angles"],
+    };
 
-    if (!aiRes.ok) {
-      const body = await aiRes.text();
-      console.error("AI gateway error", aiRes.status, body);
-      const msg =
-        aiRes.status === 429
-          ? "Rate limit exceeded. Try again in a moment."
-          : aiRes.status === 402
-            ? "AI credits exhausted. Add credits in Settings → Workspace → Usage."
-            : "AI gateway error";
-      return new Response(JSON.stringify({ error: msg }), {
-        status: aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const callLovable = async () => {
+      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          response_format: { type: "json_object" },
+        }),
       });
-    }
 
-    const aiJson = await aiRes.json();
-    const raw = aiJson?.choices?.[0]?.message?.content ?? "{}";
-    let brief: unknown = {};
-    try {
-      brief = JSON.parse(raw.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim());
-    } catch (e) {
-      console.error("Failed to parse AI JSON:", raw.slice(0, 500));
-      throw new Error("The AI returned an unreadable summary. Try again.");
-    }
+      if (!aiRes.ok) {
+        const body = await aiRes.text();
+        console.error("AI gateway error", aiRes.status, body);
+        const msg =
+          aiRes.status === 429
+            ? "Rate limit exceeded. Try again in a moment."
+            : aiRes.status === 402
+              ? "AI credits exhausted. Add credits in Settings → Workspace → Usage."
+              : "AI gateway error";
+        throw new Error(msg);
+      }
+
+      const aiJson = await aiRes.json();
+      const raw = aiJson?.choices?.[0]?.message?.content ?? "{}";
+      try {
+        return JSON.parse(raw.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim());
+      } catch (_e) {
+        console.error("Failed to parse AI JSON:", raw.slice(0, 500));
+        throw new Error("The AI returned an unreadable summary. Try again.");
+      }
+    };
+
+    const { result: brief, provider } = await withFallback<unknown>(
+      () =>
+        anthropicJson({
+          system: systemPrompt,
+          user: userPrompt,
+          schema: BRIEF_SCHEMA,
+          toolName: "coverage_brief",
+          description: "Return the client's earned-media coverage brief.",
+          maxTokens: 4096,
+        }),
+      callLovable,
+    );
 
     const record = {
       client_name,
@@ -154,12 +203,13 @@ ${rows
       synced_at: new Date().toISOString(),
     };
 
+
     const { error } = await admin
       .from("client_coverage_intel")
       .upsert(record, { onConflict: "client_name" });
     if (error) throw error;
 
-    return new Response(JSON.stringify(record), {
+    return new Response(JSON.stringify({ ...record, provider }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

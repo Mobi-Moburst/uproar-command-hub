@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { anthropicJson, withFallback } from "../_shared/ai-writer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,9 +26,9 @@ const DRAFT_SCHEMA = {
   },
   required: ["subject", "body"],
 };
-
 /** Streams /v1/responses and returns the accumulated output text. */
-async function callModel(system: string, user: string): Promise<string> {
+async function callLovableModel(system: string, user: string): Promise<string> {
+
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -97,6 +98,26 @@ async function callModel(system: string, user: string): Promise<string> {
   if (!text.trim()) throw new Error("The model returned an empty draft — try again");
   return text;
 }
+
+/** Claude first (better prose), Lovable AI as automatic fallback. */
+async function callModel(system: string, user: string) {
+  return await withFallback(
+    async () =>
+      JSON.stringify(
+        await anthropicJson({
+          system,
+          user,
+          schema: DRAFT_SCHEMA,
+          toolName: "pitch_draft",
+          description: "Return the pitch email subject line and body.",
+          maxTokens: 1500,
+        }),
+      ),
+    () => callLovableModel(system, user),
+  );
+}
+
+
 
 function line(label: string, value: unknown) {
   const v = Array.isArray(value) ? value.join(", ") : value;
@@ -225,6 +246,8 @@ serve(async (req) => {
       .join("\n\n");
 
     const results: Array<{ contact_id: string; subject?: string; body?: string; error?: string }> = [];
+    let lastProvider: "anthropic" | "lovable" | undefined;
+
 
     for (const contact of contacts) {
       try {
@@ -257,15 +280,17 @@ Rules:
 - End with one specific, easy-to-say-yes-to offer (interview, exclusive data, exec quote, embargoed release).
 - Do not include any rationale, commentary, or notes — return the email only.`;
 
-        const raw = await callModel(system, user);
+        const { result: raw, provider } = await callModel(system, user);
+        lastProvider = provider;
         const parsed = JSON.parse(raw) as { subject?: string; body?: string };
         const subject = (parsed.subject ?? "").trim();
         const body = (parsed.body ?? "").trim();
         if (!subject || !body) throw new Error("Incomplete draft returned");
 
         if (isPreview) {
-          return json({ preview: true, contact_name: contact.name, subject, body });
+          return json({ preview: true, contact_name: contact.name, subject, body, provider });
         }
+
 
 
         const { data: existing } = await supabase
@@ -304,6 +329,8 @@ Rules:
     return json({
       drafted: results.filter((r) => !r.error).length,
       failed: results.filter((r) => r.error).length,
+      provider: lastProvider,
+
       results,
     });
   } catch (e) {

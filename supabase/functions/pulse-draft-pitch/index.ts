@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { anthropicJson, anthropicModel, withFallback } from "../_shared/ai-writer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -68,32 +69,54 @@ Write a cold pitch:
 
 Return JSON: { "subject": "...", "body": "..." }`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: "You write tight, modern PR pitches. No fluff. Return only JSON." },
-          { role: "user", content: prompt },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
+    const SYSTEM = "You write tight, modern PR pitches. No fluff. Return only JSON.";
 
-    if (!res.ok) {
-      if (res.status === 429) throw new Error("Rate limit — try again in a moment");
-      if (res.status === 402) throw new Error("AI credits exhausted — add credits in workspace settings");
-      throw new Error(`AI gateway error ${res.status}`);
-    }
+    const callLovable = async () => {
+      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: [
+            { role: "system", content: SYSTEM },
+            { role: "user", content: prompt },
+          ],
+          response_format: { type: "json_object" },
+        }),
+      });
 
-    const ai = await res.json();
-    const parsed = JSON.parse(ai.choices?.[0]?.message?.content || "{}");
+      if (!res.ok) {
+        if (res.status === 429) throw new Error("Rate limit — try again in a moment");
+        if (res.status === 402) throw new Error("AI credits exhausted — add credits in workspace settings");
+        throw new Error(`AI gateway error ${res.status}`);
+      }
+
+      const ai = await res.json();
+      return JSON.parse(ai.choices?.[0]?.message?.content || "{}");
+    };
+
+    const { result: parsed, provider } = await withFallback<{ subject?: string; body?: string }>(
+      () =>
+        anthropicJson({
+          system: SYSTEM,
+          user: prompt,
+          schema: {
+            type: "object",
+            properties: { subject: { type: "string" }, body: { type: "string" } },
+            required: ["subject", "body"],
+          },
+          toolName: "pulse_pitch",
+          description: "Return the cold pitch subject line and body.",
+          maxTokens: 1200,
+        }),
+      callLovable,
+    );
+
     const pitch = {
       subject: parsed.subject || "",
       body: parsed.body || "",
       drafted_at: new Date().toISOString(),
-      model: MODEL,
+      model: provider === "anthropic" ? anthropicModel() : MODEL,
     };
 
     const nextPitches = { ...(signal.drafted_pitches || {}), [reporter_id]: pitch };
@@ -103,7 +126,7 @@ Return JSON: { "subject": "...", "body": "..." }`;
       .eq("id", signal_id);
     if (uErr) throw uErr;
 
-    return new Response(JSON.stringify({ success: true, pitch, cached: false }), {
+    return new Response(JSON.stringify({ success: true, pitch, cached: false, provider }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
