@@ -25,9 +25,9 @@ const DRAFT_SCHEMA = {
   },
   required: ["subject", "body"],
 };
-
 /** Streams /v1/responses and returns the accumulated output text. */
-async function callModel(system: string, user: string): Promise<string> {
+async function callLovableModel(system: string, user: string): Promise<string> {
+
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) throw new Error("LOVABLE_API_KEY is not configured");
 
