@@ -1,3 +1,4 @@
+import { anthropicJson, withFallback } from "../_shared/ai-writer.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -208,7 +209,7 @@ ${rows
       .upsert(record, { onConflict: "client_name" });
     if (error) throw error;
 
-    return new Response(JSON.stringify(record), {
+    return new Response(JSON.stringify({ ...record, provider }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
