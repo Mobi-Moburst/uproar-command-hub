@@ -246,6 +246,8 @@ serve(async (req) => {
       .join("\n\n");
 
     const results: Array<{ contact_id: string; subject?: string; body?: string; error?: string }> = [];
+    let lastProvider: "anthropic" | "lovable" | undefined;
+
 
     for (const contact of contacts) {
       try {
