@@ -4,7 +4,7 @@ The bridge from "a human approved this draft" to "HubSpot enrolled the reporter 
 
 ## The concurrency problem, stated plainly
 
-The pitch text rides on a contact property (`pitch_body`) that the sequence reads through a token. One property, one reporter, many pitchers. If Sam arms a pitch to a reporter and Alex arms a different one ninety seconds later, Alex's text overwrites Sam's before Sam's sequence has finished sending. The reporter gets Alex's pitch under Sam's name.
+The pitch text rides on a contact property (`ur_pitch_body`) that the sequence reads through a token. One property, one reporter, many pitchers. If Sam arms a pitch to a reporter and Alex arms a different one ninety seconds later, Alex's text overwrites Sam's before Sam's sequence has finished sending. The reporter gets Alex's pitch under Sam's name.
 
 The fix is a claim: one active pitch per reporter at a time, enforced before anything is written to HubSpot.
 
@@ -13,11 +13,11 @@ The fix is a claim: one active pitch per reporter at a time, enforced before any
 ```text
 Approve draft
    -> Claim the reporter   (fails if someone else holds it)
-   -> Write pitch_subject + pitch_body to the contact
+   -> Write ur_pitch_subject + ur_pitch_body to the contact
    -> Read the properties back and confirm they match
    -> Set Contact Owner = the arming PR user
    -> Create the ticket, move it to Pitched
-   -> Flip pitch_enroll_trigger = true
+   -> Flip ur_pitch_enroll_trigger = true
    -> Stamp last_pitched_date, New advances to Warm
    -> HubSpot workflow enrolls into the PR sequence, sends as Contact Owner
 ```
@@ -44,26 +44,26 @@ Contact properties (single-line text unless noted):
 
 | Property | Type | Purpose |
 |---|---|---|
-| `pitch_subject` | text | Subject line token |
-| `pitch_body` | multi-line text | Pitch body token |
-| `pitch_enroll_trigger` | checkbox | Workflow A trigger, cleared after enrollment |
-| `pitch_claimed_by` | text | Email of the PR person holding the reporter |
-| `pitch_claimed_at` | date | When the claim started |
-| `pitch_campaign` | text | Client and angle, for readability in the CRM |
-| `pitch_release_signal` | checkbox | Workflow sets this on reply or sequence end |
+| `ur_pitch_subject` | text | Subject line token |
+| `ur_pitch_body` | multi-line text | Pitch body token |
+| `ur_pitch_enroll_trigger` | checkbox | Workflow A trigger, cleared after enrollment |
+| `ur_pitch_claimed_by` | text | Email of the PR person holding the reporter |
+| `ur_pitch_claimed_at` | date | When the claim started |
+| `ur_pitch_campaign` | text | Client and angle, for readability in the CRM |
+| `ur_pitch_release_signal` | checkbox | Workflow sets this on reply or sequence end |
 
-One sequence to build: a shared PR sequence, send as Contact Owner, body from `{{ contact.pitch_body }}`, subject from `{{ contact.pitch_subject }}`, auto-unenroll on reply.
+One sequence to build: a shared PR sequence, send as Contact Owner, body from `{{ contact.ur_pitch_body }}`, subject from `{{ contact.ur_pitch_subject }}`, auto-unenroll on reply.
 
 Two workflows:
 
-- **Enroll**: trigger `pitch_enroll_trigger = true` -> enroll in the PR sequence -> clear the trigger.
-- **Release**: trigger on reply received, sequence finished, or unenrolled -> set `pitch_release_signal = true`.
+- **Enroll**: trigger `ur_pitch_enroll_trigger = true` -> enroll in the PR sequence -> clear the trigger.
+- **Release**: trigger on reply received, sequence finished, or unenrolled -> set `ur_pitch_release_signal = true`.
 
 The existing sales firewall workflow stays untouched.
 
 ## One thing to verify before this is trusted at volume
 
-HubSpot may render `{{ contact.pitch_body }}` once at enrollment or fresh at each send in the sequence. The claim covers us either way, but if it re-reads live, the body must stay untouched for the whole sequence, which makes claim length a correctness requirement rather than a courtesy. First step of the build is a two-contact test that settles this, and the answer gets written into the plan file.
+HubSpot may render `{{ contact.ur_pitch_body }}` once at enrollment or fresh at each send in the sequence. The claim covers us either way, but if it re-reads live, the body must stay untouched for the whole sequence, which makes claim length a correctness requirement rather than a courtesy. First step of the build is a two-contact test that settles this, and the answer gets written into the plan file.
 
 ## What you will see in the app
 
@@ -85,7 +85,7 @@ HubSpot may render `{{ contact.pitch_body }}` once at enrollment or fresh at eac
 - `set-stage` — label-based write then refetch into `stage_cache`.
 - `read-stages` — batch read for the board.
 - `release-claim` — manual or admin force release.
-- `reconcile-claims` — reads `pitch_release_signal` and ticket stages, releases anything finished, clears the signal.
+- `reconcile-claims` — reads `ur_pitch_release_signal` and ticket stages, releases anything finished, clears the signal.
 
 **Scheduled**: `reconcile-claims` runs on a cron every 30 minutes so claims free themselves without anyone clicking.
 
