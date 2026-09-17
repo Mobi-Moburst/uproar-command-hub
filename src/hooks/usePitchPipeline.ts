@@ -325,3 +325,93 @@ export function usePitchDrafts(campaignId: string | undefined, contactIds: strin
     setStatus,
   };
 }
+
+export interface PitchClaim {
+  id: string;
+  contact_id: string | null;
+  hubspot_contact_id: string;
+  claimed_by: string | null;
+  claimed_by_email: string | null;
+  claimed_at: string;
+}
+
+export function usePitchArming(campaignId: string | undefined, contactIds: string[]) {
+  const queryClient = useQueryClient();
+  const key = ["pitch-claims", campaignId];
+
+  const claims = useQuery({
+    queryKey: key,
+    enabled: !!campaignId && contactIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pitch_claims")
+        .select("id, contact_id, hubspot_contact_id, claimed_by, claimed_by_email, claimed_at")
+        .in("contact_id", contactIds)
+        .is("released_at", null);
+      if (error) throw error;
+      const map: Record<string, PitchClaim> = {};
+      for (const c of (data ?? []) as PitchClaim[]) if (c.contact_id) map[c.contact_id] = c;
+      return map;
+    },
+  });
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: key });
+    queryClient.invalidateQueries({ queryKey: ["pitch-contacts", campaignId] });
+    queryClient.invalidateQueries({ queryKey: ["pitch-drafts", campaignId] });
+  };
+
+  const arm = useMutation({
+    mutationFn: (ids: string[]) =>
+      invoke<{
+        armed: number;
+        blocked: number;
+        failed: number;
+        capped: number;
+        results: { contact_id: string; ok: boolean; reason?: string }[];
+      }>({ action: "approve-and-arm", contact_ids: ids }),
+    onSuccess: (res) => {
+      refresh();
+      if (res.armed) toast.success(`${res.armed} pitch${res.armed === 1 ? "" : "es"} armed for sending`);
+      if (res.blocked) toast.warning(`${res.blocked} held by someone else`);
+      if (res.capped) toast.warning(`${res.capped} hit today's send cap`);
+      if (res.failed) {
+        const first = res.results.find((r) => !r.ok && r.reason)?.reason;
+        toast.error(first || `${res.failed} could not be armed`);
+      }
+    },
+    onError: (e: Error) => toast.error(e.message || "Arming failed"),
+  });
+
+  const release = useMutation({
+    mutationFn: (input: { contact_id: string; reason?: string; force?: boolean }) =>
+      invoke({ action: "release-claim", ...input }),
+    onSuccess: () => {
+      refresh();
+      toast.success("Reporter released");
+    },
+    onError: (e: Error) => toast.error(e.message || "Could not release the reporter"),
+  });
+
+  const setStage = useMutation({
+    mutationFn: (input: { contact_id: string; stage: string; clip_url?: string }) =>
+      invoke<{ stage: string }>({ action: "set-stage", ...input }),
+    onSuccess: (res) => {
+      refresh();
+      toast.success(`Moved to ${res.stage}`);
+    },
+    onError: (e: Error) => toast.error(e.message || "Could not move the ticket"),
+  });
+
+  const syncStages = useMutation({
+    mutationFn: () => invoke({ action: "read-stages", campaign_id: campaignId }),
+    onSuccess: () => {
+      refresh();
+      toast.success("Stages synced from the CRM");
+    },
+    onError: (e: Error) => toast.error(e.message || "Could not sync stages"),
+  });
+
+  return { claims: claims.data ?? {}, arm, release, setStage, syncStages };
+}
+

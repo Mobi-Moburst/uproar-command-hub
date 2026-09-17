@@ -46,6 +46,7 @@ interface Props {
   contacts: PitchContact[];
   portalId?: string | null;
   drafts?: Record<string, PitchDraft>;
+  claims?: Record<string, { claimed_by_email: string | null; claimed_at: string }>;
   onToggleExclude: (contact: PitchContact) => void;
   onOpenDraft?: (contact: PitchContact) => void;
 }
@@ -54,9 +55,11 @@ export function PitchContactsTable({
   contacts,
   portalId,
   drafts = {},
+  claims = {},
   onToggleExclude,
   onOpenDraft,
 }: Props) {
+
   return (
     <div className="overflow-hidden rounded-lg border border-[rgba(255,255,255,0.08)]">
       <Table>
@@ -67,8 +70,10 @@ export function PitchContactsTable({
             <TableHead>Beat</TableHead>
             <TableHead>Flags</TableHead>
             <TableHead className="w-[130px]">Pitch</TableHead>
+            <TableHead className="w-[130px]">Stage</TableHead>
             <TableHead className="w-[110px] text-right">CRM</TableHead>
             <TableHead className="w-[60px]" />
+
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -92,13 +97,22 @@ export function PitchContactsTable({
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
+                    {claims[contact.id] && (
+                      <Badge
+                        variant="outline"
+                        className="whitespace-nowrap border-[hsl(var(--warning))]/40 bg-[hsl(var(--warning))]/10 text-[11px] font-medium text-[hsl(var(--warning))]"
+                      >
+                        Held by {claims[contact.id].claimed_by_email || "another user"}
+                      </Badge>
+                    )}
                     {warnings.length ? (
                       warnings.map((w, i) => <WarningBadge key={`${w.kind}-${i}`} warning={w} />)
-                    ) : (
+                    ) : claims[contact.id] ? null : (
                       <span className="text-xs text-muted-foreground font-mono">clear</span>
                     )}
                   </div>
                 </TableCell>
+
                 <TableCell>
                   {(() => {
                     const draft = drafts[contact.id];
@@ -110,12 +124,24 @@ export function PitchContactsTable({
                         onClick={() => onOpenDraft?.(contact)}
                       >
                         <Sparkles className="h-3.5 w-3.5" />
-                        {draft ? (draft.status === "approved" ? "Approved" : "Draft ready") : "Draft"}
+                        {draft
+                          ? draft.status === "armed"
+                            ? "Armed"
+                            : draft.status === "approved"
+                              ? "Approved"
+                              : "Draft ready"
+                          : "Draft"}
                       </Button>
                     );
                   })()}
                 </TableCell>
+                <TableCell>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {contact.stage_cache || "—"}
+                  </span>
+                </TableCell>
                 <TableCell className="text-right">
+
                   {contact.hubspot_contact_id && portalId ? (
                     <a
                       href={`https://app.hubspot.com/contacts/${portalId}/contact/${contact.hubspot_contact_id}`}

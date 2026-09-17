@@ -1,19 +1,23 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Plus, X, Sparkles } from "lucide-react";
+import { ArrowLeft, Plus, X, Sparkles, Send, RefreshCw } from "lucide-react";
 import {
   usePitchCampaign,
   usePitchContacts,
   useClientGuardrails,
   useHubspotPortalId,
   usePitchDrafts,
+  usePitchArming,
   type PitchContact,
 } from "@/hooks/usePitchPipeline";
+
 import { MediaListImport } from "@/components/pitch/MediaListImport";
 import { PitchContactsTable } from "@/components/pitch/PitchContactsTable";
 import { PitchDraftSheet } from "@/components/pitch/PitchDraftSheet";
@@ -31,7 +35,21 @@ export default function PitchCampaignPage() {
   const [draftContact, setDraftContact] = useState<PitchContact | null>(null);
   const contactIds = useMemo(() => contacts.map((c) => c.id), [contacts]);
   const { drafts, generate, saveDraft, setStatus } = usePitchDrafts(campaignId, contactIds);
+  const { claims, arm, release, syncStages } = usePitchArming(campaignId, contactIds);
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
   const activeDraft = draftContact ? drafts[draftContact.id] : undefined;
+  const activeClaim = draftContact ? claims[draftContact.id] : undefined;
+  const readyToArm = useMemo(
+    () =>
+      contacts
+        .filter((c) => !c.excluded && drafts[c.id]?.status === "approved" && !claims[c.id])
+        .map((c) => c.id),
+    [contacts, drafts, claims],
+  );
+
   const needsDraft = useMemo(
     () => contacts.filter((c) => !c.excluded && !drafts[c.id]).map((c) => c.id),
     [contacts, drafts],
@@ -173,30 +191,54 @@ export default function PitchCampaignPage() {
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-semibold text-foreground">Media list</h2>
-            {needsDraft.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={generate.isPending}
-                  onClick={() => generate.mutate({ contact_ids: needsDraft, mode: "custom" })}
-                >
-                  <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                  {generate.isPending ? "Drafting…" : `Draft all (${needsDraft.length})`}
-                </Button>
-                {campaign.press_release_body && (
+            <div className="flex flex-wrap gap-2">
+              {needsDraft.length > 0 && (
+                <>
                   <Button
                     size="sm"
                     variant="outline"
                     disabled={generate.isPending}
-                    onClick={() => generate.mutate({ contact_ids: needsDraft, mode: "bulk" })}
+                    onClick={() => generate.mutate({ contact_ids: needsDraft, mode: "custom" })}
                   >
-                    Bulk from release
+                    <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                    {generate.isPending ? "Drafting…" : `Draft all (${needsDraft.length})`}
                   </Button>
-                )}
-              </div>
-            )}
+                  {campaign.press_release_body && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={generate.isPending}
+                      onClick={() => generate.mutate({ contact_ids: needsDraft, mode: "bulk" })}
+                    >
+                      Bulk from release
+                    </Button>
+                  )}
+                </>
+              )}
+              {readyToArm.length > 0 && (
+                <Button
+                  size="sm"
+                  disabled={arm.isPending}
+                  onClick={() => arm.mutate(readyToArm)}
+                >
+                  <Send className="mr-1.5 h-3.5 w-3.5" />
+                  {arm.isPending ? "Arming…" : `Arm approved (${readyToArm.length})`}
+                </Button>
+              )}
+              {contacts.some((c) => c.hubspot_ticket_id) && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={syncStages.isPending}
+                  onClick={() => syncStages.mutate()}
+                >
+                  <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                  {syncStages.isPending ? "Syncing…" : "Sync stages"}
+                </Button>
+              )}
+            </div>
           </div>
+
           {contactsLoading ? (
             <Skeleton className="h-64 w-full rounded-lg" />
           ) : contacts.length === 0 ? (
@@ -212,6 +254,7 @@ export default function PitchCampaignPage() {
               contacts={contacts}
               portalId={portal?.portal_id}
               drafts={drafts}
+              claims={claims}
               onOpenDraft={(contact) => setDraftContact(contact)}
               onToggleExclude={(contact) =>
                 setExcluded.mutate({ id: contact.id, excluded: !contact.excluded })
@@ -225,6 +268,9 @@ export default function PitchCampaignPage() {
           draft={activeDraft}
           isGenerating={generate.isPending}
           isSaving={saveDraft.isPending}
+          isArming={arm.isPending}
+          claim={activeClaim ?? null}
+          isHolder={!!activeClaim && activeClaim.claimed_by === userId}
           onClose={() => setDraftContact(null)}
           onGenerate={(mode) =>
             draftContact && generate.mutate({ contact_ids: [draftContact.id], mode })
@@ -236,7 +282,10 @@ export default function PitchCampaignPage() {
             activeDraft &&
             setStatus.mutate({ id: activeDraft.id, status: approved ? "approved" : "draft" })
           }
+          onArm={() => draftContact && arm.mutate([draftContact.id])}
+          onRelease={() => draftContact && release.mutate({ contact_id: draftContact.id })}
         />
+
       </div>
     </DashboardLayout>
   );
