@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Copy, Check, Sparkles, RefreshCw } from "lucide-react";
+import { Copy, Check, Sparkles, RefreshCw, Send } from "lucide-react";
 import { toast } from "sonner";
 import type { PitchContact, PitchDraft } from "@/hooks/usePitchPipeline";
 
@@ -19,10 +19,15 @@ interface Props {
   draft: PitchDraft | undefined;
   isGenerating: boolean;
   isSaving: boolean;
+  isArming?: boolean;
+  claim?: { claimed_by_email: string | null; claimed_at: string } | null;
+  isHolder?: boolean;
   onClose: () => void;
   onGenerate: (mode: "custom" | "bulk") => void;
   onSave: (subject: string, body: string) => void;
   onApprove: (approved: boolean) => void;
+  onArm?: () => void;
+  onRelease?: () => void;
 }
 
 export function PitchDraftSheet({
@@ -30,10 +35,15 @@ export function PitchDraftSheet({
   draft,
   isGenerating,
   isSaving,
+  isArming,
+  claim,
+  isHolder,
   onClose,
   onGenerate,
   onSave,
   onApprove,
+  onArm,
+  onRelease,
 }: Props) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -46,6 +56,9 @@ export function PitchDraftSheet({
 
   const dirty = !!draft && (subject !== draft.subject || body !== draft.body);
   const approved = draft?.status === "approved";
+  const armed = draft?.status === "armed";
+  const blockedByOther = !!claim && !isHolder;
+
 
   const copy = async () => {
     await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
@@ -125,17 +138,40 @@ export function PitchDraftSheet({
                 </Button>
                 <Button
                   size="sm"
-                  variant={approved ? "outline" : "default"}
-                  disabled={dirty}
+                  variant={approved || armed ? "outline" : "default"}
+                  disabled={dirty || armed}
                   onClick={() => onApprove(!approved)}
                 >
                   {approved ? "Unapprove" : "Approve"}
                 </Button>
+                {approved && !armed && (
+                  <Button
+                    size="sm"
+                    disabled={dirty || isArming || blockedByOther}
+                    onClick={() => onArm?.()}
+                  >
+                    <Send className="mr-1.5 h-3.5 w-3.5" />
+                    {isArming ? "Arming…" : "Arm for sequence"}
+                  </Button>
+                )}
+                {claim && isHolder && (
+                  <Button size="sm" variant="outline" onClick={() => onRelease?.()}>
+                    Release reporter
+                  </Button>
+                )}
               </div>
+              {blockedByOther && (
+                <p className="rounded-lg border border-[hsl(var(--warning))]/40 bg-[hsl(var(--warning))]/10 p-3 text-xs text-[hsl(var(--warning))]">
+                  {claim?.claimed_by_email || "Someone else"} has an active pitch on this reporter.
+                  Wait for it to finish, or ask an admin to release it.
+                </p>
+              )}
               <p className="text-xs text-muted-foreground font-mono">
-                Approving marks the pitch ready. Nothing is sent from here — sending lands in the
-                next phase.
+                {armed
+                  ? "Armed. The CRM workflow enrolls this reporter in the sequence and sends as the contact owner."
+                  : "Approve, then arm. Arming claims the reporter, writes the pitch to the CRM, opens the ticket and lets the workflow send."}
               </p>
+
             </>
           )}
         </div>

@@ -383,8 +383,67 @@ export type Database = {
         }
         Relationships: []
       }
+      pitch_claims: {
+        Row: {
+          campaign_id: string | null
+          claimed_at: string
+          claimed_by: string | null
+          claimed_by_email: string | null
+          contact_id: string | null
+          created_at: string
+          forced_by: string | null
+          hubspot_contact_id: string
+          id: string
+          release_reason: string | null
+          released_at: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          claimed_at?: string
+          claimed_by?: string | null
+          claimed_by_email?: string | null
+          contact_id?: string | null
+          created_at?: string
+          forced_by?: string | null
+          hubspot_contact_id: string
+          id?: string
+          release_reason?: string | null
+          released_at?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          claimed_at?: string
+          claimed_by?: string | null
+          claimed_by_email?: string | null
+          contact_id?: string | null
+          created_at?: string
+          forced_by?: string | null
+          hubspot_contact_id?: string
+          id?: string
+          release_reason?: string | null
+          released_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pitch_claims_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "pitch_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pitch_claims_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "pitch_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pitch_contacts: {
         Row: {
+          arm_error: string | null
+          armed_at: string | null
           beat: string
           campaign_id: string
           created_at: string
@@ -403,6 +462,8 @@ export type Database = {
           warnings: Json
         }
         Insert: {
+          arm_error?: string | null
+          armed_at?: string | null
           beat?: string
           campaign_id: string
           created_at?: string
@@ -421,6 +482,8 @@ export type Database = {
           warnings?: Json
         }
         Update: {
+          arm_error?: string | null
+          armed_at?: string | null
           beat?: string
           campaign_id?: string
           created_at?: string

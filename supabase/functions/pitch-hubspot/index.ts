@@ -10,6 +10,19 @@ const corsHeaders = {
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/hubspot";
 const TICKET_PIPELINE_ID = "923698812";
 const RECENTLY_PITCHED_DAYS = 30;
+// Conservative daily ceiling per user, below HubSpot's own sequence send cap.
+const DAILY_ARM_CAP = 200;
+
+const CLAIM_PROPS = [
+  "ur_pitch_subject",
+  "ur_pitch_body",
+  "ur_pitch_enroll_trigger",
+  "ur_pitch_claimed_by",
+  "ur_pitch_claimed_at",
+  "ur_pitch_campaign",
+  "ur_pitch_release_signal",
+];
+
 
 const CONTACT_PROPS = [
   "email",
@@ -327,6 +340,222 @@ async function findOrCreateContact(row: Row, owners: Map<string, { name: string;
   };
 }
 
+// ---------- Phase 3: claims, tickets, arming ----------
+
+// deno-lint-ignore no-explicit-any
+type Db = any;
+
+
+async function stageId(label: string): Promise<string> {
+  const map = await loadPipeline();
+  if (map[label]) return map[label];
+  const fresh = await loadPipeline(true);
+  if (!fresh[label]) throw new Error(`Pipeline stage "${label}" not found on pipeline ${TICKET_PIPELINE_ID}`);
+  return fresh[label];
+}
+
+async function labelForStageId(id: string): Promise<string | null> {
+  const map = await loadPipeline();
+  const hit = Object.entries(map).find(([, v]) => v === id);
+  if (hit) return hit[0];
+  const fresh = await loadPipeline(true);
+  return Object.entries(fresh).find(([, v]) => v === id)?.[0] ?? null;
+}
+
+async function readContact(contactId: string, props: string[]) {
+  const data = await hs(
+    `/crm/v3/objects/contacts/${contactId}?properties=${encodeURIComponent(props.join(","))}`,
+  );
+  return (data?.properties ?? {}) as Record<string, string>;
+}
+
+/** Acquire the single active claim on a reporter. Returns the blocking claim when taken. */
+async function acquireClaim(
+  supabase: Db,
+  args: {
+    hubspot_contact_id: string;
+    campaign_id: string | null;
+    contact_id: string;
+    user_id: string;
+    user_email: string | null;
+  },
+) {
+  const { data, error } = await supabase
+    .from("pitch_claims")
+    .insert({
+      hubspot_contact_id: args.hubspot_contact_id,
+      campaign_id: args.campaign_id,
+      contact_id: args.contact_id,
+      claimed_by: args.user_id,
+      claimed_by_email: args.user_email,
+    })
+    .select("id")
+    .single();
+
+  if (!error) return { claim_id: String(data.id), blocked: null as null | Record<string, unknown> };
+
+  const { data: holder } = await supabase
+    .from("pitch_claims")
+    .select("id, claimed_by, claimed_by_email, claimed_at, campaign_id, contact_id")
+    .eq("hubspot_contact_id", args.hubspot_contact_id)
+    .is("released_at", null)
+    .maybeSingle();
+
+  return { claim_id: null, blocked: holder ?? { reason: error.message } };
+}
+
+async function releaseClaim(
+  supabase: Db,
+  claimId: string,
+  reason: string,
+  forcedBy?: string | null,
+) {
+  await supabase
+    .from("pitch_claims")
+    .update({ released_at: new Date().toISOString(), release_reason: reason, forced_by: forcedBy ?? null })
+    .eq("id", claimId)
+    .is("released_at", null);
+}
+
+async function ensureTicket(
+  supabase: Db,
+  contact: Record<string, any>,
+  campaign: Record<string, any>,
+): Promise<string> {
+  if (contact.hubspot_ticket_id) return String(contact.hubspot_ticket_id);
+
+  const subject = `${campaign.client_name} / ${campaign.angle} - ${contact.name || "Reporter"}`;
+  const payload: Record<string, unknown> = {
+    properties: {
+      subject,
+      hs_pipeline: TICKET_PIPELINE_ID,
+      hs_pipeline_stage: await stageId("Researching"),
+    },
+  };
+  if (contact.hubspot_contact_id) {
+    payload.associations = [{
+      to: { id: String(contact.hubspot_contact_id) },
+      types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 16 }],
+    }];
+  }
+  const created = await hs("/crm/v3/objects/tickets", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const ticketId = String(created.id);
+  await supabase.from("pitch_contacts").update({ hubspot_ticket_id: ticketId, stage_cache: "Researching" }).eq("id", contact.id);
+  return ticketId;
+}
+
+async function moveTicket(ticketId: string, label: string) {
+  await hs(`/crm/v3/objects/tickets/${ticketId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ properties: { hs_pipeline_stage: await stageId(label) } }),
+  });
+}
+
+/**
+ * Approve -> claim -> write body -> verify -> own -> ticket -> arm trigger.
+ * Any failure after the claim releases it, so a half-written pitch never enrolls.
+ */
+async function armContact(
+  supabase: Db,
+  contactRowId: string,
+  user: { id: string; email?: string | null },
+): Promise<{ ok: boolean; reason?: string; blocked?: unknown; ticket_id?: string }> {
+  const { data: contact } = await supabase
+    .from("pitch_contacts")
+    .select("*")
+    .eq("id", contactRowId)
+    .maybeSingle();
+  if (!contact) return { ok: false, reason: "Reporter not found" };
+  if (contact.excluded) return { ok: false, reason: "Reporter is excluded from this campaign" };
+  if (!contact.hubspot_contact_id) return { ok: false, reason: "Reporter is not in the CRM yet" };
+
+  const { data: campaign } = await supabase
+    .from("pitch_campaigns")
+    .select("id, client_name, angle")
+    .eq("id", contact.campaign_id)
+    .maybeSingle();
+  if (!campaign) return { ok: false, reason: "Campaign not found" };
+
+  const { data: draft } = await supabase
+    .from("pitch_drafts")
+    .select("id, subject, body, status")
+    .eq("contact_id", contactRowId)
+    .maybeSingle();
+  if (!draft) return { ok: false, reason: "No draft to arm" };
+  if (draft.status !== "approved") return { ok: false, reason: "Draft is not approved yet" };
+
+  const claim = await acquireClaim(supabase, {
+    hubspot_contact_id: String(contact.hubspot_contact_id),
+    campaign_id: contact.campaign_id,
+    contact_id: contactRowId,
+    user_id: user.id,
+    user_email: user.email ?? null,
+  });
+  if (!claim.claim_id) {
+    return { ok: false, reason: "Another pitch is active on this reporter", blocked: claim.blocked };
+  }
+
+  try {
+    const ownerId = await ownerIdForEmail(user.email ?? undefined);
+    const nowIso = new Date().toISOString();
+    const today = nowIso.slice(0, 10);
+
+    // 1. Write the pitch, without the trigger.
+    const writeProps: Record<string, string> = {
+      ur_pitch_subject: draft.subject ?? "",
+      ur_pitch_body: draft.body ?? "",
+      ur_pitch_claimed_by: user.email ?? "",
+      ur_pitch_claimed_at: today,
+      ur_pitch_campaign: `${campaign.client_name} / ${campaign.angle}`,
+      ur_pitch_release_signal: "false",
+      last_pitched_date: today,
+    };
+    if (ownerId) writeProps.hubspot_owner_id = ownerId;
+    const currentStatus = await readContact(String(contact.hubspot_contact_id), ["media_relationship_status"]);
+    if (String(currentStatus.media_relationship_status ?? "New") === "New") {
+      writeProps.media_relationship_status = "Warm";
+    }
+    await hs(`/crm/v3/objects/contacts/${contact.hubspot_contact_id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ properties: writeProps }),
+    });
+
+    // 2. Read back and confirm before anything can send.
+    const verify = await readContact(String(contact.hubspot_contact_id), CLAIM_PROPS);
+    if ((verify.ur_pitch_body ?? "").trim() !== (draft.body ?? "").trim()) {
+      throw new Error("Pitch body did not save correctly in the CRM, so nothing was armed");
+    }
+
+    // 3. Ticket, then advance it.
+    const ticketId = await ensureTicket(supabase, contact, campaign);
+    await moveTicket(ticketId, "Pitched");
+
+    // 4. Arm the enrollment workflow last.
+    await hs(`/crm/v3/objects/contacts/${contact.hubspot_contact_id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ properties: { ur_pitch_enroll_trigger: "true" } }),
+    });
+
+    await supabase
+      .from("pitch_contacts")
+      .update({ armed_at: nowIso, arm_error: null, hubspot_ticket_id: ticketId, stage_cache: "Pitched" })
+      .eq("id", contactRowId);
+    await supabase.from("pitch_drafts").update({ status: "armed", sent_at: nowIso }).eq("id", draft.id);
+
+    return { ok: true, ticket_id: ticketId };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    await releaseClaim(supabase, claim.claim_id, `arm failed: ${message}`);
+    await supabase.from("pitch_contacts").update({ arm_error: message }).eq("id", contactRowId);
+    return { ok: false, reason: message };
+  }
+}
+
+
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -446,7 +675,177 @@ serve(async (req) => {
       return json({ ok: true, imported: inserts.length, created, matched, failed, skipped });
     }
 
+    if (action === "create-ticket") {
+      const contactRowId = String(body.contact_id ?? "");
+      if (!contactRowId) return json({ error: "contact_id required" }, 400);
+      const { data: contact } = await supabase.from("pitch_contacts").select("*").eq("id", contactRowId).maybeSingle();
+      if (!contact) return json({ error: "Reporter not found" }, 404);
+      const { data: campaign } = await supabase
+        .from("pitch_campaigns").select("id, client_name, angle").eq("id", contact.campaign_id).maybeSingle();
+      if (!campaign) return json({ error: "Campaign not found" }, 404);
+      const ticketId = await ensureTicket(supabase, contact, campaign);
+      return json({ ok: true, ticket_id: ticketId });
+    }
+
+    if (action === "approve-and-arm") {
+      const ids: string[] = Array.isArray(body.contact_ids)
+        ? body.contact_ids.map(String)
+        : body.contact_id ? [String(body.contact_id)] : [];
+      if (!ids.length) return json({ error: "contact_id required" }, 400);
+
+      const since = new Date();
+      since.setUTCHours(0, 0, 0, 0);
+      const { count: armedToday } = await supabase
+        .from("pitch_claims")
+        .select("id", { count: "exact", head: true })
+        .eq("claimed_by", user.id)
+        .gte("claimed_at", since.toISOString());
+
+      let remaining = Math.max(0, DAILY_ARM_CAP - (armedToday ?? 0));
+      const results: Record<string, unknown>[] = [];
+      let armed = 0, blocked = 0, failed = 0, capped = 0;
+
+      for (const id of ids) {
+        if (remaining <= 0) {
+          capped++;
+          results.push({ contact_id: id, ok: false, reason: "Daily send cap reached" });
+          continue;
+        }
+        const res = await armContact(supabase, id, { id: user.id, email: user.email });
+        if (res.ok) { armed++; remaining--; }
+        else if (res.blocked) blocked++;
+        else failed++;
+        results.push({ contact_id: id, ...res });
+      }
+
+      return json({ ok: true, armed, blocked, failed, capped, results });
+    }
+
+    if (action === "release-claim") {
+      const contactRowId = String(body.contact_id ?? "");
+      const reason = String(body.reason ?? "released manually");
+      const force = body.force === true;
+      const { data: claim } = await supabase
+        .from("pitch_claims")
+        .select("id, claimed_by")
+        .eq("contact_id", contactRowId)
+        .is("released_at", null)
+        .maybeSingle();
+      if (!claim) return json({ ok: true, released: 0 });
+
+      if (claim.claimed_by !== user.id) {
+        const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+        if (!isAdmin) return json({ error: "Only the holder or an admin can release this claim" }, 403);
+      }
+      await releaseClaim(supabase, String(claim.id), reason, force ? user.id : null);
+
+      const { data: contact } = await supabase
+        .from("pitch_contacts").select("hubspot_contact_id").eq("id", contactRowId).maybeSingle();
+      if (contact?.hubspot_contact_id) {
+        try {
+          await hs(`/crm/v3/objects/contacts/${contact.hubspot_contact_id}`, {
+            method: "PATCH",
+            body: JSON.stringify({
+              properties: { ur_pitch_claimed_by: "", ur_pitch_enroll_trigger: "false", ur_pitch_release_signal: "false" },
+            }),
+          });
+        } catch (e) {
+          console.error("claim release CRM clear failed:", e);
+        }
+      }
+      return json({ ok: true, released: 1 });
+    }
+
+    if (action === "read-stages") {
+      const { data: rows } = await supabase
+        .from("pitch_contacts")
+        .select("id, hubspot_ticket_id")
+        .eq("campaign_id", String(body.campaign_id ?? ""))
+        .not("hubspot_ticket_id", "is", null);
+
+      const stages: Record<string, string | null> = {};
+      for (const r of rows ?? []) {
+        try {
+          const t = await hs(`/crm/v3/objects/tickets/${r.hubspot_ticket_id}?properties=hs_pipeline_stage`);
+          const label = await labelForStageId(String(t?.properties?.hs_pipeline_stage ?? ""));
+          stages[r.id] = label;
+          if (label) await supabase.from("pitch_contacts").update({ stage_cache: label }).eq("id", r.id);
+        } catch (e) {
+          console.error(`read-stages failed for ${r.id}: ${e}`);
+          stages[r.id] = null;
+        }
+      }
+      return json({ ok: true, stages });
+    }
+
+    if (action === "set-stage") {
+      const contactRowId = String(body.contact_id ?? "");
+      const label = String(body.stage ?? "");
+      if (!contactRowId || !label) return json({ error: "contact_id and stage required" }, 400);
+      const { data: contact } = await supabase
+        .from("pitch_contacts").select("id, hubspot_contact_id, hubspot_ticket_id").eq("id", contactRowId).maybeSingle();
+      if (!contact?.hubspot_ticket_id) return json({ error: "No ticket on this reporter yet" }, 400);
+
+      await moveTicket(String(contact.hubspot_ticket_id), label);
+      const t = await hs(`/crm/v3/objects/tickets/${contact.hubspot_ticket_id}?properties=hs_pipeline_stage`);
+      const current = await labelForStageId(String(t?.properties?.hs_pipeline_stage ?? "")) ?? label;
+      await supabase.from("pitch_contacts").update({ stage_cache: current }).eq("id", contactRowId);
+
+      if (current === "Published (Won)" && contact.hubspot_contact_id) {
+        const props: Record<string, string> = { last_coverage_date: new Date().toISOString().slice(0, 10) };
+        if (body.clip_url) {
+          // Additive: never clobber notes another team member wrote.
+          const existing = await readContact(String(contact.hubspot_contact_id), ["pitch_preferences__notes"]);
+          const prior = String(existing.pitch_preferences__notes ?? "").trim();
+          const line = `Clip: ${String(body.clip_url)}`;
+          props.pitch_preferences__notes = prior.includes(line) ? prior : [prior, line].filter(Boolean).join("\n");
+        }
+
+        await hs(`/crm/v3/objects/contacts/${contact.hubspot_contact_id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ properties: props }),
+        });
+      }
+
+      const closing = ["In Conversation", "Committed", "Published (Won)", "Closed Lost"];
+      if (closing.includes(current)) {
+        const { data: claim } = await supabase
+          .from("pitch_claims").select("id").eq("contact_id", contactRowId).is("released_at", null).maybeSingle();
+        if (claim) await releaseClaim(supabase, String(claim.id), `ticket reached ${current}`);
+      }
+
+      return json({ ok: true, stage: current });
+    }
+
+    if (action === "reconcile-claims") {
+      const { data: claims } = await supabase
+        .from("pitch_claims")
+        .select("id, hubspot_contact_id, contact_id")
+        .is("released_at", null);
+
+      let released = 0;
+      for (const c of claims ?? []) {
+        try {
+          const props = await readContact(String(c.hubspot_contact_id), CLAIM_PROPS);
+          const signalled = String(props.ur_pitch_release_signal ?? "").toLowerCase() === "true";
+          if (!signalled) continue;
+          await releaseClaim(supabase, String(c.id), "sequence finished or reporter replied");
+          await hs(`/crm/v3/objects/contacts/${c.hubspot_contact_id}`, {
+            method: "PATCH",
+            body: JSON.stringify({
+              properties: { ur_pitch_release_signal: "false", ur_pitch_claimed_by: "", ur_pitch_enroll_trigger: "false" },
+            }),
+          });
+          released++;
+        } catch (e) {
+          console.error(`reconcile failed for claim ${c.id}: ${e}`);
+        }
+      }
+      return json({ ok: true, checked: claims?.length ?? 0, released });
+    }
+
     if (action === "portal") {
+
       return json({ portal_id: await getPortalId() });
     }
 
