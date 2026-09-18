@@ -43,6 +43,7 @@ interface Props {
   onArm?: () => void;
   onSend?: () => void;
   onRelease?: () => void;
+  onEditFollowups?: () => void;
 }
 
 export function PitchDraftSheet({
@@ -65,6 +66,7 @@ export function PitchDraftSheet({
   onArm,
   onSend,
   onRelease,
+  onEditFollowups,
 }: Props) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -214,7 +216,16 @@ export function PitchDraftSheet({
                     ? "No email address on this reporter, so it cannot be sent from Gmail."
                     : !gmailConnected
                       ? "Connect your Gmail on the account page to send from your own address."
-                      : `Approve, then send. It goes out from ${gmailAddress || "your Gmail"}${followupSummary ? `, with follow-ups on ${followupSummary}` : ""}.`}
+                      : `Approve, then send. It goes out from ${gmailAddress || "your Gmail"}${followupSummary ? `, with follow-ups on ${followupSummary}` : ", with no follow-ups queued"}.`}
+                {!sentAlready && onEditFollowups && (
+                  <button
+                    type="button"
+                    onClick={onEditFollowups}
+                    className="ml-1.5 underline underline-offset-2 hover:text-foreground"
+                  >
+                    Edit follow-ups
+                  </button>
+                )}
               </p>
 
 

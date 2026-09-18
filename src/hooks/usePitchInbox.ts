@@ -120,6 +120,86 @@ export function useInboxReply(sendId: string | null) {
   });
 }
 
+export interface ScheduledFollowup {
+  id: string;
+  step: number;
+  scheduled_for: string;
+  body: string | null;
+}
+
+export function useScheduledFollowups(sendId: string | null) {
+  return useQuery({
+    queryKey: ["pitch-followups-queue", sendId],
+    enabled: !!sendId,
+    queryFn: async (): Promise<ScheduledFollowup[]> => {
+      const { data, error } = await supabase
+        .from("pitch_followups")
+        .select("id, step, scheduled_for, body")
+        .eq("send_id", sendId!)
+        .eq("status", "scheduled")
+        .order("scheduled_for", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as ScheduledFollowup[];
+    },
+  });
+}
+
+export function useFollowupQueueActions(sendId: string | null) {
+  const queryClient = useQueryClient();
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["pitch-followups-queue", sendId] });
+    queryClient.invalidateQueries({ queryKey: ["pitch-inbox"] });
+  };
+
+  const update = useMutation({
+    mutationFn: async (args: { id: string; body?: string; scheduled_for?: string }) => {
+      const patch: Record<string, string> = {};
+      if (args.body !== undefined) patch.body = args.body;
+      if (args.scheduled_for !== undefined) patch.scheduled_for = args.scheduled_for;
+      const { error } = await supabase.from("pitch_followups").update(patch).eq("id", args.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refresh();
+      toast.success("Follow-up updated");
+    },
+    onError: (e: Error) => toast.error(e.message || "Could not update the follow-up"),
+  });
+
+  const skip = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("pitch_followups")
+        .update({ status: "cancelled", cancelled_reason: "Skipped by sender" })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refresh();
+      toast.success("Follow-up skipped");
+    },
+    onError: (e: Error) => toast.error(e.message || "Could not skip that follow-up"),
+  });
+
+  const stopAll = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("pitch_followups")
+        .update({ status: "cancelled", cancelled_reason: "Stopped by sender" })
+        .eq("send_id", sendId!)
+        .eq("status", "scheduled");
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refresh();
+      toast.success("Follow-ups stopped for this reporter");
+    },
+    onError: (e: Error) => toast.error(e.message || "Could not stop the follow-ups"),
+  });
+
+  return { update, skip, stopAll };
+}
+
 export function useCheckReplies() {
   const queryClient = useQueryClient();
   return useMutation({
