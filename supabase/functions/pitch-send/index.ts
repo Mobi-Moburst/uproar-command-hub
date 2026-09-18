@@ -288,6 +288,13 @@ serve(async (req) => {
     }
     const senderEmail = String(conn?.account_email ?? user.email ?? "");
 
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("email_signature")
+      .eq("id", user.id)
+      .maybeSingle();
+    const signature = (prof?.email_signature as string | null) ?? null;
+
     const since = new Date();
     since.setUTCHours(0, 0, 0, 0);
     const { count: sentToday } = await supabase
@@ -306,7 +313,14 @@ serve(async (req) => {
         results.push({ contact_id: id, ok: false, reason: "Daily send cap reached" });
         continue;
       }
-      const res = await sendOne(supabase, id, { id: user.id, email: user.email }, connectionKey, senderEmail);
+      const res = await sendOne(
+        supabase,
+        id,
+        { id: user.id, email: user.email },
+        connectionKey,
+        senderEmail,
+        signature,
+      );
       if (res.ok) { sent++; remaining--; }
       else if (res.blocked) blocked++;
       else failed++;

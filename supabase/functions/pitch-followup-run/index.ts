@@ -37,6 +37,13 @@ serve(async (req) => {
     const connectionKey = await getConnectionKeyForUser(user.id, GOOGLE_MAIL_CONNECTOR_ID);
     if (!connectionKey) return json({ ok: true, sent: 0, connected: false });
 
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("email_signature")
+      .eq("id", user.id)
+      .maybeSingle();
+    const signature = (prof?.email_signature as string | null) ?? null;
+
     // Only this user's own sends, and only those still awaiting a reply.
     const { data: sends } = await supabase
       .from("pitch_sends")
