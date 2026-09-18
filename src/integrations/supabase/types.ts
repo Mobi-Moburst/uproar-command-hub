@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_user_connections: {
+        Row: {
+          account_email: string | null
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at: string
+          id: string
+          reconnect_required: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_email?: string | null
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at?: string
+          id?: string
+          reconnect_required?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_email?: string | null
+          connection_key_ciphertext?: string
+          connector_id?: string
+          created_at?: string
+          id?: string
+          reconnect_required?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_comms_intel: {
         Row: {
           brief: Json
@@ -548,6 +581,160 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "pitch_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "pitch_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pitch_followups: {
+        Row: {
+          body: string | null
+          cancelled_reason: string | null
+          created_at: string
+          gmail_message_id: string | null
+          id: string
+          scheduled_for: string
+          send_id: string
+          sent_at: string | null
+          status: string
+          step: number
+        }
+        Insert: {
+          body?: string | null
+          cancelled_reason?: string | null
+          created_at?: string
+          gmail_message_id?: string | null
+          id?: string
+          scheduled_for: string
+          send_id: string
+          sent_at?: string | null
+          status?: string
+          step: number
+        }
+        Update: {
+          body?: string | null
+          cancelled_reason?: string | null
+          created_at?: string
+          gmail_message_id?: string | null
+          id?: string
+          scheduled_for?: string
+          send_id?: string
+          sent_at?: string | null
+          status?: string
+          step?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pitch_followups_send_id_fkey"
+            columns: ["send_id"]
+            isOneToOne: false
+            referencedRelation: "pitch_sends"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pitch_send_settings: {
+        Row: {
+          campaign_id: string
+          followups_enabled: boolean
+          steps: Json
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          followups_enabled?: boolean
+          steps?: Json
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          followups_enabled?: boolean
+          steps?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pitch_send_settings_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: true
+            referencedRelation: "pitch_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pitch_sends: {
+        Row: {
+          body: string
+          campaign_id: string
+          contact_id: string
+          created_at: string
+          draft_id: string | null
+          error: string | null
+          gmail_message_id: string | null
+          gmail_thread_id: string | null
+          id: string
+          recipient_email: string
+          reply_at: string | null
+          reply_snippet: string | null
+          sender_email: string | null
+          sender_user_id: string
+          sent_at: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          campaign_id: string
+          contact_id: string
+          created_at?: string
+          draft_id?: string | null
+          error?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          recipient_email: string
+          reply_at?: string | null
+          reply_snippet?: string | null
+          sender_email?: string | null
+          sender_user_id: string
+          sent_at?: string
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          campaign_id?: string
+          contact_id?: string
+          created_at?: string
+          draft_id?: string | null
+          error?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          recipient_email?: string
+          reply_at?: string | null
+          reply_snippet?: string | null
+          sender_email?: string | null
+          sender_user_id?: string
+          sent_at?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pitch_sends_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "pitch_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pitch_sends_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "pitch_contacts"
