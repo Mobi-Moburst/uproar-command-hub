@@ -29,6 +29,13 @@
       "when": 1789760907887,
       "tag": "0003_followup_owner_updates",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789766839651,
+      "tag": "0004_cron_shared_secret",
+      "breakpoints": true
     }
   ]
 }
