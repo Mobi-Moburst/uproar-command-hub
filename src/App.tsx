@@ -15,6 +15,7 @@ import ReportersPage from "./pages/ReportersPage";
 import IntelligencePage from "./pages/IntelligencePage";
 import PitchPipelinePage from "./pages/PitchPipelinePage";
 import PitchCampaignPage from "./pages/PitchCampaignPage";
+import InboxPage from "./pages/InboxPage";
 
 import TeamsPage from "./pages/TeamsPage";
 import SamplesPage from "./pages/SamplesPage";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/pulse" element={<ProtectedRoute><PulsePage /></ProtectedRoute>} />
             <Route path="/pitch-pipeline" element={<ProtectedRoute><PitchPipelinePage /></ProtectedRoute>} />
             <Route path="/pitch-pipeline/:campaignId" element={<ProtectedRoute><PitchCampaignPage /></ProtectedRoute>} />
+            <Route path="/inbox" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />
             
             <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
             <Route path="/samples" element={<ProtectedRoute><SamplesPage /></ProtectedRoute>} />
