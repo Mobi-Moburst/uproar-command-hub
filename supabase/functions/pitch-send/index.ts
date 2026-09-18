@@ -162,6 +162,7 @@ async function sendOne(
       to: String(contact.email),
       subject: draft.subject ?? "",
       body: draft.body ?? "",
+      signature,
     });
 
     const { data: sendRow, error: sendErr } = await supabase
