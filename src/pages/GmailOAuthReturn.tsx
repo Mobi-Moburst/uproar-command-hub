@@ -41,19 +41,30 @@ export default function GmailOAuthReturn() {
       return;
     }
 
-    void supabase.functions
-      .invoke("gmail-connection", { body: { action: "complete", code } })
-      .then(({ data, error }) => {
-        if (error) throw error;
+    void (async () => {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          throw new Error("Your sign-in was not available in this window. Close it and try again.");
+        }
+        const { data, error } = await supabase.functions.invoke("gmail-connection", {
+          body: { action: "complete", code },
+        });
+        if (error) {
+          const detail = await (error as { context?: Response }).context?.text?.().catch(() => "");
+          throw new Error(detail || error.message);
+        }
         if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
         notify("appUserConnectorOAuthComplete");
         window.close();
-      })
-      .catch(() => {
-        const reason = "Could not finish the Gmail connection.";
+      } catch (e) {
+        const reason = e instanceof Error ? e.message : "Could not finish the Gmail connection.";
+        console.error("gmail oauth complete failed:", reason);
         setMessage(reason);
         notify("appUserConnectorOAuthFailed", reason);
-      });
+      }
+    })();
+
   }, []);
 
   return (
