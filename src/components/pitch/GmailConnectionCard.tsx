@@ -94,6 +94,24 @@ export function GmailConnectionCard() {
           account.
         </p>
       )}
+
+      <div className="mt-8 border-t border-[rgba(255,255,255,0.06)] pt-6">
+        <h3 className="text-sm font-semibold text-foreground">Signature</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Added to the bottom of every pitch and follow-up you send.
+        </p>
+        <div className="mt-4">
+          <RichTextEditor
+            value={signature}
+            onChange={setSignature}
+            className="[&_[contenteditable]]:min-h-[120px]"
+            placeholder="Katie White, Uproar PR…"
+          />
+        </div>
+        <Button size="sm" className="mt-3" disabled={savingSignature} onClick={saveSignature}>
+          {savingSignature ? "Saving…" : "Save signature"}
+        </Button>
+      </div>
     </section>
   );
 }
