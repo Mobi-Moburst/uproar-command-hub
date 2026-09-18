@@ -24,6 +24,8 @@ import { PitchDraftSheet } from "@/components/pitch/PitchDraftSheet";
 import { AddReporterDialog } from "@/components/pitch/AddReporterDialog";
 import { usePitchSending } from "@/hooks/usePitchSending";
 import { useGmailConnection } from "@/hooks/useGmailConnection";
+import { FollowupSettings } from "@/components/pitch/FollowupSettings";
+import { summarizeSteps, useFollowupSettings } from "@/hooks/useFollowupSettings";
 
 // The CRM sequence path is built but hidden while Gmail sending is the pilot.
 const SHOW_SEQUENCE_ARMING = false;
@@ -43,6 +45,8 @@ export default function PitchCampaignPage() {
   const { claims, arm, release, syncStages } = usePitchArming(campaignId, contactIds);
   const { sends, send, checkReplies } = usePitchSending(campaignId);
   const { status: gmail } = useGmailConnection();
+  const { settings: followupSettings } = useFollowupSettings(campaignId);
+  const [followupsOpen, setFollowupsOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -210,6 +214,14 @@ export default function PitchCampaignPage() {
           )}
         </section>
 
+        {campaignId && (
+          <FollowupSettings
+            campaignId={campaignId}
+            open={followupsOpen}
+            onOpenChange={setFollowupsOpen}
+          />
+        )}
+
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-semibold text-foreground">Media list</h2>
@@ -329,7 +341,11 @@ export default function PitchCampaignPage() {
           isHolder={!!activeClaim && activeClaim.claimed_by === userId}
           gmailConnected={!!gmail?.connected && !gmail?.reconnectRequired}
           gmailAddress={gmail?.accountEmail ?? null}
-          followupSummary="day 3 and day 7"
+          followupSummary={summarizeSteps(followupSettings)}
+          onEditFollowups={() => {
+            setDraftContact(null);
+            setFollowupsOpen(true);
+          }}
           send={draftContact ? (sends[draftContact.id] ?? null) : null}
           onSend={() => draftContact && send.mutate([draftContact.id])}
           onClose={() => setDraftContact(null)}
