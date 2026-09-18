@@ -103,6 +103,24 @@ export function PitchContactsTable({
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
+                    {sends[contact.id] && (
+                      <Badge
+                        variant="outline"
+                        className={`whitespace-nowrap text-[11px] font-medium ${
+                          sends[contact.id].status === "replied"
+                            ? "border-[hsl(var(--accent))]/40 bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))]"
+                            : sends[contact.id].status === "bounced"
+                              ? "border-[hsl(var(--coral))]/40 bg-[hsl(var(--coral))]/10 text-[hsl(var(--coral))]"
+                              : "border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] text-muted-foreground"
+                        }`}
+                      >
+                        {sends[contact.id].status === "replied"
+                          ? "Replied"
+                          : sends[contact.id].status === "bounced"
+                            ? "Bounced"
+                            : `Sent ${daysSince(sends[contact.id].sent_at)}d ago`}
+                      </Badge>
+                    )}
                     {claims[contact.id] && (
                       <Badge
                         variant="outline"
