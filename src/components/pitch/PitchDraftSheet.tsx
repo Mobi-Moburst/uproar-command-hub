@@ -72,10 +72,11 @@ export function PitchDraftSheet({
 
   useEffect(() => {
     setSubject(draft?.subject ?? "");
-    setBody(draft?.body ?? "");
+    setBody(toEditorHtml(draft?.body ?? ""));
   }, [draft?.id, draft?.subject, draft?.body]);
 
-  const dirty = !!draft && (subject !== draft.subject || body !== draft.body);
+  const dirty =
+    !!draft && (subject !== draft.subject || body !== toEditorHtml(draft.body ?? ""));
   const approved = draft?.status === "approved";
   const armed = draft?.status === "armed";
   const sentAlready = draft?.status === "sent" || !!send;
@@ -84,7 +85,7 @@ export function PitchDraftSheet({
 
 
   const copy = async () => {
-    await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
+    await navigator.clipboard.writeText(`Subject: ${subject}\n\n${htmlToText(body)}`);
     setCopied(true);
     toast.success("Pitch copied");
     setTimeout(() => setCopied(false), 1500);
@@ -140,10 +141,10 @@ export function PitchDraftSheet({
                 <label className="text-xs uppercase tracking-wide text-muted-foreground font-mono">
                   Body
                 </label>
-                <Textarea
+                <RichTextEditor
                   value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  className="min-h-[280px] leading-relaxed"
+                  onChange={setBody}
+                  placeholder="Write the pitch…"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
