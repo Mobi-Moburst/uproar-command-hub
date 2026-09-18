@@ -14,6 +14,9 @@ import { Copy, Check, Sparkles, RefreshCw, Send } from "lucide-react";
 import { toast } from "sonner";
 import type { PitchContact, PitchDraft } from "@/hooks/usePitchPipeline";
 
+// The CRM sequence path is built but hidden while Gmail sending is the pilot.
+const SHOW_SEQUENCE_ARMING = false;
+
 interface Props {
   contact: PitchContact | null;
   draft: PitchDraft | undefined;
