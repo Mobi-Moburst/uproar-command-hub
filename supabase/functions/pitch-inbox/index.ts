@@ -5,11 +5,9 @@ import { GOOGLE_MAIL_CONNECTOR_ID } from "../_shared/appUserScopes.ts";
 import {
   getRfcMessageId,
   gmail,
-  htmlToText,
   ReconnectRequiredError,
   sendGmail,
 } from "../_shared/gmail.ts";
-import { logNote } from "../_shared/hubspotPitch.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -163,16 +161,6 @@ serve(async (req) => {
           .eq("send_id", send.id)
           .eq("status", "scheduled");
 
-        if (contact?.hubspot_contact_id) {
-          try {
-            await logNote(
-              String(contact.hubspot_contact_id),
-              `Uproar reply sent by ${send.sender_email ?? user.email}\n\n${htmlToText(replyBody)}`,
-            );
-          } catch (e) {
-            console.error("reply note failed:", e);
-          }
-        }
 
         return json({ ok: true });
       }

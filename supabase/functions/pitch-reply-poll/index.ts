@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getConnectionKeyForUser, markReconnectRequired } from "../_shared/appUserConnections.ts";
 import { GOOGLE_MAIL_CONNECTOR_ID } from "../_shared/appUserScopes.ts";
 import { findThreadReply, ReconnectRequiredError } from "../_shared/gmail.ts";
-import { logNote, moveTicket } from "../_shared/hubspotPitch.ts";
+import { moveTicket } from "../_shared/hubspotPitch.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -99,16 +99,6 @@ serve(async (req) => {
               .eq("id", s.contact_id);
           } catch (e) {
             console.error("stage move after reply failed:", e);
-          }
-        }
-        if (contact?.hubspot_contact_id) {
-          try {
-            await logNote(
-              String(contact.hubspot_contact_id),
-              `Reporter replied to the Uproar pitch "${s.subject}"\n\n${reply.snippet}`,
-            );
-          } catch (e) {
-            console.error("reply note failed:", e);
           }
         }
         replies++;

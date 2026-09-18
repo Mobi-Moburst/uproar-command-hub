@@ -2,11 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getConnectionKeyForUser, markReconnectRequired } from "../_shared/appUserConnections.ts";
 import { GOOGLE_MAIL_CONNECTOR_ID } from "../_shared/appUserScopes.ts";
-import { htmlToText, ReconnectRequiredError, sendGmail } from "../_shared/gmail.ts";
+import { ReconnectRequiredError, sendGmail } from "../_shared/gmail.ts";
 import {
   ensureTicket,
   hs,
-  logNote,
   moveTicket,
   ownerIdForEmail,
   readContact,
@@ -214,10 +213,6 @@ async function sendOne(
           method: "PATCH",
           body: JSON.stringify({ properties: props }),
         });
-        await logNote(
-          String(contact.hubspot_contact_id),
-          `Uproar pitch sent by ${senderEmail || user.email || "a PR user"} for ${campaign.client_name} / ${campaign.angle}\n\nSubject: ${draft.subject}\n\n${htmlToText(String(draft.body ?? ""))}`,
-        );
       } catch (e) {
         console.error("CRM logging failed after send:", e);
       }
