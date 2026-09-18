@@ -148,13 +148,15 @@ export function PitchContactsTable({
                         onClick={() => onOpenDraft?.(contact)}
                       >
                         <Sparkles className="h-3.5 w-3.5" />
-                        {draft
-                          ? draft.status === "armed"
-                            ? "Armed"
-                            : draft.status === "approved"
-                              ? "Approved"
-                              : "Draft ready"
-                          : "Draft"}
+                        {sends[contact.id]
+                          ? "Sent"
+                          : draft
+                            ? draft.status === "armed"
+                              ? "Armed"
+                              : draft.status === "approved"
+                                ? "Approved"
+                                : "Draft ready"
+                            : "Draft"}
                       </Button>
                     );
                   })()}
