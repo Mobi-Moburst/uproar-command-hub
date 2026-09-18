@@ -54,6 +54,21 @@ export default function PitchCampaignPage() {
     [contacts, drafts, claims],
   );
 
+  const readyToSend = useMemo(
+    () =>
+      contacts
+        .filter(
+          (c) =>
+            !c.excluded &&
+            !!c.email &&
+            drafts[c.id]?.status === "approved" &&
+            !claims[c.id] &&
+            !sends[c.id],
+        )
+        .map((c) => c.id),
+    [contacts, drafts, claims, sends],
+  );
+
   const needsDraft = useMemo(
     () => contacts.filter((c) => !c.excluded && !drafts[c.id]).map((c) => c.id),
     [contacts, drafts],
