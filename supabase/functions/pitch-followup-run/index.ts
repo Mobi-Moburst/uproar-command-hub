@@ -76,6 +76,7 @@ serve(async (req) => {
           to: String(parent.recipient_email),
           subject: `Re: ${parent.subject}`,
           body: String(f.body ?? ""),
+          signature,
           threadId: parent.gmail_thread_id ? String(parent.gmail_thread_id) : null,
           inReplyTo: rfcId,
         });
