@@ -173,7 +173,7 @@ export function PitchDraftSheet({
                     {isSending ? "Sending…" : "Approve and send"}
                   </Button>
                 )}
-                {approved && !armed && !sentAlready && (
+                {SHOW_SEQUENCE_ARMING && approved && !armed && !sentAlready && (
                   <Button
                     size="sm"
                     variant="outline"
