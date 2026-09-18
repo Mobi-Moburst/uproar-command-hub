@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { LogOut, Save, Settings } from "lucide-react";
 import { useMyRoles, ROLE_LABEL } from "@/hooks/useMyRoles";
+import { GmailConnectionCard } from "@/components/pitch/GmailConnectionCard";
 
 export default function AccountPage() {
   const { user, profile, signOut, refreshProfile } = useAuthContext();
@@ -158,6 +159,8 @@ export default function AccountPage() {
             </div>
           </div>
         </section>
+
+        <GmailConnectionCard />
 
         {/* Password */}
         {!isGoogleUser && (

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Plus, X, Sparkles, Send, RefreshCw } from "lucide-react";
+import { ArrowLeft, Plus, X, Sparkles, Send, RefreshCw, Inbox } from "lucide-react";
 import {
   usePitchCampaign,
   usePitchContacts,
@@ -22,6 +22,8 @@ import { MediaListImport } from "@/components/pitch/MediaListImport";
 import { PitchContactsTable } from "@/components/pitch/PitchContactsTable";
 import { PitchDraftSheet } from "@/components/pitch/PitchDraftSheet";
 import { AddReporterDialog } from "@/components/pitch/AddReporterDialog";
+import { usePitchSending } from "@/hooks/usePitchSending";
+import { useGmailConnection } from "@/hooks/useGmailConnection";
 
 export default function PitchCampaignPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
@@ -36,6 +38,8 @@ export default function PitchCampaignPage() {
   const contactIds = useMemo(() => contacts.map((c) => c.id), [contacts]);
   const { drafts, generate, saveDraft, setStatus } = usePitchDrafts(campaignId, contactIds);
   const { claims, arm, release, syncStages } = usePitchArming(campaignId, contactIds);
+  const { sends, send, checkReplies } = usePitchSending(campaignId);
+  const { status: gmail } = useGmailConnection();
   const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -48,6 +52,21 @@ export default function PitchCampaignPage() {
         .filter((c) => !c.excluded && drafts[c.id]?.status === "approved" && !claims[c.id])
         .map((c) => c.id),
     [contacts, drafts, claims],
+  );
+
+  const readyToSend = useMemo(
+    () =>
+      contacts
+        .filter(
+          (c) =>
+            !c.excluded &&
+            !!c.email &&
+            drafts[c.id]?.status === "approved" &&
+            !claims[c.id] &&
+            !sends[c.id],
+        )
+        .map((c) => c.id),
+    [contacts, drafts, claims, sends],
   );
 
   const needsDraft = useMemo(
@@ -215,13 +234,34 @@ export default function PitchCampaignPage() {
                   )}
                 </>
               )}
+              {readyToSend.length > 0 && gmail?.connected && (
+                <Button
+                  size="sm"
+                  disabled={send.isPending}
+                  onClick={() => send.mutate(readyToSend)}
+                >
+                  <Send className="mr-1.5 h-3.5 w-3.5" />
+                  {send.isPending ? "Sending…" : `Send approved (${readyToSend.length})`}
+                </Button>
+              )}
+              {Object.keys(sends).length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={checkReplies.isPending}
+                  onClick={() => checkReplies.mutate()}
+                >
+                  <Inbox className="mr-1.5 h-3.5 w-3.5" />
+                  {checkReplies.isPending ? "Checking…" : "Check replies"}
+                </Button>
+              )}
               {readyToArm.length > 0 && (
                 <Button
                   size="sm"
+                  variant="outline"
                   disabled={arm.isPending}
                   onClick={() => arm.mutate(readyToArm)}
                 >
-                  <Send className="mr-1.5 h-3.5 w-3.5" />
                   {arm.isPending ? "Arming…" : `Arm approved (${readyToArm.length})`}
                 </Button>
               )}
@@ -255,6 +295,7 @@ export default function PitchCampaignPage() {
               portalId={portal?.portal_id}
               drafts={drafts}
               claims={claims}
+              sends={sends}
               onOpenDraft={(contact) => setDraftContact(contact)}
               onToggleExclude={(contact) =>
                 setExcluded.mutate({ id: contact.id, excluded: !contact.excluded })
@@ -269,8 +310,14 @@ export default function PitchCampaignPage() {
           isGenerating={generate.isPending}
           isSaving={saveDraft.isPending}
           isArming={arm.isPending}
+          isSending={send.isPending}
           claim={activeClaim ?? null}
           isHolder={!!activeClaim && activeClaim.claimed_by === userId}
+          gmailConnected={!!gmail?.connected && !gmail?.reconnectRequired}
+          gmailAddress={gmail?.accountEmail ?? null}
+          followupSummary="day 3 and day 7"
+          send={draftContact ? (sends[draftContact.id] ?? null) : null}
+          onSend={() => draftContact && send.mutate([draftContact.id])}
           onClose={() => setDraftContact(null)}
           onGenerate={(mode) =>
             draftContact && generate.mutate({ contact_ids: [draftContact.id], mode })

@@ -8,6 +8,13 @@
       "when": 1789664147605,
       "tag": "0000_pitch_claims",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789739768521,
+      "tag": "0001_gmail_send_path",
+      "breakpoints": true
     }
   ]
 }

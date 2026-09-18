@@ -47,8 +47,13 @@ interface Props {
   portalId?: string | null;
   drafts?: Record<string, PitchDraft>;
   claims?: Record<string, { claimed_by_email: string | null; claimed_at: string }>;
+  sends?: Record<string, { status: string; sent_at: string; reply_at: string | null }>;
   onToggleExclude: (contact: PitchContact) => void;
   onOpenDraft?: (contact: PitchContact) => void;
+}
+
+function daysSince(iso: string) {
+  return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
 }
 
 export function PitchContactsTable({
@@ -56,6 +61,7 @@ export function PitchContactsTable({
   portalId,
   drafts = {},
   claims = {},
+  sends = {},
   onToggleExclude,
   onOpenDraft,
 }: Props) {
@@ -97,6 +103,24 @@ export function PitchContactsTable({
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
+                    {sends[contact.id] && (
+                      <Badge
+                        variant="outline"
+                        className={`whitespace-nowrap text-[11px] font-medium ${
+                          sends[contact.id].status === "replied"
+                            ? "border-[hsl(var(--accent))]/40 bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))]"
+                            : sends[contact.id].status === "bounced"
+                              ? "border-[hsl(var(--coral))]/40 bg-[hsl(var(--coral))]/10 text-[hsl(var(--coral))]"
+                              : "border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] text-muted-foreground"
+                        }`}
+                      >
+                        {sends[contact.id].status === "replied"
+                          ? "Replied"
+                          : sends[contact.id].status === "bounced"
+                            ? "Bounced"
+                            : `Sent ${daysSince(sends[contact.id].sent_at)}d ago`}
+                      </Badge>
+                    )}
                     {claims[contact.id] && (
                       <Badge
                         variant="outline"
@@ -107,7 +131,7 @@ export function PitchContactsTable({
                     )}
                     {warnings.length ? (
                       warnings.map((w, i) => <WarningBadge key={`${w.kind}-${i}`} warning={w} />)
-                    ) : claims[contact.id] ? null : (
+                    ) : claims[contact.id] || sends[contact.id] ? null : (
                       <span className="text-xs text-muted-foreground font-mono">clear</span>
                     )}
                   </div>
@@ -124,13 +148,15 @@ export function PitchContactsTable({
                         onClick={() => onOpenDraft?.(contact)}
                       >
                         <Sparkles className="h-3.5 w-3.5" />
-                        {draft
-                          ? draft.status === "armed"
-                            ? "Armed"
-                            : draft.status === "approved"
-                              ? "Approved"
-                              : "Draft ready"
-                          : "Draft"}
+                        {sends[contact.id]
+                          ? "Sent"
+                          : draft
+                            ? draft.status === "armed"
+                              ? "Armed"
+                              : draft.status === "approved"
+                                ? "Approved"
+                                : "Draft ready"
+                            : "Draft"}
                       </Button>
                     );
                   })()}
