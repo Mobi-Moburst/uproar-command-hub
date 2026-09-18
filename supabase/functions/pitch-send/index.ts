@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getConnectionKeyForUser, markReconnectRequired } from "../_shared/appUserConnections.ts";
 import { GOOGLE_MAIL_CONNECTOR_ID } from "../_shared/appUserScopes.ts";
-import { ReconnectRequiredError, sendGmail } from "../_shared/gmail.ts";
+import { htmlToText, ReconnectRequiredError, sendGmail } from "../_shared/gmail.ts";
 import {
   ensureTicket,
   hs,
@@ -105,6 +105,7 @@ async function sendOne(
   user: { id: string; email?: string | null },
   connectionKey: string,
   senderEmail: string,
+  signature: string | null,
 ): Promise<{ ok: boolean; reason?: string; blocked?: unknown; send_id?: string }> {
   const { data: contact } = await supabase
     .from("pitch_contacts")
@@ -161,6 +162,7 @@ async function sendOne(
       to: String(contact.email),
       subject: draft.subject ?? "",
       body: draft.body ?? "",
+      signature,
     });
 
     const { data: sendRow, error: sendErr } = await supabase
@@ -214,7 +216,7 @@ async function sendOne(
         });
         await logNote(
           String(contact.hubspot_contact_id),
-          `Uproar pitch sent by ${senderEmail || user.email || "a PR user"} for ${campaign.client_name} / ${campaign.angle}\n\nSubject: ${draft.subject}\n\n${draft.body}`,
+          `Uproar pitch sent by ${senderEmail || user.email || "a PR user"} for ${campaign.client_name} / ${campaign.angle}\n\nSubject: ${draft.subject}\n\n${htmlToText(String(draft.body ?? ""))}`,
         );
       } catch (e) {
         console.error("CRM logging failed after send:", e);
@@ -286,6 +288,13 @@ serve(async (req) => {
     }
     const senderEmail = String(conn?.account_email ?? user.email ?? "");
 
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("email_signature")
+      .eq("id", user.id)
+      .maybeSingle();
+    const signature = (prof?.email_signature as string | null) ?? null;
+
     const since = new Date();
     since.setUTCHours(0, 0, 0, 0);
     const { count: sentToday } = await supabase
@@ -304,7 +313,14 @@ serve(async (req) => {
         results.push({ contact_id: id, ok: false, reason: "Daily send cap reached" });
         continue;
       }
-      const res = await sendOne(supabase, id, { id: user.id, email: user.email }, connectionKey, senderEmail);
+      const res = await sendOne(
+        supabase,
+        id,
+        { id: user.id, email: user.email },
+        connectionKey,
+        senderEmail,
+        signature,
+      );
       if (res.ok) { sent++; remaining--; }
       else if (res.blocked) blocked++;
       else failed++;
