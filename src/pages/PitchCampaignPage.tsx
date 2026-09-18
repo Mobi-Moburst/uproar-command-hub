@@ -38,6 +38,8 @@ export default function PitchCampaignPage() {
   const contactIds = useMemo(() => contacts.map((c) => c.id), [contacts]);
   const { drafts, generate, saveDraft, setStatus } = usePitchDrafts(campaignId, contactIds);
   const { claims, arm, release, syncStages } = usePitchArming(campaignId, contactIds);
+  const { sends, send, checkReplies } = usePitchSending(campaignId);
+  const { status: gmail } = useGmailConnection();
   const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
