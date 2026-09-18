@@ -35,24 +35,86 @@ const b64 = (s: string) =>
 
 const header = (v: string) => (/^[\x00-\x7F]*$/.test(v) ? v : `=?UTF-8?B?${b64(v)}?=`);
 
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** True when the stored draft already holds markup from the rich editor. */
+export function looksLikeHtml(s: string): boolean {
+  return /<(p|div|br|ul|ol|li|a|b|strong|i|em|span)\b/i.test(s);
+}
+
+/** Plain text to HTML: blank lines become paragraphs, bare URLs become links. */
+export function textToHtml(text: string): string {
+  const linkify = (s: string) =>
+    s.replace(
+      /(https?:\/\/[^\s<]+)/g,
+      (url) => `<a href="${url}">${url}</a>`,
+    );
+  return text
+    .split(/\n\s*\n/)
+    .map((block) => `<p>${linkify(escapeHtml(block.trim())).replace(/\n/g, "<br>")}</p>`)
+    .join("\n");
+}
+
+/** HTML back to readable plain text for the fallback part. */
+export function htmlToText(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li|ul|ol|h[1-6])>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "- ")
+    .replace(/<a[^>]+href="([^"]+)"[^>]*>(.*?)<\/a>/gi, (_m, href, label) =>
+      label && !label.includes(href) ? `${label} (${href})` : href)
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+const HTML_WRAPPER = (inner: string) =>
+  `<!DOCTYPE html><html><body style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#202124;">${inner}</body></html>`;
+
 export function buildRawEmail(opts: {
   to: string;
   subject: string;
   body: string;
+  signature?: string | null;
   inReplyTo?: string | null;
   references?: string | null;
 }): string {
+  const htmlBody = looksLikeHtml(opts.body) ? opts.body : textToHtml(opts.body);
+  const sig = (opts.signature ?? "").trim();
+  const sigHtml = sig ? (looksLikeHtml(sig) ? sig : textToHtml(sig)) : "";
+  const html = HTML_WRAPPER(sigHtml ? `${htmlBody}<br>${sigHtml}` : htmlBody);
+  const text = htmlToText(sigHtml ? `${htmlBody}<br><br>${sigHtml}` : htmlBody);
+
+  const boundary = `uproar_${crypto.randomUUID().replace(/-/g, "")}`;
   const lines = [
     `To: ${opts.to}`,
     `Subject: ${header(opts.subject)}`,
     "MIME-Version: 1.0",
-    'Content-Type: text/plain; charset="UTF-8"',
   ];
   if (opts.inReplyTo) {
     lines.push(`In-Reply-To: ${opts.inReplyTo}`);
     lines.push(`References: ${opts.references || opts.inReplyTo}`);
   }
-  lines.push("", opts.body);
+  lines.push(
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    "",
+    `--${boundary}`,
+    'Content-Type: text/plain; charset="UTF-8"',
+    "",
+    text,
+    "",
+    `--${boundary}`,
+    'Content-Type: text/html; charset="UTF-8"',
+    "",
+    html,
+    "",
+    `--${boundary}--`,
+  );
   return b64(lines.join("\r\n")).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
