@@ -26,7 +26,12 @@ interface Props {
   gmailAddress?: string | null;
   gmailConnected?: boolean;
   followupSummary?: string | null;
-  send?: { status: string; sent_at: string; reply_snippet: string | null } | null;
+  send?: {
+    status: string;
+    sent_at: string;
+    reply_at?: string | null;
+    reply_snippet: string | null;
+  } | null;
   onClose: () => void;
   onGenerate: (mode: "custom" | "bulk") => void;
   onSave: (subject: string, body: string) => void;
