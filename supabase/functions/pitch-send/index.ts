@@ -214,10 +214,6 @@ async function sendOne(
           method: "PATCH",
           body: JSON.stringify({ properties: props }),
         });
-        await logNote(
-          String(contact.hubspot_contact_id),
-          `Uproar pitch sent by ${senderEmail || user.email || "a PR user"} for ${campaign.client_name} / ${campaign.angle}\n\nSubject: ${draft.subject}\n\n${htmlToText(String(draft.body ?? ""))}`,
-        );
       } catch (e) {
         console.error("CRM logging failed after send:", e);
       }
