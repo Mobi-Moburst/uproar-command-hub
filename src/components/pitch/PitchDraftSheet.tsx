@@ -69,7 +69,9 @@ export function PitchDraftSheet({
   const dirty = !!draft && (subject !== draft.subject || body !== draft.body);
   const approved = draft?.status === "approved";
   const armed = draft?.status === "armed";
+  const sentAlready = draft?.status === "sent" || !!send;
   const blockedByOther = !!claim && !isHolder;
+  const noEmail = !contact?.email;
 
 
   const copy = async () => {
