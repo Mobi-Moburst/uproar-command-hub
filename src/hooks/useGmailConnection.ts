@@ -19,6 +19,7 @@ async function invoke<T>(body: Record<string, unknown>): Promise<T> {
 function waitForOAuthCompletion(popup: Window) {
   return new Promise<void>((resolve, reject) => {
     let poll: number | undefined;
+    let exchanging = false;
     const cleanup = () => {
       window.removeEventListener("message", onMessage);
       if (poll !== undefined) window.clearInterval(poll);
@@ -27,9 +28,26 @@ function waitForOAuthCompletion(popup: Window) {
       const type = event.data?.type;
       if (
         event.origin !== window.location.origin ||
-        event.data?.connectorId !== "google_mail" ||
-        (type !== "appUserConnectorOAuthComplete" && type !== "appUserConnectorOAuthFailed")
+        event.data?.connectorId !== "google_mail"
       ) {
+        return;
+      }
+      if (type === "appUserConnectorOAuthCode") {
+        // The popup may not carry the session, so exchange the code here.
+        exchanging = true;
+        cleanup();
+        invoke({ action: "complete", code: event.data.code })
+          .then(() => {
+            popup.close();
+            resolve();
+          })
+          .catch((e: Error) => {
+            popup.close();
+            reject(new Error(e.message || "Could not finish the Gmail connection."));
+          });
+        return;
+      }
+      if (type !== "appUserConnectorOAuthComplete" && type !== "appUserConnectorOAuthFailed") {
         return;
       }
       cleanup();
@@ -42,12 +60,13 @@ function waitForOAuthCompletion(popup: Window) {
     };
     window.addEventListener("message", onMessage);
     poll = window.setInterval(() => {
-      if (!popup.closed) return;
+      if (!popup.closed || exchanging) return;
       cleanup();
       reject(new Error("The Google window closed before the connection finished."));
     }, 500);
   });
 }
+
 
 export function useGmailConnection() {
   const queryClient = useQueryClient();

@@ -41,12 +41,20 @@ export default function GmailOAuthReturn() {
       return;
     }
 
+    // The popup may not carry the app's sign-in (preview surfaces broker the
+    // session to the editor frame), so hand the one-time code to the opener,
+    // which is signed in, and let it finish the exchange.
+    if (window.opener) {
+      setMessage("Finishing the Gmail connection…");
+      window.opener.postMessage(
+        { type: "appUserConnectorOAuthCode", connectorId: "google_mail", code },
+        window.location.origin,
+      );
+      return;
+    }
+
     void (async () => {
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session) {
-          throw new Error("Your sign-in was not available in this window. Close it and try again.");
-        }
         const { data, error } = await supabase.functions.invoke("gmail-connection", {
           body: { action: "complete", code },
         });
@@ -55,15 +63,14 @@ export default function GmailOAuthReturn() {
           throw new Error(detail || error.message);
         }
         if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
-        notify("appUserConnectorOAuthComplete");
-        window.close();
+        setMessage("Gmail connected. You can close this window.");
       } catch (e) {
         const reason = e instanceof Error ? e.message : "Could not finish the Gmail connection.";
         console.error("gmail oauth complete failed:", reason);
         setMessage(reason);
-        notify("appUserConnectorOAuthFailed", reason);
       }
     })();
+
 
   }, []);
 
