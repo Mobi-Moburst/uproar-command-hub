@@ -295,6 +295,7 @@ export default function PitchCampaignPage() {
               portalId={portal?.portal_id}
               drafts={drafts}
               claims={claims}
+              sends={sends}
               onOpenDraft={(contact) => setDraftContact(contact)}
               onToggleExclude={(contact) =>
                 setExcluded.mutate({ id: contact.id, excluded: !contact.excluded })
@@ -309,8 +310,14 @@ export default function PitchCampaignPage() {
           isGenerating={generate.isPending}
           isSaving={saveDraft.isPending}
           isArming={arm.isPending}
+          isSending={send.isPending}
           claim={activeClaim ?? null}
           isHolder={!!activeClaim && activeClaim.claimed_by === userId}
+          gmailConnected={!!gmail?.connected && !gmail?.reconnectRequired}
+          gmailAddress={gmail?.accountEmail ?? null}
+          followupSummary="day 3 and day 7"
+          send={draftContact ? (sends[draftContact.id] ?? null) : null}
+          onSend={() => draftContact && send.mutate([draftContact.id])}
           onClose={() => setDraftContact(null)}
           onGenerate={(mode) =>
             draftContact && generate.mutate({ contact_ids: [draftContact.id], mode })
