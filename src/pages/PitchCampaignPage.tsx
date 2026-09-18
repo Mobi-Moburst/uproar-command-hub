@@ -248,15 +248,26 @@ export default function PitchCampaignPage() {
                 </Button>
               )}
               {Object.keys(sends).length > 0 && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={checkReplies.isPending}
-                  onClick={() => checkReplies.mutate()}
-                >
-                  <Inbox className="mr-1.5 h-3.5 w-3.5" />
-                  {checkReplies.isPending ? "Checking…" : "Check replies"}
-                </Button>
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={checkReplies.isPending}
+                    onClick={() =>
+                      checkReplies.mutate(undefined, {
+                        onSuccess: (res) => {
+                          if (res?.replies) navigate("/inbox");
+                        },
+                      })
+                    }
+                  >
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                    {checkReplies.isPending ? "Checking…" : "Check replies"}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => navigate("/inbox")}>
+                    <Inbox className="mr-1.5 h-3.5 w-3.5" /> Open inbox
+                  </Button>
+                </>
               )}
               {SHOW_SEQUENCE_ARMING && readyToArm.length > 0 && (
                 <Button

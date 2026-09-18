@@ -11,6 +11,7 @@ const navItems = [
   { title: "Overview", path: "/" },
   { title: "Clients", path: "/clients" },
   { title: "Pitch Pipeline", path: "/pitch-pipeline" },
+  { title: "Inbox", path: "/inbox" },
   { title: "Media Placements", path: "/placements" },
   { title: "Awards Pipeline", path: "/awards" },
   { title: "Samples", path: "/samples" },
