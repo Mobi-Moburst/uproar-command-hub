@@ -234,13 +234,34 @@ export default function PitchCampaignPage() {
                   )}
                 </>
               )}
+              {readyToSend.length > 0 && gmail?.connected && (
+                <Button
+                  size="sm"
+                  disabled={send.isPending}
+                  onClick={() => send.mutate(readyToSend)}
+                >
+                  <Send className="mr-1.5 h-3.5 w-3.5" />
+                  {send.isPending ? "Sending…" : `Send approved (${readyToSend.length})`}
+                </Button>
+              )}
+              {Object.keys(sends).length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={checkReplies.isPending}
+                  onClick={() => checkReplies.mutate()}
+                >
+                  <Inbox className="mr-1.5 h-3.5 w-3.5" />
+                  {checkReplies.isPending ? "Checking…" : "Check replies"}
+                </Button>
+              )}
               {readyToArm.length > 0 && (
                 <Button
                   size="sm"
+                  variant="outline"
                   disabled={arm.isPending}
                   onClick={() => arm.mutate(readyToArm)}
                 >
-                  <Send className="mr-1.5 h-3.5 w-3.5" />
                   {arm.isPending ? "Arming…" : `Arm approved (${readyToArm.length})`}
                 </Button>
               )}
