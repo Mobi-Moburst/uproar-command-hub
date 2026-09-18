@@ -101,16 +101,6 @@ serve(async (req) => {
             console.error("stage move after reply failed:", e);
           }
         }
-        if (contact?.hubspot_contact_id) {
-          try {
-            await logNote(
-              String(contact.hubspot_contact_id),
-              `Reporter replied to the Uproar pitch "${s.subject}"\n\n${reply.snippet}`,
-            );
-          } catch (e) {
-            console.error("reply note failed:", e);
-          }
-        }
         replies++;
       } catch (e) {
         if (e instanceof ReconnectRequiredError) {
