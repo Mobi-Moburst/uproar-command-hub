@@ -25,6 +25,9 @@ import { AddReporterDialog } from "@/components/pitch/AddReporterDialog";
 import { usePitchSending } from "@/hooks/usePitchSending";
 import { useGmailConnection } from "@/hooks/useGmailConnection";
 
+// The CRM sequence path is built but hidden while Gmail sending is the pilot.
+const SHOW_SEQUENCE_ARMING = false;
+
 export default function PitchCampaignPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
@@ -255,7 +258,7 @@ export default function PitchCampaignPage() {
                   {checkReplies.isPending ? "Checking…" : "Check replies"}
                 </Button>
               )}
-              {readyToArm.length > 0 && (
+              {SHOW_SEQUENCE_ARMING && readyToArm.length > 0 && (
                 <Button
                   size="sm"
                   variant="outline"
