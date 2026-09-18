@@ -100,8 +100,17 @@ serve(async (req) => {
     );
 
     // Scheduled run: process every connected sender.
-    const cronSecret = Deno.env.get("PITCH_CRON_SECRET");
-    if (cronSecret && req.headers.get("x-cron-secret") === cronSecret) {
+    const presented = req.headers.get("x-cron-secret");
+    let cronSecret: string | null = null;
+    if (presented) {
+      const { data: row } = await supabase
+        .from("app_cron_secrets")
+        .select("value")
+        .eq("key", "pitch_cron")
+        .maybeSingle();
+      cronSecret = (row?.value as string | null) ?? null;
+    }
+    if (cronSecret && presented === cronSecret) {
       const { data: conns } = await supabase
         .from("app_user_connections")
         .select("user_id")
