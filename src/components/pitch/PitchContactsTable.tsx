@@ -131,7 +131,7 @@ export function PitchContactsTable({
                     )}
                     {warnings.length ? (
                       warnings.map((w, i) => <WarningBadge key={`${w.kind}-${i}`} warning={w} />)
-                    ) : claims[contact.id] ? null : (
+                    ) : claims[contact.id] || sends[contact.id] ? null : (
                       <span className="text-xs text-muted-foreground font-mono">clear</span>
                     )}
                   </div>
