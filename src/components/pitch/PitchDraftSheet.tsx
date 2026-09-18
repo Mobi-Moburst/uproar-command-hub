@@ -9,9 +9,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Copy, Check, Sparkles, RefreshCw, Send } from "lucide-react";
 import { toast } from "sonner";
+import { RichTextEditor } from "@/components/pitch/RichTextEditor";
+import { htmlToText, toEditorHtml } from "@/lib/pitchHtml";
 import type { PitchContact, PitchDraft } from "@/hooks/usePitchPipeline";
 
 // The CRM sequence path is built but hidden while Gmail sending is the pilot.
