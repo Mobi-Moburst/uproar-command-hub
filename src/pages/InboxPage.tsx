@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RichTextEditor } from "@/components/pitch/RichTextEditor";
+import { FollowupQueue } from "@/components/pitch/FollowupQueue";
 import { RefreshCw, Inbox as InboxIcon, Send, Clock, CornerUpLeft } from "lucide-react";
 import {
   useCheckReplies,
@@ -234,6 +235,8 @@ export default function InboxPage() {
                     </Button>
                   </div>
                 </div>
+
+                <FollowupQueue sendId={active.id} />
 
                 <div className="flex-1 space-y-3 overflow-y-auto p-4">
                   {thread.isLoading ? (
