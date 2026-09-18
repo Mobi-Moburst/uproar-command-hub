@@ -196,16 +196,21 @@ async function sendOne(
       .update({ armed_at: nowIso, arm_error: null })
       .eq("id", contactRowId);
 
-    // CRM record: stamp the contact, log the pitch, open and advance the ticket.
+    // The sending PR user becomes the CRM owner of the reporter and the ticket.
+    const senderOwnerId = await ownerIdForEmail(senderEmail || user.email);
+
     if (contact.hubspot_contact_id) {
       try {
         const today = nowIso.slice(0, 10);
         const props: Record<string, string> = { last_pitched_date: today };
-        const ownerId = await ownerIdForEmail(user.email);
-        if (ownerId) props.hubspot_owner_id = ownerId;
         const current = await readContact(String(contact.hubspot_contact_id), [
           "media_relationship_status",
+          "hubspot_owner_id",
         ]);
+        // Never take a reporter away from whoever already owns them.
+        if (senderOwnerId && !current.hubspot_owner_id) {
+          props.hubspot_owner_id = senderOwnerId;
+        }
         if (String(current.media_relationship_status ?? "New") === "New") {
           props.media_relationship_status = "Warm";
         }
@@ -221,6 +226,16 @@ async function sendOne(
     try {
       const ticketId = await ensureTicket(supabase, contact, campaign);
       await moveTicket(ticketId, "Pitched");
+      if (senderOwnerId) {
+        try {
+          await hs(`/crm/v3/objects/tickets/${ticketId}`, {
+            method: "PATCH",
+            body: JSON.stringify({ properties: { hubspot_owner_id: senderOwnerId } }),
+          });
+        } catch (e) {
+          console.error("ticket owner update failed:", e);
+        }
+      }
       await supabase
         .from("pitch_contacts")
         .update({ hubspot_ticket_id: ticketId, stage_cache: "Pitched" })
