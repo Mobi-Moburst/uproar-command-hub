@@ -47,8 +47,13 @@ interface Props {
   portalId?: string | null;
   drafts?: Record<string, PitchDraft>;
   claims?: Record<string, { claimed_by_email: string | null; claimed_at: string }>;
+  sends?: Record<string, { status: string; sent_at: string; reply_at: string | null }>;
   onToggleExclude: (contact: PitchContact) => void;
   onOpenDraft?: (contact: PitchContact) => void;
+}
+
+function daysSince(iso: string) {
+  return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
 }
 
 export function PitchContactsTable({
@@ -56,6 +61,7 @@ export function PitchContactsTable({
   portalId,
   drafts = {},
   claims = {},
+  sends = {},
   onToggleExclude,
   onOpenDraft,
 }: Props) {
