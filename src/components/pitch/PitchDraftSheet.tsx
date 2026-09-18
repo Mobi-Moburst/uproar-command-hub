@@ -20,13 +20,19 @@ interface Props {
   isGenerating: boolean;
   isSaving: boolean;
   isArming?: boolean;
+  isSending?: boolean;
   claim?: { claimed_by_email: string | null; claimed_at: string } | null;
   isHolder?: boolean;
+  gmailAddress?: string | null;
+  gmailConnected?: boolean;
+  followupSummary?: string | null;
+  send?: { status: string; sent_at: string; reply_snippet: string | null } | null;
   onClose: () => void;
   onGenerate: (mode: "custom" | "bulk") => void;
   onSave: (subject: string, body: string) => void;
   onApprove: (approved: boolean) => void;
   onArm?: () => void;
+  onSend?: () => void;
   onRelease?: () => void;
 }
 
@@ -36,13 +42,19 @@ export function PitchDraftSheet({
   isGenerating,
   isSaving,
   isArming,
+  isSending,
   claim,
   isHolder,
+  gmailAddress,
+  gmailConnected,
+  followupSummary,
+  send,
   onClose,
   onGenerate,
   onSave,
   onApprove,
   onArm,
+  onSend,
   onRelease,
 }: Props) {
   const [subject, setSubject] = useState("");
