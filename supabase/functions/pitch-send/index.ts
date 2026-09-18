@@ -2,11 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getConnectionKeyForUser, markReconnectRequired } from "../_shared/appUserConnections.ts";
 import { GOOGLE_MAIL_CONNECTOR_ID } from "../_shared/appUserScopes.ts";
-import { htmlToText, ReconnectRequiredError, sendGmail } from "../_shared/gmail.ts";
+import { ReconnectRequiredError, sendGmail } from "../_shared/gmail.ts";
 import {
   ensureTicket,
   hs,
-  logNote,
   moveTicket,
   ownerIdForEmail,
   readContact,
