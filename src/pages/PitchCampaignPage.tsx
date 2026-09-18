@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Plus, X, Sparkles, Send, RefreshCw } from "lucide-react";
+import { ArrowLeft, Plus, X, Sparkles, Send, RefreshCw, Inbox } from "lucide-react";
 import {
   usePitchCampaign,
   usePitchContacts,
@@ -22,6 +22,8 @@ import { MediaListImport } from "@/components/pitch/MediaListImport";
 import { PitchContactsTable } from "@/components/pitch/PitchContactsTable";
 import { PitchDraftSheet } from "@/components/pitch/PitchDraftSheet";
 import { AddReporterDialog } from "@/components/pitch/AddReporterDialog";
+import { usePitchSending } from "@/hooks/usePitchSending";
+import { useGmailConnection } from "@/hooks/useGmailConnection";
 
 export default function PitchCampaignPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
