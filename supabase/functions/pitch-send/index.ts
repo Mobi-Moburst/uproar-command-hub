@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getConnectionKeyForUser, markReconnectRequired } from "../_shared/appUserConnections.ts";
 import { GOOGLE_MAIL_CONNECTOR_ID } from "../_shared/appUserScopes.ts";
-import { ReconnectRequiredError, sendGmail } from "../_shared/gmail.ts";
+import { htmlToText, ReconnectRequiredError, sendGmail } from "../_shared/gmail.ts";
 import {
   ensureTicket,
   hs,
@@ -105,6 +105,7 @@ async function sendOne(
   user: { id: string; email?: string | null },
   connectionKey: string,
   senderEmail: string,
+  signature: string | null,
 ): Promise<{ ok: boolean; reason?: string; blocked?: unknown; send_id?: string }> {
   const { data: contact } = await supabase
     .from("pitch_contacts")
