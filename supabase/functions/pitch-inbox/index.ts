@@ -163,16 +163,6 @@ serve(async (req) => {
           .eq("send_id", send.id)
           .eq("status", "scheduled");
 
-        if (contact?.hubspot_contact_id) {
-          try {
-            await logNote(
-              String(contact.hubspot_contact_id),
-              `Uproar reply sent by ${send.sender_email ?? user.email}\n\n${htmlToText(replyBody)}`,
-            );
-          } catch (e) {
-            console.error("reply note failed:", e);
-          }
-        }
 
         return json({ ok: true });
       }
