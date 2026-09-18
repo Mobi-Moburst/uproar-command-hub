@@ -24,6 +24,7 @@ import LoginPage from "./pages/LoginPage";
 import PulsePage from "./pages/PulsePage";
 import PublicReportPage from "./pages/PublicReportPage";
 import AccountPage from "./pages/AccountPage";
+import GmailOAuthReturn from "./pages/GmailOAuthReturn";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import VoiceProfilesPage from "./pages/VoiceProfilesPage";
 import NotFound from "./pages/NotFound";
@@ -41,6 +42,7 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/r/:slug" element={<PublicReportPage />} />
+            <Route path="/oauth/gmail/return" element={<GmailOAuthReturn />} />
             <Route path="/" element={<ProtectedRoute><OverviewPage /></ProtectedRoute>} />
             <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
             <Route path="/placements" element={<ProtectedRoute><PlacementsPage /></ProtectedRoute>} />
