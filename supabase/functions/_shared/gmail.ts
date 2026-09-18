@@ -120,13 +120,21 @@ export function buildRawEmail(opts: {
 
 export async function sendGmail(
   connectionAPIKey: string,
-  opts: { to: string; subject: string; body: string; threadId?: string | null; inReplyTo?: string | null },
+  opts: {
+    to: string;
+    subject: string;
+    body: string;
+    signature?: string | null;
+    threadId?: string | null;
+    inReplyTo?: string | null;
+  },
 ): Promise<{ id: string; threadId: string }> {
   const payload: Record<string, unknown> = {
     raw: buildRawEmail({
       to: opts.to,
       subject: opts.subject,
       body: opts.body,
+      signature: opts.signature ?? null,
       inReplyTo: opts.inReplyTo ?? null,
     }),
   };
