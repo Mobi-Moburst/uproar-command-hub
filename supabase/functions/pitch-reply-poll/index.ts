@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getConnectionKeyForUser, markReconnectRequired } from "../_shared/appUserConnections.ts";
 import { GOOGLE_MAIL_CONNECTOR_ID } from "../_shared/appUserScopes.ts";
 import { findThreadReply, ReconnectRequiredError } from "../_shared/gmail.ts";
-import { logNote, moveTicket } from "../_shared/hubspotPitch.ts";
+import { moveTicket } from "../_shared/hubspotPitch.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
