@@ -5,11 +5,9 @@ import { GOOGLE_MAIL_CONNECTOR_ID } from "../_shared/appUserScopes.ts";
 import {
   getRfcMessageId,
   gmail,
-  htmlToText,
   ReconnectRequiredError,
   sendGmail,
 } from "../_shared/gmail.ts";
-import { logNote } from "../_shared/hubspotPitch.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
