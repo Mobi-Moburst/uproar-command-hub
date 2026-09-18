@@ -158,13 +158,23 @@ export function PitchDraftSheet({
                 >
                   {approved ? "Unapprove" : "Approve"}
                 </Button>
-                {approved && !armed && (
+                {approved && !armed && !sentAlready && (
                   <Button
                     size="sm"
+                    disabled={dirty || isSending || blockedByOther || !gmailConnected || noEmail}
+                    onClick={() => onSend?.()}
+                  >
+                    <Send className="mr-1.5 h-3.5 w-3.5" />
+                    {isSending ? "Sending…" : "Approve and send"}
+                  </Button>
+                )}
+                {approved && !armed && !sentAlready && (
+                  <Button
+                    size="sm"
+                    variant="outline"
                     disabled={dirty || isArming || blockedByOther}
                     onClick={() => onArm?.()}
                   >
-                    <Send className="mr-1.5 h-3.5 w-3.5" />
                     {isArming ? "Arming…" : "Arm for sequence"}
                   </Button>
                 )}
@@ -180,11 +190,23 @@ export function PitchDraftSheet({
                   Wait for it to finish, or ask an admin to release it.
                 </p>
               )}
+              {send && (
+                <p className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-3 text-xs text-muted-foreground">
+                  {send.status === "replied"
+                    ? `Replied on ${new Date(send.reply_at ?? send.sent_at).toLocaleDateString()}. ${send.reply_snippet ?? ""}`
+                    : `Sent ${new Date(send.sent_at).toLocaleDateString()}, waiting on a reply.`}
+                </p>
+              )}
               <p className="text-xs text-muted-foreground font-mono">
-                {armed
-                  ? "Armed. The CRM workflow enrolls this reporter in the sequence and sends as the contact owner."
-                  : "Approve, then arm. Arming claims the reporter, writes the pitch to the CRM, opens the ticket and lets the workflow send."}
+                {sentAlready
+                  ? "Sent from your Gmail. Follow-ups stop the moment they reply."
+                  : noEmail
+                    ? "No email address on this reporter, so it cannot be sent from Gmail."
+                    : !gmailConnected
+                      ? "Connect your Gmail on the account page to send from your own address."
+                      : `Approve, then send. It goes out from ${gmailAddress || "your Gmail"}${followupSummary ? `, with follow-ups on ${followupSummary}` : ""}.`}
               </p>
+
 
             </>
           )}
